@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>プロセカ リザルト管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    
+    <style>
+      :root {
+        --bg-color: #f4f7f6;
+        --card-bg: #ffffff;
+        --text-color: #333;
+        --diff-append: #FF82C4;
+        --diff-master: #AC3EE6;
+        --diff-expert: #DC5268;
+        --diff-hard:    #E9B153;
+        --fc-color:     #FF82FF;
+        --sidebar-width: 200px;
+        --active-color: #e8f0fe;
+        --border-color: #ddd;
+        --selected-border: #007bff;
+      }
+      body { font-family: 'M PLUS Rounded 1c', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; padding-bottom: 80px; }
+      .container { max-width: 1200px; margin: 0 auto; }
+      h2 { display: flex; align-items: center; gap: 10px; color: #444; }
+      .material-symbols-outlined { font-size: 1.2rem; vertical-align: sub; }
+      
+      /* Auth Buttons & Top Controls */
+      .auth-section { text-align: right; margin-bottom: 20px; display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-wrap: wrap;}
+      .btn-auth {
+        background-color: #4285f4; color: white; border: none; padding: 10px 20px;
+        border-radius: 4px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;
+      }
+      .btn-auth:hover { background-color: #357ae8; }
+      .btn-signout { background-color: #dc3545; }
+      .btn-upload { background-color: #28a745; }
+      
+      /* Mode Toggle Button Style */
+      .btn-mode {
+        background-color: white; border: 1px solid #ccc; color: #555; padding: 10px 15px;
+        border-radius: 4px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;
+      }
+      .btn-mode.active { background-color: #e8f0fe; color: #007bff; border-color: #007bff; }
+
+      #auth-status { margin-right: 10px; font-size: 0.9rem; color: #666; }
+
+      /* Controls */
+      .controls { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; align-items: end;}
+      .control-group { display: flex; flex-direction: column; }
+      .control-group label { font-size: 0.8rem; font-weight: bold; color: #777; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+      select, input[type="number"], input[type="text"], input[type="file"] { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; background-color: #fafafa; }
+      
+      .range-inputs { display: flex; align-items: center; gap: 5px; }
+      .range-inputs input { width: 100%; text-align: center; }
+
+      .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: #666; font-weight: bold; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+      
+      /* Card */
+      .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; border: 2px solid transparent; position: relative; cursor: pointer; }
+      .card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+      .card.is-fc { border-color: var(--fc-color); }
+      
+      /* Selection Mode Styles */
+      .card.selected { border-color: var(--selected-border); background-color: #f0f7ff; transform: scale(0.98); }
+      .card.selected::after { content: "check_circle"; font-family: 'Material Symbols Outlined'; position: absolute; top: 10px; right: 10px; font-size: 24px; color: var(--selected-border); z-index: 20; background: white; border-radius: 50%; }
+
+      .card-img-container { width: 100%; height: 140px; background-color: #e0e2e5; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }
+      .card-img { width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s ease-in; position: relative; z-index: 2; }
+      .img-loader-spinner { position: absolute; width: 24px; height: 24px; border: 3px solid #ddd; border-top: 3px solid #999; border-radius: 50%; animation: spin 1s linear infinite; z-index: 1; }
+      
+      .fc-badge { position: absolute; top: 8px; right: 8px; background: var(--fc-color); color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 4px; z-index: 3; }
+      
+      /* Overlay Actions (Edit/Delete) */
+      .card-overlay-actions { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 6px; z-index: 10; opacity: 0; transition: opacity 0.2s; }
+      .card:hover .card-overlay-actions { opacity: 1; }
+      .card.select-mode-active .card-overlay-actions { display: none !important; } /* Hide in select mode */
+
+      .btn-overlay { width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: 1px solid #ddd; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); color: #555; transition: all 0.2s; }
+      .btn-overlay:hover { transform: scale(1.1); color: #007bff; }
+      .btn-overlay.del:hover { color: #dc3545; background: #fff5f5; }
+
+      .card-body { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; }
+      .song-meta { display: flex; gap: 6px; margin-bottom: 8px; font-size: 0.75rem; }
+      .tag { padding: 4px 8px; border-radius: 4px; font-weight: bold; color: white; letter-spacing: 0.5px; }
+      .tag.lvl { background-color: #555; }
+      .tag.diff-A { background-color: var(--diff-append); }
+      .tag.diff-M { background-color: var(--diff-master); }
+      .tag.diff-E { background-color: var(--diff-expert); }
+      .tag.diff-H { background-color: var(--diff-hard); }
+      .song-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 12px; line-height: 1.4; }
+      .score-info { font-size: 0.9rem; color: #666; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 8px; margin-top: auto; }
+      .miss-val { font-weight: bold; }
+      .miss-val.zero { color: var(--fc-color); } 
+
+      #loader { display: none; flex-direction: column; align-items: center; margin-top: 50px; color: #666; }
+      .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top: 4px solid var(--diff-master); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      
+      /* Modals */
+      .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); justify-content: center; align-items: center; }
+      .modal-content-img { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); object-fit: contain; }
+      
+      /* Generic Batch/Edit Modal */
+      .modal-form-content { background-color: #fff; border-radius: 12px; width: 95%; max-width: 1000px; height: 85vh; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; position: relative;}
+      .modal-header { padding: 15px 20px; border-bottom: 1px solid #eee; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; background: #fff;}
+      
+      /* Split View Layout */
+      .split-container { display: flex; flex: 1; overflow: hidden; }
+      .sidebar { width: 250px; border-right: 1px solid #eee; overflow-y: auto; background-color: #f8f9fa; display: flex; flex-direction: column; flex-shrink: 0; }
+      
+      .sidebar-toolbar { padding: 10px; border-bottom: 1px solid #ddd; background: #fff; display: flex; justify-content: center;}
+      .btn-analyze-all { width: 100%; font-size: 0.8rem; padding: 8px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; }
+      .btn-analyze-all:hover { background: #138496; }
+
+      .sidebar-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; position: relative;}
+      .sidebar-item:hover { background-color: #eee; }
+      .sidebar-item.active { background-color: var(--active-color); border-left: 4px solid #007bff; }
+      .sidebar-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #ddd; flex-shrink: 0;}
+      .sidebar-info { overflow: hidden; font-size: 0.8rem; flex-grow: 1; }
+      .sidebar-title { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .sidebar-status { font-size: 0.75rem; color: #666; display: flex; justify-content: space-between;}
+      .btn-remove-side { border: none; background: none; color: #999; cursor: pointer; padding: 5px; }
+      .btn-remove-side:hover { color: #dc3545; }
+
+      .main-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+      .editor-layout { display: flex; flex-wrap: wrap; gap: 20px; height: 100%; }
+      .preview-pane { flex: 1; min-width: 300px; background: #000; display: flex; justify-content: center; align-items: center; border-radius: 8px; overflow: hidden; position: relative; max-height: 500px; }
+      .preview-pane img { max-width: 100%; max-height: 100%; object-fit: contain; }
+      .form-pane { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; position: relative; }
+
+      .form-group { margin-bottom: 5px; }
+      .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; color:#555; }
+      
+      .breakdown-group { display: flex; gap: 10px; background: #f0f2f5; padding: 10px; border-radius: 8px; }
+      .breakdown-item { flex: 1; text-align: center; }
+      .breakdown-item label { font-size: 0.75rem; margin-bottom: 2px; display: block; }
+      .breakdown-item input { width: 100%; text-align: center; font-weight: bold; box-sizing: border-box;}
+      .total-score { text-align: right; font-weight: bold; margin-top: 5px; font-size: 0.9rem; color: #333;}
+
+      .form-actions { padding: 15px 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; background: #fff; flex-shrink: 0; }
+      .btn-cancel { background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+      .btn-submit { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+      .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
+      
+      .btn-reanalyze { background-color: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px; align-self: flex-start; margin-bottom: 10px;}
+      .btn-reanalyze:hover { background-color: #0056b3; }
+
+      /* Drop Zone */
+      .drop-zone { border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; color: #777; transition: all 0.2s; cursor: pointer; background-color: #fcfcfc; margin: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;}
+      .drop-zone:hover, .drop-zone.dragover { border-color: #007bff; background-color: #f0f7ff; color: #007bff; }
+      
+      .upload-status { font-weight: bold; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+      .upload-status.processing { background-color: #e2f0ff; color: #007bff; }
+      .upload-status.done { background-color: #d4edda; color: #155724; }
+      .upload-status.error { background-color: #f8d7da; color: #721c24; }
+      .upload-status.pending { background-color: #eee; color: #777; }
+
+      /* Batch Selection Bar */
+
+      .debug-toggle-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top: 8px; }
+      .btn-debug { background:#6f42c1; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:bold; display:inline-flex; align-items:center; gap:6px; }
+      .btn-debug:hover { background:#5a34a4; }
+      .debug-panel { margin-top: 14px; border: 1px solid #e3e6ea; border-radius: 10px; background: #fbfbfd; padding: 12px; display:flex; flex-direction:column; gap:12px; }
+      .debug-panel h3 { margin: 0; font-size: 0.95rem; color:#4b5563; }
+      .debug-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:10px; }
+      .debug-card { border:1px solid #e5e7eb; background:white; border-radius:8px; padding:10px; }
+      .debug-card .label { font-size:0.75rem; color:#6b7280; font-weight:bold; margin-bottom:6px; }
+      .debug-image { width:100%; max-height:160px; object-fit:contain; border-radius:6px; background:#f3f4f6; }
+      .debug-pre { white-space: pre-wrap; word-break: break-word; font-size: 0.8rem; line-height:1.45; margin:0; color:#111827; }
+      .debug-kv { display:grid; grid-template-columns: 120px 1fr; gap:6px 10px; font-size:0.82rem; }
+      .debug-kv div:nth-child(odd) { color:#6b7280; font-weight:bold; }
+      .debug-log { max-height: 240px; overflow:auto; background:#0f172a; color:#e2e8f0; border-radius:8px; padding:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:0.78rem; }
+      .debug-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; background:#ede9fe; color:#5b21b6; font-size:0.75rem; font-weight:bold; }
+
+      #batch-actions { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 15px 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: none; justify-content: center; gap: 15px; z-index: 900; box-sizing: border-box; }
+      .btn-batch { padding: 10px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; color: white; }
+      .btn-batch.delete { background-color: #dc3545; }
+      .btn-batch.edit { background-color: #007bff; }
+      .btn-batch.deselect { background-color: #6c757d; }
+
+      .close-btn { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 1001; transition: color 0.2s; }
+      .close-btn:hover { color: var(--fc-color); }
+    </style>
+  </head>
+  <body>
+
+    <div id="imageModal" class="modal" onclick="if(event.target === this) closeImageModal()">
+      <span class="close-btn" onclick="closeImageModal()">&times;</span>
+      <img class="modal-content-img" id="modalImg">
+    </div>
+
+    <div id="batchModal" class="modal" style="background-color: rgba(0,0,0,0.5);">
+      <div class="modal-form-content">
+        <div class="modal-header">
+          <span id="batch-modal-title"><span class="material-symbols-outlined">cloud_upload</span> 画像アップロード・編集</span>
+          <span style="cursor:pointer;" onclick="closeBatchModal()">&times;</span>
+        </div>
+        
+        <div id="upload-initial" style="display: flex; flex: 1;">
+            <div id="drop-zone" class="drop-zone" onclick="document.getElementById('up-file').click()">
+            <span class="material-symbols-outlined" style="font-size: 64px; margin-bottom: 10px;">upload_file</span>
+            <div style="font-size: 1.2rem; font-weight: bold;">クリックして画像を選択</div>
+            <div style="font-size: 0.9rem; margin-top: 5px;">または画像をここにドラッグ＆ドロップ</div>
+            <input type="file" id="up-file" accept="image/*" multiple style="display: none;">
+            </div>
+        </div>
+
+        <div id="batch-workspace" class="split-container" style="display: none;">
+            <div class="sidebar">
+                <div class="sidebar-toolbar">
+                    <button class="btn-analyze-all" onclick="analyzeAllInBatch()">
+                        <span class="material-symbols-outlined">analytics</span> 一括解析 (すべて)
+                    </button>
+                </div>
+                <div id="batch-sidebar-list" style="overflow-y:auto; flex:1;"></div>
+            </div>
+            
+            <div class="main-area">
+                <div id="batch-editor-container" class="editor-layout" style="display: none;">
+                    <div class="preview-pane">
+                        <img id="batch-preview-img" src="" crossorigin="anonymous">
+                    </div>
+                    <div class="form-pane">
+                        <button type="button" class="btn-reanalyze" onclick="reanalyzeCurrentItem()">
+                            <span class="material-symbols-outlined" style="font-size:1rem;">analytics</span> この画像を再解析
+                        </button>
+
+                        <div class="form-group">
+                            <label>曲名</label>
+                            <input type="text" id="up-title" style="width: 100%; box-sizing: border-box;" oninput="updateCurrentItem('title', this.value)">
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <div class="form-group" style="flex:1;">
+                                <label>レベル</label>
+                                <input type="number" id="up-level" style="width: 100%; box-sizing: border-box;" oninput="updateCurrentItem('level', this.value)">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>難易度</label>
+                                <select id="up-diff" style="width: 100%; box-sizing: border-box;" onchange="updateCurrentItem('diff', this.value)">
+                                    <option value="A">APPEND</option>
+                                    <option value="M">MASTER</option>
+                                    <option value="E">EXPERT</option>
+                                    <option value="H">HARD</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>判定内訳</label>
+                            <div class="breakdown-group">
+                                <div class="breakdown-item">
+                                    <label style="color:#8ac5f7;">GOOD</label>
+                                    <input type="number" id="up-good" min="0" value="0" oninput="updateCurrentItem('good', this.value)">
+                                </div>
+                                <div class="breakdown-item">
+                                    <label style="color:#9bfcc0;">BAD</label>
+                                    <input type="number" id="up-bad" min="0" value="0" oninput="updateCurrentItem('bad', this.value)">
+                                </div>
+                                <div class="breakdown-item">
+                                    <label style="color:#e0e0e0;">MISS</label>
+                                    <input type="number" id="up-miss-detail" min="0" value="0" oninput="updateCurrentItem('missDetail', this.value)">
+                                </div>
+                            </div>
+                            <div class="total-score">
+                                総ミス数: <span id="up-total-miss" style="font-size:1.2rem; color:var(--diff-master);">0</span>
+                            </div>
+
+                            <div class="debug-panel" id="debug-panel">
+                                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                                    <h3><span class="material-symbols-outlined" style="font-size:1rem; vertical-align:middle;">bug_report</span> 読み取りデバッグ</h3>
+                                    <span class="debug-badge" id="debug-active-id">未選択</span>
+                                </div>
+                                <div class="debug-toggle-row">
+                                    <button type="button" class="btn-debug" onclick="runDebugForCurrentItem()"><span class="material-symbols-outlined" style="font-size:1rem;">play_circle</span> この画像をデバッグ実行</button>
+                                    <button type="button" class="btn-debug" onclick="copyDebugJson()"><span class="material-symbols-outlined" style="font-size:1rem;">content_copy</span> JSONコピー</button>
+                                    <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;color:#555;">
+                                        <input type="checkbox" id="debug-auto-update" checked onchange="setDebugAutoUpdate(this.checked)"> 自動更新
+                                    </label>
+                                </div>
+                                <div class="debug-grid">
+                                    <div class="debug-card">
+                                        <div class="label">原画像</div>
+                                        <img id="debug-original-img" class="debug-image" alt="debug original">
+                                    </div>
+                                    <div class="debug-card">
+                                        <div class="label">切り出し画像</div>
+                                        <div id="debug-crops" class="debug-grid" style="grid-template-columns:1fr; gap:8px;"></div>
+                                    </div>
+                                </div>
+                                <div class="debug-card">
+                                    <div class="label">解析結果</div>
+                                    <div id="debug-summary" class="debug-kv"></div>
+                                </div>
+                                <div class="debug-card">
+                                    <div class="label">OCRログ</div>
+                                    <div id="debug-log" class="debug-log"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="batch-empty-msg" style="margin:auto; color:#999; text-align:center;">
+                    左のリストから画像を選択してください
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-header" style="font-size: 0.9rem; padding: 10px 20px; background: #f8f9fa; border-top: 1px solid #eee; border-bottom: none; display:block;" id="batch-msg-area">
+             <span id="batch-status-msg">待機中...</span>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-cancel" onclick="closeBatchModal()">閉じる</button>
+          <button class="btn-submit" id="btn-exec-batch" onclick="handleBatchExecution()" disabled>実行</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="auth-section">
+        <span id="auth-status">未ログイン</span>
+
+        <button id="btn-select-mode" class="btn-mode" onclick="toggleSelectMode()">
+            <span class="material-symbols-outlined">check_box</span> 選択モード
+        </button>
+        
+        <button id="upload_button" class="btn-auth btn-upload" onclick="openBatchModal('upload')" style="display: none;">
+          <span class="material-symbols-outlined">add_photo_alternate</span> アップロード
+        </button>
+
+        <button id="authorize_button" class="btn-auth" onclick="handleAuthClick()">
+          <span class="material-symbols-outlined">login</span> Googleでログイン
+        </button>
+        <button id="signout_button" class="btn-auth btn-signout" onclick="handleSignoutClick()" style="display: none;">
+          <span class="material-symbols-outlined">logout</span> ログアウト
+        </button>
+      </div>
+
+      <h2><span class="material-symbols-outlined">library_music</span> リザルト管理 (My Drive)</h2>
+      
+      <div class="controls">
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">sort</span> 並べ替え</label>
+          <select id="sort-order" onchange="updateView()">
+            <option value="title_asc">曲名 (昇順)</option>
+            <option value="title_desc">曲名 (降順)</option>
+            <option value="level_desc" selected>レベル (高い順)</option>
+            <option value="level_asc">レベル (低い順)</option>
+            <option value="miss_asc">失点数 (少ない順)</option>
+            <option value="miss_desc">失点数 (多い順)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">filter_alt</span> FC状況</label>
+          <select id="filter-fc" onchange="updateView()">
+            <option value="all">すべて</option>
+            <option value="fc">FC済み (FC-0)</option>
+            <option value="unfc">未FC (失点あり)</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">remove_circle</span> 失点数 (範囲)</label>
+          <div class="range-inputs">
+            <input type="number" id="filter-miss-min" placeholder="0" min="0" oninput="updateView()">
+            <span>~</span>
+            <input type="number" id="filter-miss-max" placeholder="Max" min="0" oninput="updateView()">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">speed</span> 難易度</label>
+          <select id="filter-diff" onchange="updateView()">
+            <option value="all">すべて</option>
+            <option value="A">APPEND</option>
+            <option value="M">MASTER</option>
+            <option value="E">EXPERT</option>
+            <option value="H">HARD</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">manage_search</span> 曲名検索</label>
+          <input type="text" id="filter-title" placeholder="曲名を入力..." oninput="updateView()">
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">search</span> レベル検索</label>
+          <input type="number" id="filter-level" placeholder="" oninput="updateView()">
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <span id="result-count">ログインしてください</span>
+      </div>
+
+      <div id="loader">
+        <div class="spinner"></div>
+        <div id="loader-text">データを読み込み中...</div>
+      </div>
+      
+      <div id="grid" class="grid"></div>
+    </div>
+
+    <div id="batch-actions">
+        <button class="btn-batch deselect" onclick="clearSelection()"><span class="material-symbols-outlined">close</span> 選択解除</button>
+        <button class="btn-batch delete" onclick="batchDelete()"><span class="material-symbols-outlined">delete</span> 削除</button>
+        <button class="btn-batch edit" onclick="batchEdit()"><span class="material-symbols-outlined">edit_note</span> 編集・解析</button>
+        <div style="margin-left:auto; display:flex; align-items:center; color:#666;">
+            <span id="selected-count">0</span> 件選択中
+        </div>
+    </div>
+
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+    <script>
+      // ↓↓↓ GCP Settings ↓↓↓
+      const CLIENT_ID = '966636096862-8hrrm5heb4g5r469veoels7u6ifjguuk.apps.googleusercontent.com';
+      const API_KEY = 'AIzaSyC-m1rkHuJTmNK2k-s89bJFshvXCS5MZZ0';
+      // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+      
+      const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+      const SCOPES = 'https://www.googleapis.com/auth/drive';
+
+      let tokenClient;
+      let gapiInited = false;
+      let gisInited = false;
+      let allRecords = []; // All drive records
+      let filteredRecords = []; // Currently visible records
+      const diffRank = { 'A': 4, 'M': 3, 'E': 2, 'H': 1 };
+
+      // Selection Mode State
+      let isSelectMode = false;
+      let selectedIds = new Set();
+
+      // Database
+      let dbMusics = [];
+      let dbDiffs = [];
+      
+      window.onload = async function() {
+        try {
+          const [musicsResp, diffsResp] = await Promise.all([
+            fetch('https://sekai-world.github.io/sekai-master-db-diff/musics.json'),
+            fetch('https://sekai-world.github.io/sekai-master-db-diff/musicDifficulties.json')
+          ]);
+          dbMusics = await musicsResp.json();
+          dbDiffs = await diffsResp.json();
+        } catch (e) { console.error("DB Error", e); }
+      };
+
+      // --- Auth ---
+      function gapiLoaded() { gapi.load('client', initializeGapiClient); }
+      async function initializeGapiClient() { await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] }); gapiInited = true; }
+      function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '', }); gisInited = true; }
+
+      function handleAuthClick() {
+        tokenClient.callback = async (resp) => {
+          if (resp.error !== undefined) throw (resp);
+          setAuthUI(true);
+          await fetchDataFromDrive();
+        };
+        if (gapi.client.getToken() === null) tokenClient.requestAccessToken({prompt: 'consent'});
+        else tokenClient.requestAccessToken({prompt: ''});
+      }
+
+      function handleSignoutClick() {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken('');
+          setAuthUI(false);
+          document.getElementById('result-count').innerText = 'ログアウトしました';
+          document.getElementById('grid').innerHTML = '';
+          allRecords = [];
+          selectedIds.clear();
+          updateSelectionUI();
+        }
+      }
+
+      function setAuthUI(isLoggedIn) {
+        document.getElementById('signout_button').style.display = isLoggedIn ? 'inline-flex' : 'none';
+        document.getElementById('upload_button').style.display = isLoggedIn ? 'inline-flex' : 'none';
+        document.getElementById('authorize_button').style.display = isLoggedIn ? 'none' : 'inline-flex';
+        document.getElementById('auth-status').innerText = isLoggedIn ? 'ログイン済み' : '未ログイン';
+      }
+
+      // --- Data Fetching ---
+      async function fetchDataFromDrive() {
+        const loader = document.getElementById('loader');
+        loader.style.display = 'flex';
+        document.getElementById('result-count').innerText = 'データ取得中...';
+        
+        try {
+          const ROOT_FOLDER_NAME = "プロセカリザルト";
+          const rootFolder = await getFolderByName(ROOT_FOLDER_NAME);
+          if (!rootFolder) { allRecords = []; onDataLoaded(); return; }
+          const fcFolder = await getFolderByName("FC", rootFolder.id);
+          if (!fcFolder) { allRecords = []; onDataLoaded(); return; }
+
+          document.getElementById('loader-text').innerText = '楽曲情報を取得中...';
+          const folderQuery = `'${fcFolder.id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+          const songFolders = await fetchAllDriveItems(folderQuery, "id, name");
+          
+          const folderMap = new Map();
+          songFolders.forEach(folder => {
+            const metadata = parseFolderTitle(folder.name);
+            if (metadata) folderMap.set(folder.id, { ...metadata, folderId: folder.id });
+          });
+
+          if (songFolders.length === 0) { allRecords = []; onDataLoaded(); return; }
+
+          document.getElementById('loader-text').innerText = 'リザルト画像を処理中...';
+          const fileQuery = `name contains 'FC' and mimeType != 'application/vnd.google-apps.folder' and trashed = false`;
+          const candidateFiles = await fetchAllDriveItems(fileQuery, "id, name, parents, thumbnailLink");
+
+          const records = [];
+          candidateFiles.forEach(file => {
+            if (!file.parents || file.parents.length === 0) return;
+            const parentId = file.parents.find(p => folderMap.has(p));
+            if (parentId) {
+              const songInfo = folderMap.get(parentId);
+              const missCount = parseScore(file.name);
+              records.push({
+                id: file.id,
+                parentId: parentId,
+                title: songInfo.title,
+                level: songInfo.level,
+                difficulty: songInfo.difficulty,
+                difficultyRaw: songInfo.rawDiff,
+                missCount: missCount,
+                isFC: (missCount === 0),
+                thumbnail: file.thumbnailLink || null
+              });
+            }
+          });
+
+          allRecords = records;
+          onDataLoaded();
+        } catch (e) {
+          console.error(e);
+          loader.style.display = 'none';
+        }
+      }
+
+      async function fetchAllDriveItems(query, fields) {
+        let items = [];
+        let pageToken = null;
+        do {
+          const response = await gapi.client.drive.files.list({
+            q: query, fields: `nextPageToken, files(${fields})`, pageSize: 1000, pageToken: pageToken
+          });
+          if (response.result.files) items = items.concat(response.result.files);
+          pageToken = response.result.nextPageToken;
+        } while (pageToken);
+        return items;
+      }
+      async function getFolderByName(name, parentId = null) {
+        let query = `mimeType = 'application/vnd.google-apps.folder' and name = '${name}' and trashed = false`;
+        if (parentId) query += ` and '${parentId}' in parents`;
+        const response = await gapi.client.drive.files.list({ q: query, fields: 'files(id, name)', pageSize: 1 });
+        return (response.result.files && response.result.files.length > 0) ? response.result.files[0] : null;
+      }
+
+      // --- Unified Batch/Upload Modal Logic ---
+
+      let editorQueue = []; // { id, file(blob/file), imgUrl, data:{}, status, originalId(optional) }
+      let activeItemId = null;
+      let currentMode = 'upload'; // 'upload' or 'edit'
+      let debugAutoUpdate = true;
+      let lastDebugPayload = null;
+
+      function openBatchModal(mode) {
+        currentMode = mode;
+        const modal = document.getElementById('batchModal');
+        modal.style.display = 'flex';
+        
+        // Reset state
+        editorQueue = [];
+        activeItemId = null;
+        document.getElementById('batch-sidebar-list').innerHTML = "";
+        document.getElementById('batch-editor-container').style.display = 'none';
+        document.getElementById('batch-empty-msg').style.display = 'block';
+        document.getElementById('batch-status-msg').innerText = "待機中...";
+        document.getElementById('btn-exec-batch').disabled = true;
+
+        if (mode === 'upload') {
+            document.getElementById('batch-modal-title').innerHTML = '<span class="material-symbols-outlined">cloud_upload</span> 画像アップロード';
+            document.getElementById('upload-initial').style.display = 'flex';
+            document.getElementById('batch-workspace').style.display = 'none';
+            document.getElementById('up-file').value = "";
+            document.getElementById('btn-exec-batch').innerText = "全てアップロード";
+        } else {
+            document.getElementById('batch-modal-title').innerHTML = '<span class="material-symbols-outlined">edit_square</span> 編集・解析モード';
+            document.getElementById('upload-initial').style.display = 'none';
+            document.getElementById('batch-workspace').style.display = 'flex';
+            document.getElementById('btn-exec-batch').innerText = "保存して反映";
+            // Edit mode specific init is handled by caller (batchEdit)
+        }
+      }
+
+      function closeBatchModal() {
+        document.getElementById('batchModal').style.display = 'none';
+      }
+
+      // Drop Zone & File Handling (Upload Mode)
+      const dropZone = document.getElementById('drop-zone');
+      dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+      dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+      dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files); });
+      document.getElementById('up-file').addEventListener('change', (e) => handleFiles(e.target.files));
+
+      async function handleFiles(files) {
+        if (files.length === 0) return;
+        document.getElementById('upload-initial').style.display = 'none';
+        document.getElementById('batch-workspace').style.display = 'flex';
+        document.getElementById('batch-status-msg').innerText = "画像を処理中...";
+        
+        // Add to queue
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const qId = "new_" + Date.now() + "_" + i;
+            editorQueue.push({
+                id: qId,
+                file: file, // File Object
+                imgUrl: URL.createObjectURL(file),
+                status: 'pending',
+                data: { title:'', level:'', diff:'M', good:0, bad:0, missDetail:0, totalMiss:0, musicId:null },
+                originalId: null
+            });
+            renderSidebarItem(qId);
+        }
+        
+        // Auto Analyze new items
+        await runBatchAnalysis(editorQueue.filter(i => i.status === 'pending'));
+        
+        if (!activeItemId && editorQueue.length > 0) selectItem(editorQueue[0].id);
+        checkBatchButton();
+      }
+
+      // Initialize Batch Edit from Selection
+      async function batchEdit() {
+          if (selectedIds.size === 0) return;
+          openBatchModal('edit');
+          
+          const targets = allRecords.filter(r => selectedIds.has(r.id));
+          document.getElementById('batch-status-msg').innerText = "編集データを準備中...";
+
+          for (const rec of targets) {
+              const qId = "edit_" + rec.id;
+              // Use high-res thumbnail for preview/ocr
+              const highResUrl = rec.thumbnail ? rec.thumbnail.replace('=s220', '=w1600') : '';
+              
+              editorQueue.push({
+                  id: qId,
+                  file: null, // No file object for existing items
+                  imgUrl: highResUrl,
+                  status: 'existing', // Mark as already existing
+                  data: { 
+                      title: rec.title, 
+                      level: rec.level, 
+                      diff: rec.difficultyRaw, 
+                      good: 0, bad: 0, missDetail: 0, // Breakdown unknown for existing
+                      totalMiss: rec.missCount,
+                      musicId: null 
+                  },
+                  originalId: rec.id,
+                  originalParent: rec.parentId
+              });
+              renderSidebarItem(qId);
+          }
+          if (editorQueue.length > 0) selectItem(editorQueue[0].id);
+          checkBatchButton();
+          document.getElementById('batch-status-msg').innerText = "編集準備完了";
+      }
+
+      function renderSidebarItem(id) {
+        const item = editorQueue.find(q => q.id === id);
+        const div = document.createElement('div');
+        div.className = 'sidebar-item';
+        div.id = `sb-${id}`;
+        div.onclick = () => selectItem(id);
+        
+        let thumbUrl = item.imgUrl;
+
+        div.innerHTML = `
+            <img src="${thumbUrl}" class="sidebar-thumb" crossorigin="anonymous">
+            <div class="sidebar-info">
+                <div class="sidebar-title" id="sb-title-${id}">${item.data.title || "名称未設定"}</div>
+                <div class="sidebar-status">
+                    <span id="sb-status-${id}" class="upload-status ${item.status === 'existing' ? 'done' : item.status}">${item.status === 'existing' ? 'EXIST' : item.status}</span>
+                    <button class="btn-remove-side" onclick="removeBatchItem(event, '${id}')">
+                        <span class="material-symbols-outlined" style="font-size:1rem;">delete</span>
+                    </button>
+                </div>
+            </div>
+        `;
+        document.getElementById('batch-sidebar-list').appendChild(div);
+      }
+
+      function selectItem(id) {
+        activeItemId = id;
+        const item = editorQueue.find(q => q.id === id);
+        if(!item) return;
+
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        const sbEl = document.getElementById(`sb-${id}`);
+        if(sbEl) sbEl.classList.add('active');
+
+        document.getElementById('batch-editor-container').style.display = 'flex';
+        document.getElementById('batch-empty-msg').style.display = 'none';
+
+        const imgEl = document.getElementById('batch-preview-img');
+        imgEl.src = item.imgUrl;
+        
+        document.getElementById('up-title').value = item.data.title;
+        document.getElementById('up-level').value = item.data.level;
+        document.getElementById('up-diff').value = item.data.diff;
+        
+        document.getElementById('up-good').value = item.data.good;
+        document.getElementById('up-bad').value = item.data.bad;
+        document.getElementById('up-miss-detail').value = item.data.missDetail;
+        document.getElementById('up-total-miss').innerText = item.data.totalMiss;
+        const active = document.getElementById('debug-active-id');
+        if (active) active.innerText = `対象: ${id}`;
+        if (debugAutoUpdate && lastDebugPayload && item.imgUrl) { renderDebugPanel(lastDebugPayload, imgEl).catch(()=>{}); }
+      }
+
+      function updateCurrentItem(field, value) {
+        if(!activeItemId) return;
+        const item = editorQueue.find(q => q.id === activeItemId);
+        if(!item) return;
+
+        if(['good', 'bad', 'missDetail', 'level'].includes(field)) {
+             item.data[field] = parseInt(value) || 0;
+        } else {
+             item.data[field] = value;
+        }
+
+        if(field === 'diff' && item.data.musicId) {
+             const map = {'A':'append', 'M':'master', 'E':'expert', 'H':'hard'};
+             const newLvl = getLevelFromDb(item.data.musicId, map[value]);
+             if(newLvl) { item.data.level = newLvl; document.getElementById('up-level').value = newLvl; }
+        }
+
+        if(['good', 'bad', 'missDetail'].includes(field)) {
+            item.data.totalMiss = item.data.good + item.data.bad + item.data.missDetail;
+            document.getElementById('up-total-miss').innerText = item.data.totalMiss;
+        }
+
+        if(field === 'title') {
+            document.getElementById(`sb-title-${activeItemId}`).innerText = value || "名称未設定";
+        }
+        item.status = 'done'; // Modified manually = ready
+        updateSidebarStatus(activeItemId);
+      }
+
+      function updateSidebarStatus(id) {
+          const item = editorQueue.find(q => q.id === id);
+          if(!item) return;
+          const statusEl = document.getElementById(`sb-status-${id}`);
+          statusEl.innerText = "OK"; 
+          statusEl.className = "upload-status done";
+      }
+
+      function removeBatchItem(e, id) {
+        e.stopPropagation();
+        editorQueue = editorQueue.filter(q => q.id !== id);
+        document.getElementById(`sb-${id}`).remove();
+        if (activeItemId === id) {
+            document.getElementById('batch-editor-container').style.display = 'none';
+            document.getElementById('batch-empty-msg').style.display = 'block';
+            activeItemId = null;
+        }
+        checkBatchButton();
+      }
+
+      function checkBatchButton() {
+        const btn = document.getElementById('btn-exec-batch');
+        btn.disabled = editorQueue.length === 0;
+        const label = currentMode === 'upload' ? '全てアップロード' : '保存して反映';
+        btn.innerText = editorQueue.length > 0 ? `${label} (${editorQueue.length}件)` : label;
+      }
+
+      // --- Analysis Logic ---
+      
+      async function runBatchAnalysis(itemsToAnalyze) {
+          if(itemsToAnalyze.length === 0) return;
+          const statusMsg = document.getElementById('batch-status-msg');
+          statusMsg.innerText = "解析中... (しばらくお待ちください)";
+          
+          const worker = await Tesseract.createWorker(['jpn', 'eng']);
+          
+          for (const item of itemsToAnalyze) {
+              const el = document.getElementById(`sb-status-${item.id}`);
+              if(el) { el.innerText = "解析中"; el.className = "upload-status processing"; }
+              
+              const img = new Image();
+              img.crossOrigin = "anonymous";
+              img.src = item.imgUrl;
+              try {
+                  await new Promise((resolve, reject) => {
+                      img.onload = resolve;
+                      img.onerror = reject;
+                  });
+                  
+                  const res = await analyzeLoadedImage(img, worker);
+                  if (res) {
+                    item.data = {
+                        title: res.title, level: res.level, diff: res.diff,
+                        good: res.missDetail.good, bad: res.missDetail.bad, missDetail: res.missDetail.miss,
+                        totalMiss: res.miss, musicId: res.musicId
+                    };
+                    item.status = 'done';
+                  } else {
+                    item.status = 'error';
+                  }
+              } catch (e) {
+                  console.error("Analysis Failed for " + item.id, e);
+                  item.status = 'error';
+              }
+              
+              updateSidebarStatus(item.id);
+              if (item.status === 'done') {
+                 document.getElementById(`sb-title-${item.id}`).innerText = item.data.title;
+                 if (activeItemId === item.id) selectItem(item.id);
+              } else {
+                 const statEl = document.getElementById(`sb-status-${item.id}`);
+                 if(statEl) { statEl.innerText = "ERR"; statEl.className = "upload-status error"; }
+              }
+          }
+          await worker.terminate();
+          statusMsg.innerText = "処理完了";
+      }
+
+      async function reanalyzeCurrentItem() {
+          if (!activeItemId) return;
+          const item = editorQueue.find(q => q.id === activeItemId);
+          if (item) await runBatchAnalysis([item]);
+      }
+
+      async function analyzeAllInBatch() {
+          if (editorQueue.length === 0) return;
+          // REMOVED CONFIRMATION
+          await runBatchAnalysis(editorQueue);
+      }
+
+      async function cropImage(imageElement, xRatio, yRatio, wRatio, hRatio, type = 'filter-standard') {
+        const canvas = document.createElement('canvas');
+        const w = imageElement.naturalWidth;
+        const h = imageElement.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        
+        if (type === 'threshold-diff') {
+            const scale = 1.5;
+            canvas.width = w * wRatio * scale;
+            canvas.height = h * hRatio * scale;
+            ctx.drawImage(imageElement, w * xRatio, h * yRatio, w * wRatio, h * hRatio, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+                data[i] = data[i+1] = data[i+2] = (gray > 180) ? 0 : 255;
+            }
+            ctx.putImageData(imageData, 0, 0);
+        } else {
+            canvas.width = w * wRatio;
+            canvas.height = h * hRatio;
+            ctx.filter = 'grayscale(100%) contrast(150%)';
+            ctx.drawImage(imageElement, w * xRatio, h * yRatio, w * wRatio, h * hRatio, 0, 0, canvas.width, canvas.height);
+        }
+        return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      }
+
+      async function analyzeLoadedImage(imgElement, worker) {
+         try {
+            const debug = {
+              timestamp: new Date().toISOString(),
+              sourceWidth: imgElement.naturalWidth,
+              sourceHeight: imgElement.naturalHeight,
+              steps: []
+            };
+
+            const diffCrop = await cropImage(imgElement, 0.20, 0.07, 0.10, 0.04, 'threshold-diff');
+            const diffRet = await worker.recognize(diffCrop, { lang: 'eng' }); 
+            const diffText = (diffRet?.data?.text || '').toUpperCase();
+            let dCode = "E", dKey = "expert";
+            if (diffText.match(/A?P{2}E?N?D?/)) { dCode = "A"; dKey = "append"; }
+            else if (diffText.includes("MASTER")) { dCode = "M"; dKey = "master"; }
+            else if (diffText.includes("EXPERT")) { dCode = "E"; dKey = "expert"; }
+            else if (diffText.includes("HARD")) { dCode = "H"; dKey = "hard"; }
+            debug.steps.push({
+              name: '難易度',
+              crop: { x: 0.20, y: 0.07, w: 0.10, h: 0.04, type: 'threshold-diff' },
+              ocr: diffText,
+              decision: `${dCode} / ${dKey}`
+            });
+
+            const titleCrop = await cropImage(imgElement, 0.19, 0.01, 0.32, 0.05, 'filter-standard');
+            const titleRet = await worker.recognize(titleCrop, { lang: 'jpn' });
+            const titleOcr = (titleRet?.data?.text || '').replace(/\r?\n/g, '').trim();
+            const matchedMusic = findBestMatchMusic(titleRet?.data?.text || '');
+            const finalTitle = matchedMusic ? matchedMusic.title : titleOcr;
+            const musicId = matchedMusic ? matchedMusic.id : null;
+            debug.steps.push({
+              name: '曲名',
+              crop: { x: 0.19, y: 0.01, w: 0.32, h: 0.05, type: 'filter-standard' },
+              ocr: titleRet?.data?.text || '',
+              normalized: titleOcr,
+              matched: matchedMusic ? `${matchedMusic.title} (#${matchedMusic.id})` : 'なし',
+              decision: finalTitle
+            });
+
+            let level = "";
+            if (musicId) level = getLevelFromDb(musicId, dKey) || "";
+            debug.steps.push({
+              name: 'レベル',
+              crop: null,
+              ocr: '(曲名DBから取得)',
+              matched: musicId ? `musicId=${musicId}` : 'なし',
+              decision: level || '(未取得)'
+            });
+
+            const missCrop = await cropImage(imgElement, 0.10, 0.55, 0.20, 0.28, 'filter-standard');
+            const missRet = await worker.recognize(missCrop, { lang: 'jpn' });
+            const missText = missRet?.data?.text || '';
+            const lines = missText.split('\n');
+            let cGood = 0, cBad = 0, cMiss = 0;
+            const parsedLines = [];
+            const parseLine = (line, regex) => { if (regex.test(line)) { const nums = line.match(/\d+/g); if (nums) return parseInt(nums[nums.length - 1], 10); } return 0; };
+            lines.forEach(line => {
+              let hit = null;
+              if (/G[O0QD]{2}D/i.test(line)) { cGood = parseLine(line, /G[O0QD]{2}D/i); hit = `GOOD=${cGood}`; }
+              if (/BAD/i.test(line))  { cBad  = parseLine(line, /BAD/i); hit = `${hit ? hit + ', ' : ''}BAD=${cBad}`; }
+              if (/MISS/i.test(line)) { cMiss = parseLine(line, /MISS/i); hit = `${hit ? hit + ', ' : ''}MISS=${cMiss}`; }
+              if (line.trim()) parsedLines.push({ line, hit });
+            });
+            debug.steps.push({
+              name: '判定内訳',
+              crop: { x: 0.10, y: 0.55, w: 0.20, h: 0.28, type: 'filter-standard' },
+              ocr: missText,
+              parsedLines,
+              decision: `GOOD=${cGood}, BAD=${cBad}, MISS=${cMiss}, TOTAL=${cGood + cBad + cMiss}`
+            });
+
+            const result = {
+                title: finalTitle, level: level, diff: dCode,
+                miss: cGood + cBad + cMiss,
+                missDetail: { good: cGood, bad: cBad, miss: cMiss },
+                musicId: musicId
+            };
+            debug.result = result;
+            lastDebugPayload = debug;
+            if (debugAutoUpdate) renderDebugPanel(debug, imgElement);
+            return result;
+        } catch (e) { console.error(e); return null; }
+      }
+
+      function normalizeString(str) { if (!str) return ""; return str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).toLowerCase().replace(/[\s\-_]/g, ''); }
+      function findBestMatchMusic(ocrText) {
+        if (!dbMusics || dbMusics.length === 0) return null;
+        const target = normalizeString(ocrText);
+        if (target.length === 0) return null;
+        let bestMatch = null, minScore = Infinity;
+        const levenshtein = (s1, s2) => {
+            if(s1.length > s2.length) [s1,s2] = [s2,s1];
+            let dist = Array.from({length: s1.length+1},(_,i)=>i);
+            for(let i2=0;i2<s2.length;i2++){
+                let newDist = [i2+1];
+                for(let i1=0;i1<s1.length;i1++){
+                    if(s1[i1]===s2[i2]) newDist.push(dist[i1]);
+                    else newDist.push(1+Math.min(dist[i1], dist[i1+1], newDist[newDist.length-1]));
+                }
+                dist = newDist;
+            }
+            return dist[dist.length-1];
+        };
+        for (const music of dbMusics) {
+            const dbTitleNorm = normalizeString(music.title);
+            const dist = levenshtein(target, dbTitleNorm);
+            const score = dist / Math.max(target.length, dbTitleNorm.length);
+            if (score < minScore) { minScore = score; bestMatch = music; }
+        }
+        return bestMatch; 
+      }
+      function getLevelFromDb(musicId, diffKey) { if (!musicId || !diffKey || !dbDiffs) return null; const entry = dbDiffs.find(d => d.musicId === musicId && d.musicDifficulty === diffKey); return entry ? entry.playLevel : null; }
+
+      async function blobToDataUrl(blob) {
+        if (!blob) return '';
+        return await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      function setDebugAutoUpdate(on) {
+        debugAutoUpdate = !!on;
+        if (on && lastDebugPayload) renderDebugPanel(lastDebugPayload, document.getElementById('batch-preview-img'));
+      }
+
+      async function runDebugForCurrentItem() {
+        if (!activeItemId) return;
+        const item = editorQueue.find(q => q.id === activeItemId);
+        if (!item) return;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = item.imgUrl;
+        await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+        const worker = await Tesseract.createWorker(['jpn', 'eng']);
+        try {
+          const res = await analyzeLoadedImage(img, worker);
+          if (res) {
+            item.data = {
+              title: res.title, level: res.level, diff: res.diff,
+              good: res.missDetail.good, bad: res.missDetail.bad, missDetail: res.missDetail.miss,
+              totalMiss: res.miss, musicId: res.musicId
+            };
+            item.status = 'done';
+            updateSidebarStatus(item.id);
+            document.getElementById(`sb-title-${item.id}`).innerText = item.data.title;
+            selectItem(item.id);
+          }
+        } finally {
+          await worker.terminate();
+        }
+      }
+
+      async function renderDebugPanel(debug, imgElement) {
+        const img = document.getElementById('debug-original-img');
+        const crops = document.getElementById('debug-crops');
+        const summary = document.getElementById('debug-summary');
+        const log = document.getElementById('debug-log');
+        const active = document.getElementById('debug-active-id');
+        if (!img || !crops || !summary || !log || !active) return;
+        active.innerText = activeItemId ? `対象: ${activeItemId}` : '未選択';
+        img.src = imgElement?.src || '';
+        crops.innerHTML = '';
+
+        const cropToImg = async (step) => {
+          if (!step.crop) return '';
+          const canvas = document.createElement('canvas');
+          const w = imgElement.naturalWidth, h = imgElement.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          if (step.crop.type === 'threshold-diff') {
+            const scale = 1.5;
+            canvas.width = w * step.crop.w * scale;
+            canvas.height = h * step.crop.h * scale;
+            ctx.drawImage(imgElement, w * step.crop.x, h * step.crop.y, w * step.crop.w, h * step.crop.h, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+              const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+              data[i] = data[i+1] = data[i+2] = (gray > 180) ? 0 : 255;
+            }
+            ctx.putImageData(imageData, 0, 0);
+          } else {
+            canvas.width = w * step.crop.w;
+            canvas.height = h * step.crop.h;
+            ctx.filter = 'grayscale(100%) contrast(150%)';
+            ctx.drawImage(imgElement, w * step.crop.x, h * step.crop.y, w * step.crop.w, h * step.crop.h, 0, 0, canvas.width, canvas.height);
+          }
+          return canvas.toDataURL('image/png');
+        };
+
+        const cropSteps = (debug.steps || []).filter(s => s.crop);
+        for (const step of cropSteps) {
+          const card = document.createElement('div');
+          card.className = 'debug-card';
+          const url = await cropToImg(step);
+          card.innerHTML = `
+            <div class="label">${step.name}</div>
+            <img src="${url}" class="debug-image" alt="${step.name}">
+            <div class="debug-pre" style="margin-top:6px;">範囲: x=${step.crop.x}, y=${step.crop.y}, w=${step.crop.w}, h=${step.crop.h}\n判定: ${escapeHtml(step.decision || '')}\nOCR:\n${escapeHtml(step.ocr || '')}</div>
+          `;
+          crops.appendChild(card);
+        }
+
+        const s = debug.result || {};
+        const pairs = [
+          ['曲名', s.title ?? ''],
+          ['レベル', s.level ?? ''],
+          ['難易度', s.diff ?? ''],
+          ['GOOD', s.missDetail?.good ?? ''],
+          ['BAD', s.missDetail?.bad ?? ''],
+          ['MISS', s.missDetail?.miss ?? ''],
+          ['総ミス', s.miss ?? ''],
+          ['musicId', s.musicId ?? '']
+        ];
+        summary.innerHTML = pairs.map(([k,v]) => `<div>${escapeHtml(k)}</div><div>${escapeHtml(String(v))}</div>`).join('');
+        log.innerHTML = `<pre class="debug-pre">${escapeHtml(JSON.stringify(debug, null, 2))}</pre>`;
+      }
+
+      async function copyDebugJson() {
+        if (!lastDebugPayload) return alert('デバッグ結果がありません');
+        await navigator.clipboard.writeText(JSON.stringify(lastDebugPayload, null, 2));
+        alert('デバッグJSONをコピーしました');
+      }
+
+      // --- Execution Logic (Save/Upload) ---
+
+      async function handleBatchExecution() {
+          const btn = document.getElementById('btn-exec-batch');
+          btn.disabled = true;
+          btn.innerText = "処理中...";
+          
+          if (currentMode === 'upload') {
+              await executeUploads();
+          } else {
+              await executeEdits();
+          }
+      }
+
+      async function findOrCreateFolder(name, parentId = null) {
+        const existing = await getFolderByName(name, parentId);
+        if (existing) return existing;
+        const metadata = { 'name': name, 'mimeType': 'application/vnd.google-apps.folder' };
+        if (parentId) metadata.parents = [parentId];
+        const response = await gapi.client.drive.files.create({ resource: metadata, fields: 'id, name' });
+        return response.result;
+      }
+
+      async function executeUploads() {
+        let successCount = 0;
+        const accessToken = gapi.client.getToken().access_token;
+        const rootFolder = await findOrCreateFolder("プロセカリザルト");
+        const fcFolder = await findOrCreateFolder("FC", rootFolder.id);
+
+        for (const item of [...editorQueue]) {
+            const sbStatus = document.getElementById(`sb-status-${item.id}`);
+            if(sbStatus) { sbStatus.innerText = "送信中"; sbStatus.className = "upload-status processing"; }
+            
+            try {
+                if(!item.data.title || !item.data.level) throw new Error("必須項目不足");
+                
+                const folderName = `${item.data.level}${item.data.diff} ${item.data.title}`;
+                const songFolder = await findOrCreateFolder(folderName, fcFolder.id);
+                const fileName = (item.data.totalMiss === 0) ? "FC" : `FC-${item.data.totalMiss}`;
+
+                const meta = { 'name': fileName, 'parents': [songFolder.id] };
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+                form.append('file', item.file);
+
+                const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST', headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }), body: form
+                });
+                if (!res.ok) throw new Error(res.statusText);
+                
+                editorQueue = editorQueue.filter(q => q.id !== item.id);
+                document.getElementById(`sb-${item.id}`).remove();
+                successCount++;
+
+            } catch (e) {
+                console.error(e);
+                if(sbStatus) { sbStatus.innerText = "失敗"; sbStatus.className = "upload-status error"; }
+            }
+        }
+        finishExecution(successCount, "アップロード");
+      }
+
+      async function executeEdits() {
+          let successCount = 0;
+          const rootFolder = await findOrCreateFolder("プロセカリザルト");
+          const fcFolder = await findOrCreateFolder("FC", rootFolder.id);
+
+          for (const item of [...editorQueue]) {
+             const sbStatus = document.getElementById(`sb-status-${item.id}`);
+             if(sbStatus) { sbStatus.innerText = "保存中"; sbStatus.className = "upload-status processing"; }
+
+             try {
+                if(!item.data.title || !item.data.level) throw new Error("必須項目不足");
+
+                const newFolderName = `${item.data.level}${item.data.diff} ${item.data.title}`;
+                const newFileName = (item.data.totalMiss === 0) ? "FC" : `FC-${item.data.totalMiss}`;
+                
+                const targetFolder = await findOrCreateFolder(newFolderName, fcFolder.id);
+
+                const params = { fileId: item.originalId, resource: { name: newFileName } };
+                if (targetFolder.id !== item.originalParent) {
+                    params.addParents = targetFolder.id;
+                    params.removeParents = item.originalParent;
+                }
+                await gapi.client.drive.files.update(params);
+
+                editorQueue = editorQueue.filter(q => q.id !== item.id);
+                document.getElementById(`sb-${item.id}`).remove();
+                successCount++;
+             } catch (e) {
+                 console.error(e);
+                 if(sbStatus) { sbStatus.innerText = "失敗"; sbStatus.className = "upload-status error"; }
+             }
+          }
+          finishExecution(successCount, "更新");
+      }
+
+      function finishExecution(count, actionName) {
+         if (editorQueue.length === 0) {
+            alert(`${actionName}完了 (${count}件)`);
+            closeBatchModal();
+            selectedIds.clear(); 
+            updateSelectionUI();
+            fetchDataFromDrive();
+        } else {
+            alert(`${count}件 ${actionName}成功。エラー分を確認してください。`);
+            checkBatchButton();
+        }
+      }
+
+      // --- Selection Mode Logic ---
+      
+      function toggleSelectMode() {
+          isSelectMode = !isSelectMode;
+          const btn = document.getElementById('btn-select-mode');
+          if (isSelectMode) {
+              btn.classList.add('active');
+          } else {
+              btn.classList.remove('active');
+              selectedIds.clear();
+              updateSelectionUI();
+          }
+          renderGrid(filteredRecords);
+      }
+
+      function toggleSelection(id) {
+          if (selectedIds.has(id)) selectedIds.delete(id);
+          else selectedIds.add(id);
+          
+          const card = document.getElementById(`card-${id}`);
+          if (card) {
+              if (selectedIds.has(id)) card.classList.add('selected');
+              else card.classList.remove('selected');
+          }
+          updateSelectionUI();
+      }
+
+      function updateSelectionUI() {
+          const bar = document.getElementById('batch-actions');
+          const countSpan = document.getElementById('selected-count');
+          countSpan.innerText = selectedIds.size;
+          if (selectedIds.size > 0) {
+              bar.style.display = 'flex';
+          } else {
+              bar.style.display = 'none';
+          }
+      }
+      
+      function clearSelection() {
+          selectedIds.clear();
+          updateSelectionUI();
+          renderGrid(filteredRecords);
+      }
+
+      // Individual Actions (Non-Select Mode)
+      function individualEdit(id) {
+          selectedIds.clear();
+          selectedIds.add(id);
+          batchEdit();
+      }
+
+      async function individualDelete(id) {
+          if(!confirm("このリザルトを削除しますか？")) return;
+          const loader = document.getElementById('loader');
+          loader.style.display = 'flex';
+          document.getElementById('grid').innerHTML = '';
+          try {
+              await gapi.client.drive.files.delete({ fileId: id });
+              alert("削除しました");
+              await fetchDataFromDrive();
+          } catch(e) {
+              alert("エラー: " + e.message);
+              fetchDataFromDrive();
+          }
+      }
+
+      async function batchDelete() {
+          if (!confirm(`選択した ${selectedIds.size} 件を削除しますか？`)) return;
+          const loader = document.getElementById('loader');
+          loader.style.display = 'flex';
+          document.getElementById('grid').innerHTML = '';
+          
+          try {
+              for (const id of selectedIds) {
+                  await gapi.client.drive.files.delete({ fileId: id });
+              }
+              alert("削除しました");
+              selectedIds.clear();
+              updateSelectionUI();
+              await fetchDataFromDrive();
+          } catch (e) {
+              alert("削除エラー: " + e.message);
+              fetchDataFromDrive(); 
+          }
+      }
+
+      // --- Standard UI Helper ---
+      
+      function updateView() {
+        if (!allRecords) return;
+        const fcF = document.getElementById('filter-fc').value;
+        const msMin = document.getElementById('filter-miss-min').value;
+        const msMax = document.getElementById('filter-miss-max').value;
+        const dfF = document.getElementById('filter-diff').value;
+        const lvF = document.getElementById('filter-level').value;
+        const tiF = document.getElementById('filter-title').value.trim().toLowerCase();
+
+        let list = allRecords;
+
+        list = list.filter(r => {
+          if (fcF === 'fc' && !r.isFC) return false;
+          if (fcF === 'unfc' && r.isFC) return false;
+          if (!r.isFC) {
+              const mVal = r.missCount;
+              if (msMin !== "" && mVal < parseInt(msMin)) return false;
+              if (msMax !== "" && mVal > parseInt(msMax)) return false;
+          } else {
+              if (msMin !== "" && 0 < parseInt(msMin)) return false;
+          }
+          if (dfF !== 'all' && r.difficultyRaw !== dfF) return false;
+          if (lvF && r.level != lvF) return false;
+          if (tiF && !r.title.toLowerCase().includes(tiF)) return false;
+          return true;
+        });
+
+        const sOrder = document.getElementById('sort-order').value;
+        list.sort((a, b) => {
+          const tAsc = a.title.localeCompare(b.title, 'ja'), tDesc = b.title.localeCompare(a.title, 'ja');
+          const lDiff = b.level - a.level, lAsc = a.level - b.level;
+          const dDiff = diffRank[b.difficultyRaw] - diffRank[a.difficultyRaw]; 
+          const mAsc = a.missCount - b.missCount, mDesc = b.missCount - a.missCount;
+
+          if(sOrder === 'title_asc') return tAsc || dDiff || mAsc;
+          if(sOrder === 'title_desc') return tDesc || dDiff || mAsc;
+          if(sOrder === 'level_desc') return lDiff || tAsc || dDiff || mAsc;
+          if(sOrder === 'level_asc') return lAsc || tAsc || dDiff || mAsc;
+          if(sOrder === 'miss_asc') return mAsc || lDiff || dDiff;
+          return mDesc || lDiff || dDiff;
+        });
+        
+        filteredRecords = list;
+        renderGrid(list);
+      }
+
+      function renderGrid(records) {
+        const grid = document.getElementById('grid');
+        document.getElementById('result-count').innerText = `表示: ${records.length} 件`;
+        grid.innerHTML = '';
+        if (records.length === 0) { grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#666;">データなし</div>'; return; }
+
+        records.forEach(rec => {
+          let thumb = rec.thumbnail ? rec.thumbnail.replace('=s220', '=w600') : ''; 
+          let large = rec.thumbnail ? rec.thumbnail.replace('=s220', '=w1600') : '';
+          const missDisplay = rec.isFC ? `<span class="miss-val zero">FC-0</span>` : `FC -<span class="miss-val">${rec.missCount}</span>`;
+          const badge = rec.isFC ? `<div class="fc-badge"><span class="material-symbols-outlined" style="font-size:1rem;">crown</span> FULL COMBO</div>` : '';
+          const isSel = selectedIds.has(rec.id) ? 'selected' : '';
+
+          // Conditional Actions
+          let clickAction = "";
+          let overlayActions = "";
+          
+          if (isSelectMode) {
+              clickAction = `toggleSelection('${rec.id}')`;
+          } else {
+              clickAction = `openImageModal('${large}')`;
+              overlayActions = `
+                <div class="card-overlay-actions">
+                    <div class="btn-overlay" onclick="event.stopPropagation(); individualEdit('${rec.id}')" title="編集"><span class="material-symbols-outlined">edit</span></div>
+                    <div class="btn-overlay del" onclick="event.stopPropagation(); individualDelete('${rec.id}')" title="削除"><span class="material-symbols-outlined">delete</span></div>
+                </div>
+              `;
+          }
+
+          grid.innerHTML += `
+            <div class="card ${rec.isFC?'is-fc':''} ${isSel} ${isSelectMode ? 'select-mode-active' : ''}" id="card-${rec.id}" onclick="${clickAction}">
+              <div class="card-img-container">
+                ${badge}
+                ${overlayActions}
+                <div class="img-loader-spinner"></div>
+                ${thumb ? `<img src="${thumb}" class="card-img" loading="lazy" onload="this.style.opacity=1; this.previousElementSibling.style.display='none';">` : '<span style="color:#aaa;">NO IMAGE</span>'}
+              </div>
+              <div class="card-body">
+                <div class="song-meta"><span class="tag lvl">Lv.${rec.level}</span><span class="tag diff-${rec.difficultyRaw}">${rec.difficulty}</span></div>
+                <div class="song-title">${escapeHtml(rec.title)}</div>
+                <div class="score-info"><span style="display:flex;align-items:center;gap:2px;"><span class="material-symbols-outlined" style="font-size:1rem;">bar_chart</span> Result</span>${missDisplay}</div>
+              </div>
+            </div>`;
+        });
+      }
+
+      function openImageModal(src) { if(src) { document.getElementById('imageModal').style.display="flex"; document.getElementById('modalImg').src=src; } }
+      function closeImageModal() { document.getElementById('imageModal').style.display="none"; }
+      function parseFolderTitle(folderName) { const regex = /^(\d+)([AMEH])\s+(.+)$/; const match = folderName.match(regex); if (!match) return null; const diffMap = { 'A': 'APPEND', 'M': 'MASTER', 'E': 'EXPERT', 'H': 'HARD' }; return { level: parseInt(match[1], 10), rawDiff: match[2], difficulty: diffMap[match[2]] || match[2], title: match[3] }; }
+      function parseScore(fileName) { const match = fileName.match(/^FC(?:-(\d+))?/); return match ? (match[1] === undefined ? 0 : parseInt(match[1], 10)) : null; }
+      function onDataLoaded() { document.getElementById('loader').style.display = 'none'; updateView(); }
+      function escapeHtml(t) { return t ? t.toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])) : ''; }
+    </script>
+  </body>
+</html>
