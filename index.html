@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>プロセカ リザルト管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <style>
+      :root {
+        --bg-color: #f4f7f6;
+        --card-bg: #ffffff;
+        --text-color: #333;
+        --diff-append: #FF82C4;
+        --diff-master: #AC3EE6;
+        --diff-expert: #DC5268;
+        --diff-hard:    #E9B153;
+        --fc-color:     #FF82FF;
+        --sidebar-width: 200px;
+        --active-color: #e8f0fe;
+        --border-color: #ddd;
+        --selected-border: #007bff;
+      }
+      body { font-family: 'M PLUS Rounded 1c', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; padding-bottom: 80px; }
+      .container { max-width: 1200px; margin: 0 auto; }
+      h2 { display: flex; align-items: center; gap: 10px; color: #444; }
+      .material-symbols-outlined { font-size: 1.2rem; vertical-align: sub; }
+      
+      /* Auth Buttons & Top Controls */
+      .auth-section { text-align: right; margin-bottom: 20px; display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-wrap: wrap;}
+      .btn-auth {
+        background-color: #4285f4; color: white; border: none; padding: 10px 20px;
+        border-radius: 4px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;
+      }
+      .btn-auth:hover { background-color: #357ae8; }
+      .btn-signout { background-color: #dc3545; }
+      .btn-upload { background-color: #28a745; }
+      
+      /* Mode Toggle Button Style */
+      .btn-mode {
+        background-color: white; border: 1px solid #ccc; color: #555; padding: 10px 15px;
+        border-radius: 4px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;
+      }
+      .btn-mode.active { background-color: #e8f0fe; color: #007bff; border-color: #007bff; }
+
+      #auth-status { margin-right: 10px; font-size: 0.9rem; color: #666; }
+
+      /* Controls */
+      .controls { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; align-items: end;}
+      .control-group { display: flex; flex-direction: column; }
+      .control-group label { font-size: 0.8rem; font-weight: bold; color: #777; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+      select, input[type="number"], input[type="text"], input[type="file"] { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; background-color: #fafafa; }
+      
+      .range-inputs { display: flex; align-items: center; gap: 5px; }
+      .range-inputs input { width: 100%; text-align: center; }
+
+      .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: #666; font-weight: bold; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+      
+      /* Card */
+      .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; border: 2px solid transparent; position: relative; cursor: pointer; }
+      .card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+      .card.is-fc { border-color: var(--fc-color); }
+      
+      /* Selection Mode Styles */
+      .card.selected { border-color: var(--selected-border); background-color: #f0f7ff; transform: scale(0.98); }
+      .card.selected::after { content: "check_circle"; font-family: 'Material Symbols Outlined'; position: absolute; top: 10px; right: 10px; font-size: 24px; color: var(--selected-border); z-index: 20; background: white; border-radius: 50%; }
+
+      .card-img-container { width: 100%; height: 140px; background-color: #e0e2e5; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }
+      .card-img { width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s ease-in; position: relative; z-index: 2; }
+      .img-loader-spinner { position: absolute; width: 24px; height: 24px; border: 3px solid #ddd; border-top: 3px solid #999; border-radius: 50%; animation: spin 1s linear infinite; z-index: 1; }
+      
+      .fc-badge { position: absolute; top: 8px; right: 8px; background: var(--fc-color); color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 4px; z-index: 3; }
+      
+      /* Overlay Actions (Edit/Delete) */
+      .card-overlay-actions { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 6px; z-index: 10; opacity: 0; transition: opacity 0.2s; }
+      .card:hover .card-overlay-actions { opacity: 1; }
+      .card.select-mode-active .card-overlay-actions { display: none !important; } /* Hide in select mode */
+
+      .btn-overlay { width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: 1px solid #ddd; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); color: #555; transition: all 0.2s; }
+      .btn-overlay:hover { transform: scale(1.1); color: #007bff; }
+      .btn-overlay.del:hover { color: #dc3545; background: #fff5f5; }
+
+      .card-body { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; }
+      .song-meta { display: flex; gap: 6px; margin-bottom: 8px; font-size: 0.75rem; }
+      .tag { padding: 4px 8px; border-radius: 4px; font-weight: bold; color: white; letter-spacing: 0.5px; }
+      .tag.lvl { background-color: #555; }
+      .tag.diff-A { background-color: var(--diff-append); }
+      .tag.diff-M { background-color: var(--diff-master); }
+      .tag.diff-E { background-color: var(--diff-expert); }
+      .tag.diff-H { background-color: var(--diff-hard); }
+      .song-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 12px; line-height: 1.4; }
+      .score-info { font-size: 0.9rem; color: #666; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 8px; margin-top: auto; }
+      .miss-val { font-weight: bold; }
+      .miss-val.zero { color: var(--fc-color); } 
+
+      #loader { display: none; flex-direction: column; align-items: center; margin-top: 50px; color: #666; }
+      .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top: 4px solid var(--diff-master); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      
+      /* Modals */
+      .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); justify-content: center; align-items: center; }
+      .modal-content-img { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); object-fit: contain; }
+      
+      /* Generic Batch/Edit Modal */
+      .modal-form-content { background-color: #fff; border-radius: 12px; width: 95%; max-width: 1000px; height: 85vh; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; position: relative;}
+      .modal-header { padding: 15px 20px; border-bottom: 1px solid #eee; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; background: #fff;}
+      
+      /* Split View Layout */
+      .split-container { display: flex; flex: 1; overflow: hidden; }
+      .sidebar { width: 250px; border-right: 1px solid #eee; overflow-y: auto; background-color: #f8f9fa; display: flex; flex-direction: column; flex-shrink: 0; }
+      
+      .sidebar-toolbar { padding: 10px; border-bottom: 1px solid #ddd; background: #fff; display: flex; justify-content: center;}
+      .btn-analyze-all { width: 100%; font-size: 0.8rem; padding: 8px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; }
+      .btn-analyze-all:hover { background: #138496; }
+
+      .sidebar-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; position: relative;}
+      .sidebar-item:hover { background-color: #eee; }
+      .sidebar-item.active { background-color: var(--active-color); border-left: 4px solid #007bff; }
+      .sidebar-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #ddd; flex-shrink: 0;}
+      .sidebar-info { overflow: hidden; font-size: 0.8rem; flex-grow: 1; }
+      .sidebar-title { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .sidebar-status { font-size: 0.75rem; color: #666; display: flex; justify-content: space-between;}
+      .btn-remove-side { border: none; background: none; color: #999; cursor: pointer; padding: 5px; }
+      .btn-remove-side:hover { color: #dc3545; }
+
+      .main-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+      .editor-layout { display: flex; flex-wrap: wrap; gap: 20px; height: 100%; }
+      .preview-pane { flex: 1; min-width: 300px; background: #000; display: flex; justify-content: center; align-items: center; border-radius: 8px; overflow: hidden; position: relative; max-height: 500px; }
+      .preview-pane img { max-width: 100%; max-height: 100%; object-fit: contain; }
+      .form-pane { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; position: relative; }
+
+      .form-group { margin-bottom: 5px; }
+      .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; color:#555; }
+      
+      .breakdown-group { display: flex; gap: 10px; background: #f0f2f5; padding: 10px; border-radius: 8px; }
+      .breakdown-item { flex: 1; text-align: center; }
+      .breakdown-item label { font-size: 0.75rem; margin-bottom: 2px; display: block; }
+      .breakdown-item input { width: 100%; text-align: center; font-weight: bold; box-sizing: border-box;}
+      .total-score { text-align: right; font-weight: bold; margin-top: 5px; font-size: 0.9rem; color: #333;}
+
+      .form-actions { padding: 15px 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; background: #fff; flex-shrink: 0; }
+      .btn-cancel { background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+      .btn-submit { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+      .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
+      
+      .btn-reanalyze { background-color: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px; align-self: flex-start; margin-bottom: 10px;}
+      .btn-reanalyze:hover { background-color: #0056b3; }
+
+      /* Drop Zone */
+      .drop-zone { border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; color: #777; transition: all 0.2s; cursor: pointer; background-color: #fcfcfc; margin: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;}
+      .drop-zone:hover, .drop-zone.dragover { border-color: #007bff; background-color: #f0f7ff; color: #007bff; }
+      
+      .upload-status { font-weight: bold; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+      .upload-status.processing { background-color: #e2f0ff; color: #007bff; }
+      .upload-status.done { background-color: #d4edda; color: #155724; }
+      .upload-status.error { background-color: #f8d7da; color: #721c24; }
+      .upload-status.pending { background-color: #eee; color: #777; }
+
+      /* Batch Selection Bar */
+      #batch-actions { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 15px 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: none; justify-content: center; gap: 15px; z-index: 900; box-sizing: border-box; }
+      .btn-batch { padding: 10px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; color: white; }
+      .btn-batch.delete { background-color: #dc3545; }
+      .btn-batch.edit { background-color: #007bff; }
+      .btn-batch.deselect { background-color: #6c757d; }
+
+      .close-btn { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 1001; transition: color 0.2s; }
+      .close-btn:hover { color: var(--fc-color); }
+    
+.btn-settings { background-color: #6c757d; color: white; border: none; }
+.btn-settings:hover { background-color: #5a6268; }
+.btn-toggle { background: white; border: 1px solid var(--border-color); color: #555; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; }
+.btn-toggle.active { background: #eef6ff; color: #0b66c3; border-color: #0b66c3; }
+.btn-toggle:disabled { opacity: 0.6; cursor: default; }
+.best-badge { position: absolute; top: 8px; left: 8px; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.95); color: #7c3aed; font-size: 0.75rem; font-weight: bold; z-index: 6; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.best-badge .material-symbols-outlined { font-size: 1rem; }
+.metrics-line { margin-top: 4px; font-size: 0.75rem; color: #666; }
+.record-date { margin-top: 6px; font-size: 0.72rem; color: #888; }
+.diff-EASY { background: #66DA7E !important; color: #fff !important; }
+.diff-NORMAL { background: #66C9F9 !important; color: #fff !important; }
+.diff-HARD { background: #F5CC44 !important; color: #fff !important; }
+.diff-EXPERT { background: #EA5577 !important; color: #fff !important; }
+.diff-MASTER { background: #BB40F5 !important; color: #fff !important; }
+.diff-APPEND { background: #EE82E2 !important; color: #fff !important; }
+.tag { display: inline-flex; align-items: center; justify-content: center; padding: 4px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: bold; }
+.tag.lvl { background: #eef1f4; color: #556; }
+.score-info { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; font-size: 0.9rem; color: #444; }
+.miss-val { font-weight: bold; color: var(--diff-master); }
+.miss-val.zero { color: #16a34a; }
+.modal { display: none; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.modal-content-img { max-width: 95vw; max-height: 92vh; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+.close-btn { position: absolute; top: 16px; right: 22px; color: white; font-size: 34px; cursor: pointer; z-index: 1001; }
+.modal-form-content { width: min(1200px, 96vw); max-height: 92vh; background: #fff; border-radius: 18px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: #f8f9fa; border-bottom: 1px solid #eee; font-weight: bold; }
+.split-container { display: flex; min-height: 60vh; }
+.sidebar { width: 320px; border-right: 1px solid #eee; display: flex; flex-direction: column; background: #fafafa; }
+.sidebar-toolbar { padding: 12px; border-bottom: 1px solid #eee; }
+.btn-analyze-all { width: 100%; background: #eef6ff; border: 1px solid #b8d5ff; color: #0b66c3; padding: 10px; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.sidebar-item { display: grid; grid-template-columns: 72px 1fr auto; gap: 10px; padding: 10px; border-bottom: 1px solid #ececec; cursor: pointer; align-items: center; }
+.sidebar-item.active { background: #eef6ff; }
+.sidebar-thumb { width: 72px; height: 48px; object-fit: cover; border-radius: 8px; background: #e7e7e7; }
+.sidebar-meta { min-width: 0; }
+.sidebar-title { font-size: 0.95rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-subtitle { font-size: 0.8rem; color: #666; margin-top: 2px; }
+.sidebar-remove { border: none; background: transparent; font-size: 20px; color: #999; cursor: pointer; }
+.main-area { flex: 1; padding: 18px; overflow: auto; }
+.editor-layout { display: flex; gap: 18px; }
+.preview-pane { flex: 1; min-width: 360px; display: flex; align-items: flex-start; justify-content: center; }
+.preview-pane img { width: 100%; max-width: 640px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.form-pane { width: 380px; display: flex; flex-direction: column; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label { font-size: 0.85rem; font-weight: bold; color: #666; }
+.form-group input, .form-group select { width: 100%; box-sizing: border-box; }
+.breakdown-group { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.breakdown-item { display: flex; flex-direction: column; gap: 5px; }
+.breakdown-item input { text-align: center; }
+.total-score { margin-top: 8px; font-weight: bold; color: #444; }
+.form-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 18px 18px; background: #fff; border-top: 1px solid #eee; }
+.btn-cancel, .btn-submit { border: none; padding: 10px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+.btn-cancel { background: #edf0f2; color: #444; }
+.btn-submit { background: #0b66c3; color: white; }
+.btn-submit:disabled { opacity: 0.6; cursor: default; }
+.drop-zone { width: 100%; min-height: 260px; border: 2px dashed #bfcad6; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #667; background: #fbfcfd; cursor: pointer; }
+.drop-zone.dragover { border-color: #0b66c3; background: #eef6ff; color: #0b66c3; }
+.upload-status { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: bold; }
+.upload-status.pending { background: #f0f0f0; color: #666; }
+.upload-status.processing { background: #fff4d8; color: #946b00; }
+.upload-status.ready { background: #e7f7ea; color: #167d34; }
+.upload-status.error { background: #fdeaea; color: #b42318; }
+.crop-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; }
+.preview-stage { position: relative; width: 100%; background: #111; border-radius: 14px; overflow: hidden; min-height: 320px; }
+.preview-stage img { width: 100%; display: block; }
+.preview-overlay { position: absolute; border: 2px solid rgba(255,255,255,0.95); background: rgba(11,102,195,0.16); box-sizing: border-box; pointer-events: none; border-radius: 4px; }
+.preview-overlay[data-key="diff"] { border-color: #EA5577; }
+.preview-overlay[data-key="title"] { border-color: #66DA7E; }
+.preview-overlay[data-key="result"] { border-color: #BB40F5; }
+.preview-overlay[data-key="combo"] { border-color: #66C9F9; }
+.crop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.crop-card { border: 1px solid #e3e7ec; border-radius: 14px; padding: 12px; background: #fff; }
+.crop-card h4 { margin: 0 0 10px; font-size: 0.95rem; }
+.crop-rows { display: grid; gap: 8px; }
+.crop-row { display: grid; grid-template-columns: 34px 1fr 64px; align-items: center; gap: 8px; font-size: 0.8rem; }
+.crop-row input[type="number"] { padding: 8px; text-align: right; }
+.settings-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.settings-result { margin-top: 12px; background: #0b1020; color: #d2e8ff; border-radius: 12px; padding: 12px; min-height: 120px; white-space: pre-wrap; font-size: 0.8rem; overflow: auto; }
+.toast-container { position: fixed; right: 18px; bottom: 18px; z-index: 2000; display: grid; gap: 10px; }
+.toast { opacity: 0; transform: translateY(12px); transition: all 0.2s ease; background: rgba(20,20,20,0.92); color: #fff; padding: 12px 14px; border-radius: 12px; box-shadow: 0 8px 18px rgba(0,0,0,0.2); max-width: 360px; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-success { background: rgba(20,120,60,0.95); }
+.toast-error { background: rgba(160,30,30,0.95); }
+.toast-info { background: rgba(20,20,20,0.92); }
+.settings-topbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: 12px; }
+.settings-image-note { font-size: 0.85rem; color: #666; }
+.controls .control-group button { width: 100%; justify-content: center; }
+</style>
+  </head>
+  <body>
+<div id="imageModal" class="modal">
+  <span class="close-btn" onclick="closeImageModal()">&times;</span>
+  <img class="modal-content-img" id="modalImg">
+</div>
+
+<div id="batchModal" class="modal" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-form-content">
+    <div class="modal-header">
+      <span id="batch-modal-title"><span class="material-symbols-outlined">cloud_upload</span> 画像アップロード・編集</span>
+      <span style="cursor:pointer;" onclick="closeBatchModal()">&times;</span>
+    </div>
+
+    <div id="upload-initial" style="display: flex; flex: 1; padding: 18px;">
+        <div id="drop-zone" class="drop-zone">
+          <span class="material-symbols-outlined" style="font-size: 64px; margin-bottom: 10px;">upload_file</span>
+          <div style="font-size: 1.2rem; font-weight: bold;">クリックして画像を選択</div>
+          <div style="font-size: 0.9rem; margin-top: 5px;">または画像をここにドラッグ＆ドロップ</div>
+          <input type="file" id="up-file" accept="image/*" multiple style="display: none;">
+        </div>
+    </div>
+
+    <div id="batch-workspace" class="split-container" style="display: none;">
+        <div class="sidebar">
+            <div class="sidebar-toolbar">
+                <button class="btn-analyze-all" onclick="analyzeAllInBatch()">
+                    <span class="material-symbols-outlined">analytics</span> 一括解析 (すべて)
+                </button>
+            </div>
+            <div id="batch-sidebar-list" style="overflow-y:auto; flex:1;"></div>
+        </div>
+
+        <div class="main-area">
+            <div id="batch-editor-container" class="editor-layout" style="display: none;">
+                <div class="preview-pane">
+                    <img id="batch-preview-img" src="" crossorigin="anonymous">
+                </div>
+                <div class="form-pane">
+                    <button type="button" class="btn-reanalyze" onclick="reanalyzeCurrentItem()">
+                        <span class="material-symbols-outlined" style="font-size:1rem;">analytics</span> この画像を再解析
+                    </button>
+
+                    <div class="form-group">
+                        <label>曲名</label>
+                        <input type="text" id="up-title" style="width: 100%; box-sizing: border-box;" oninput="updateCurrentItem('title', this.value)">
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <div class="form-group" style="flex:1;">
+                            <label>レベル</label>
+                            <input type="number" id="up-level" style="width: 100%; box-sizing: border-box;" oninput="updateCurrentItem('level', this.value)">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>難易度</label>
+                            <select id="up-diff" style="width: 100%; box-sizing: border-box;" onchange="updateCurrentItem('diff', this.value)">
+                                <option value="EASY">EASY</option>
+                                <option value="NORMAL">NORMAL</option>
+                                <option value="HARD">HARD</option>
+                                <option value="EXPERT" selected>EXPERT</option>
+                                <option value="MASTER">MASTER</option>
+                                <option value="APPEND">APPEND</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>判定内訳</label>
+                        <div class="breakdown-group">
+                            <div class="breakdown-item">
+                                <label style="color:#f59e0b;">PERFECT</label>
+                                <input type="number" id="up-perfect" min="0" value="0" oninput="updateCurrentItem('perfect', this.value)">
+                            </div>
+                            <div class="breakdown-item">
+                                <label style="color:#8b5cf6;">GREAT</label>
+                                <input type="number" id="up-great" min="0" value="0" oninput="updateCurrentItem('great', this.value)">
+                            </div>
+                            <div class="breakdown-item">
+                                <label style="color:#8ac5f7;">GOOD</label>
+                                <input type="number" id="up-good" min="0" value="0" oninput="updateCurrentItem('good', this.value)">
+                            </div>
+                            <div class="breakdown-item">
+                                <label style="color:#9bfcc0;">BAD</label>
+                                <input type="number" id="up-bad" min="0" value="0" oninput="updateCurrentItem('bad', this.value)">
+                            </div>
+                            <div class="breakdown-item">
+                                <label style="color:#e0e0e0;">MISS</label>
+                                <input type="number" id="up-miss-detail" min="0" value="0" oninput="updateCurrentItem('miss', this.value)">
+                            </div>
+                        </div>
+                        <div class="settings-footer" style="margin-top: 8px;">
+                            <div class="total-score">
+                                総ミス数: <span id="up-total-miss" style="font-size:1.2rem; color:var(--diff-master);">0</span>
+                            </div>
+                            <div class="total-score">
+                                MAX COMBO: <span id="up-combo-value" style="font-size:1.2rem; color:var(--diff-master);">0</span>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>コンボ数</label>
+                            <input type="number" id="up-combo" min="0" value="0" oninput="updateCurrentItem('combo', this.value)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="batch-empty-msg" style="margin:auto; color:#999; text-align:center;">
+                左のリストから画像を選択してください
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-header" style="font-size: 0.9rem; padding: 10px 20px; background: #f8f9fa; border-top: 1px solid #eee; border-bottom: none; display:block;" id="batch-msg-area">
+         <span id="batch-status-msg">待機中...</span>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeBatchModal()">閉じる</button>
+      <button class="btn-submit" id="btn-exec-batch" onclick="handleBatchExecution()" disabled>実行</button>
+    </div>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-form-content" style="width: min(1320px, 98vw);">
+    <div class="modal-header">
+      <span><span class="material-symbols-outlined">settings</span> 読み取り設定</span>
+      <span style="cursor:pointer;" onclick="closeSettingsModal()">&times;</span>
+    </div>
+
+    <div style="padding: 18px; overflow:auto; display:flex; flex-direction:column; gap:16px;">
+      <div class="settings-topbar">
+        <div>
+          <div style="font-weight:bold; margin-bottom:4px;">サンプル画像</div>
+          <div class="settings-image-note" id="sample-preview-note">画像を読み込むと範囲の確認ができます。</div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <input type="file" id="settings-sample-file" accept="image/*">
+          <button class="btn-toggle" id="btn-sample-analyze" type="button"><span class="material-symbols-outlined">analytics</span> サンプル解析</button>
+          <button class="btn-toggle" id="btn-reset-crops" type="button"><span class="material-symbols-outlined">restart_alt</span> 初期値へ</button>
+        </div>
+      </div>
+
+      <div class="crop-layout">
+        <div class="preview-stage" id="settings-preview-stage">
+          <img id="settings-preview-image" src="" alt="">
+          <div class="preview-overlay" id="overlay-diff" data-key="diff"></div>
+          <div class="preview-overlay" id="overlay-title" data-key="title"></div>
+          <div class="preview-overlay" id="overlay-result" data-key="result"></div>
+          <div class="preview-overlay" id="overlay-combo" data-key="combo"></div>
+        </div>
+
+        <div>
+          <div class="crop-grid">
+            <div class="crop-card">
+              <h4>難易度</h4>
+              <div class="crop-rows">
+                <div class="crop-row"><span>X</span><input type="number" step="0.01" min="0" max="1" id="crop-diff-x"><span></span></div>
+                <div class="crop-row"><span>Y</span><input type="number" step="0.01" min="0" max="1" id="crop-diff-y"><span></span></div>
+                <div class="crop-row"><span>W</span><input type="number" step="0.01" min="0.01" max="1" id="crop-diff-w"><span></span></div>
+                <div class="crop-row"><span>H</span><input type="number" step="0.01" min="0.01" max="1" id="crop-diff-h"><span></span></div>
+              </div>
+            </div>
+
+            <div class="crop-card">
+              <h4>曲名</h4>
+              <div class="crop-rows">
+                <div class="crop-row"><span>X</span><input type="number" step="0.01" min="0" max="1" id="crop-title-x"><span></span></div>
+                <div class="crop-row"><span>Y</span><input type="number" step="0.01" min="0" max="1" id="crop-title-y"><span></span></div>
+                <div class="crop-row"><span>W</span><input type="number" step="0.01" min="0.01" max="1" id="crop-title-w"><span></span></div>
+                <div class="crop-row"><span>H</span><input type="number" step="0.01" min="0.01" max="1" id="crop-title-h"><span></span></div>
+              </div>
+            </div>
+
+            <div class="crop-card">
+              <h4>結果</h4>
+              <div class="crop-rows">
+                <div class="crop-row"><span>X</span><input type="number" step="0.01" min="0" max="1" id="crop-result-x"><span></span></div>
+                <div class="crop-row"><span>Y</span><input type="number" step="0.01" min="0" max="1" id="crop-result-y"><span></span></div>
+                <div class="crop-row"><span>W</span><input type="number" step="0.01" min="0.01" max="1" id="crop-result-w"><span></span></div>
+                <div class="crop-row"><span>H</span><input type="number" step="0.01" min="0.01" max="1" id="crop-result-h"><span></span></div>
+              </div>
+            </div>
+
+            <div class="crop-card">
+              <h4>コンボ</h4>
+              <div class="crop-rows">
+                <div class="crop-row"><span>X</span><input type="number" step="0.01" min="0" max="1" id="crop-combo-x"><span></span></div>
+                <div class="crop-row"><span>Y</span><input type="number" step="0.01" min="0" max="1" id="crop-combo-y"><span></span></div>
+                <div class="crop-row"><span>W</span><input type="number" step="0.01" min="0.01" max="1" id="crop-combo-w"><span></span></div>
+                <div class="crop-row"><span>H</span><input type="number" step="0.01" min="0.01" max="1" id="crop-combo-h"><span></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-result" id="settings-analysis-result">サンプル画像を読み込んで「サンプル解析」を押すと結果が表示されます。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeSettingsModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="auth-section">
+    <span id="auth-status">未ログイン</span>
+    <button id="btn-select-mode" class="btn-mode" onclick="toggleSelectMode()">
+        <span class="material-symbols-outlined">check_box</span> 選択モード
+    </button>
+    <button id="btn-best-only" class="btn-toggle" type="button">
+        <span class="material-symbols-outlined">verified</span> 自己ベストのみ
+    </button>
+    <button id="btn-open-settings" class="btn-auth btn-settings" type="button">
+      <span class="material-symbols-outlined">settings</span> 設定
+    </button>
+    <button id="upload_button" class="btn-auth btn-upload" onclick="openBatchModal('upload')" style="display: none;">
+      <span class="material-symbols-outlined">add_photo_alternate</span> アップロード
+    </button>
+    <button id="authorize_button" class="btn-auth" onclick="handleAuthClick()">
+      <span class="material-symbols-outlined">login</span> Googleでログイン
+    </button>
+    <button id="signout_button" class="btn-auth btn-signout" onclick="handleSignoutClick()" style="display: none;">
+      <span class="material-symbols-outlined">logout</span> ログアウト
+    </button>
+  </div>
+
+  <h2><span class="material-symbols-outlined">library_music</span> リザルト管理 (My Drive)</h2>
+
+  <div class="controls">
+    <div class="control-group">
+      <label><span class="material-symbols-outlined">sort</span> 並べ替え</label>
+      <select id="sort-order">
+        <option value="name">名前順</option>
+        <option value="level" selected>楽曲レベル順</option>
+        <option value="miss">ミス数順</option>
+        <option value="date">追加日順</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label><span class="material-symbols-outlined">swap_vert</span> 昇順 / 降順</label>
+      <button id="sort-direction" class="btn-toggle" type="button"><span class="material-symbols-outlined">swap_vert</span> 降順</button>
+    </div>
+
+    <div class="control-group">
+      <label><span class="material-symbols-outlined">filter_alt</span> FC状況</label>
+      <select id="filter-fc">
+        <option value="all">すべて</option>
+        <option value="fc">FC済み (FC-0)</option>
+        <option value="unfc">未FC (失点あり)</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label><span class="material-symbols-outlined">remove_circle</span> 失点数 (範囲)</label>
+      <div class="range-inputs">
+        <input type="number" id="filter-miss-min" placeholder="0" min="0">
+        <span>~</span>
+        <input type="number" id="filter-miss-max" placeholder="Max" min="0">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label><span class="material-symbols-outlined">speed</span> 難易度</label>
+      <select id="filter-diff">
+        <option value="all">すべて</option>
+        <option value="EASY">EASY</option>
+        <option value="NORMAL">NORMAL</option>
+        <option value="HARD">HARD</option>
+        <option value="EXPERT">EXPERT</option>
+        <option value="MASTER">MASTER</option>
+        <option value="APPEND">APPEND</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label><span class="material-symbols-outlined">manage_search</span> 曲名検索</label>
+      <input type="text" id="filter-title" placeholder="曲名を入力...">
+    </div>
+
+    <div class="control-group">
+      <label><span class="material-symbols-outlined">search</span> レベル検索</label>
+      <input type="number" id="filter-level" placeholder="">
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span id="result-count">ログインしてください</span>
+  </div>
+
+  <div id="loader">
+    <div class="spinner"></div>
+    <div id="loader-text">データを読み込み中...</div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+</div>
+
+<div id="batch-actions">
+    <button class="btn-batch deselect" onclick="clearSelection()"><span class="material-symbols-outlined">close</span> 選択解除</button>
+    <button class="btn-batch delete" onclick="batchDelete()"><span class="material-symbols-outlined">delete</span> 削除</button>
+    <button class="btn-batch edit" onclick="batchEdit()"><span class="material-symbols-outlined">edit_note</span> 編集・解析</button>
+    <div style="margin-left:auto; display:flex; align-items:center; color:#666;">
+        <span id="selected-count">0</span> 件選択中
+    </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script type="module" src="./js/main.js"></script>
+
+  </body>
+</html>
