@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>プロセカ リザルト管理</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+</link><link href="./assets/css/style.css" rel="stylesheet"/></head>
+<body>
+<div class="modal" id="imageModal" onclick="if(event.target === this) closeImageModal()">
+<span class="close-btn" onclick="closeImageModal()">×</span>
+<img class="modal-content-img" id="modalImg"/>
+</div>
+<div class="modal" id="batchModal" style="background-color: rgba(0,0,0,0.5);">
+<div class="modal-form-content">
+<div class="modal-header">
+<span id="batch-modal-title"><span class="material-symbols-outlined">cloud_upload</span> 画像アップロード・編集</span>
+<span onclick="closeBatchModal()" style="cursor:pointer;">×</span>
+</div>
+<div id="upload-initial" style="display: flex; flex: 1;">
+<div class="drop-zone" id="drop-zone" onclick="document.getElementById('up-file').click()">
+<span class="material-symbols-outlined" style="font-size: 64px; margin-bottom: 10px;">upload_file</span>
+<div style="font-size: 1.2rem; font-weight: bold;">クリックして画像を選択</div>
+<div style="font-size: 0.9rem; margin-top: 5px;">または画像をここにドラッグ＆ドロップ</div>
+<input accept="image/*" id="up-file" multiple="" style="display: none;" type="file"/>
+</div>
+</div>
+<div class="split-container" id="batch-workspace" style="display: none;">
+<div class="sidebar">
+<div class="sidebar-toolbar">
+<button class="btn-analyze-all" onclick="analyzeAllInBatch()">
+<span class="material-symbols-outlined">analytics</span> 一括解析 (すべて)
+                    </button>
+</div>
+<div id="batch-sidebar-list" style="overflow-y:auto; flex:1;"></div>
+</div>
+<div class="main-area">
+<div class="editor-layout" id="batch-editor-container" style="display: none;">
+<div class="preview-pane">
+<img crossorigin="anonymous" id="batch-preview-img" src=""/>
+</div>
+<div class="form-pane">
+<button class="btn-reanalyze" onclick="reanalyzeCurrentItem()" type="button">
+<span class="material-symbols-outlined" style="font-size:1rem;">analytics</span> この画像を再解析
+                        </button>
+<div class="form-group">
+<label>曲名</label>
+<input id="up-title" oninput="updateCurrentItem('title', this.value)" style="width: 100%; box-sizing: border-box;" type="text"/>
+</div>
+<div style="display:flex; gap:10px;">
+<div class="form-group" style="flex:1;">
+<label>レベル</label>
+<input id="up-level" oninput="updateCurrentItem('level', this.value)" style="width: 100%; box-sizing: border-box;" type="number"/>
+</div>
+<div class="form-group" style="flex:1;">
+<label>難易度</label>
+<select id="up-diff" onchange="updateCurrentItem('diff', this.value)" style="width: 100%; box-sizing: border-box;"><option value="easy">EASY</option><option value="normal">NORMAL</option><option value="hard">HARD</option><option value="expert">EXPERT</option><option value="master">MASTER</option><option value="append">APPEND</option></select>
+</div>
+</div>
+<div class="form-group">
+<label>判定内訳</label>
+<div class="breakdown-group">
+<div class="breakdown-item">
+<label style="color:#d8a8ff;">PERFECT</label>
+<input id="up-perfect" min="0" oninput="updateCurrentItem('perfect', this.value)" type="number" value="0"/>
+</div>
+<div class="breakdown-item">
+<label style="color:#8ac5f7;">GREAT</label>
+<input id="up-great" min="0" oninput="updateCurrentItem('great', this.value)" type="number" value="0"/>
+</div>
+<div class="breakdown-item">
+<label style="color:#9bfcc0;">GOOD</label>
+<input id="up-good" min="0" oninput="updateCurrentItem('good', this.value)" type="number" value="0"/>
+</div>
+<div class="breakdown-item">
+<label style="color:#f8a07d;">BAD</label>
+<input id="up-bad" min="0" oninput="updateCurrentItem('bad', this.value)" type="number" value="0"/>
+</div>
+<div class="breakdown-item">
+<label style="color:#e0e0e0;">MISS</label>
+<input id="up-miss-detail" min="0" oninput="updateCurrentItem('missDetail', this.value)" type="number" value="0"/>
+</div>
+</div>
+<div style="display:flex;gap:10px;align-items:end;margin-top:12px;">
+<div class="form-group" style="flex:1; margin:0;">
+<label>コンボ</label>
+<input id="up-combo" min="0" oninput="updateCurrentItem('combo', this.value)" style="width: 100%; box-sizing: border-box;" type="number" value="0"/>
+</div>
+<div class="total-score" style="flex:1;">
+      総ミス数: <span id="up-total-miss" style="font-size:1.2rem; color:var(--diff-master);">0</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="batch-empty-msg" style="margin:auto; color:#999; text-align:center;">
+                    左のリストから画像を選択してください
+                </div>
+</div>
+</div>
+<div class="modal-header" id="batch-msg-area" style="font-size: 0.9rem; padding: 10px 20px; background: #f8f9fa; border-top: 1px solid #eee; border-bottom: none; display:block;">
+<span id="batch-status-msg">待機中...</span>
+</div>
+<div class="form-actions">
+<button class="btn-cancel" onclick="closeBatchModal()">閉じる</button>
+<button class="btn-submit" disabled="" id="btn-exec-batch" onclick="handleBatchExecution()">実行</button>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="auth-section">
+<span id="auth-status">未ログイン</span>
+<button class="btn-mode" id="btn-select-mode" onclick="toggleSelectMode()">
+<span class="material-symbols-outlined">check_box</span> 選択モード
+        </button><button class="btn-mode btn-pb" id="btn-pb-only" onclick="togglePBOnly()"><span class="material-symbols-outlined">emoji_events</span> 自己ベストのみOFF</button><button class="btn-mode btn-settings" id="btn-settings" onclick="openSettingsModal()"><span class="material-symbols-outlined">settings</span> 設定</button>
+<button class="btn-auth btn-upload" id="upload_button" onclick="openBatchModal('upload')" style="display: none;">
+<span class="material-symbols-outlined">add_photo_alternate</span> アップロード
+        </button>
+<button class="btn-auth" id="authorize_button" onclick="handleAuthClick()">
+<span class="material-symbols-outlined">login</span> Googleでログイン
+        </button>
+<button class="btn-auth btn-signout" id="signout_button" onclick="handleSignoutClick()" style="display: none;">
+<span class="material-symbols-outlined">logout</span> ログアウト
+        </button>
+</div>
+<h2><span class="material-symbols-outlined">library_music</span> リザルト管理 (My Drive)</h2>
+<div class="controls">
+<div class="control-group">
+<label><span class="material-symbols-outlined">sort</span> 並べ替え</label>
+<select id="sort-order" onchange="updateView()"><option selected="" value="level_desc">楽曲レベル順（降順）</option><option value="level_asc">楽曲レベル順（昇順）</option><option value="name_asc">名前順（昇順）</option><option value="name_desc">名前順（降順）</option><option value="miss_asc">ミス数順（昇順）</option><option value="miss_desc">ミス数順（降順）</option><option value="date_desc">追加日順（降順）</option><option value="date_asc">追加日順（昇順）</option></select>
+</div>
+<div class="control-group">
+<label><span class="material-symbols-outlined">filter_alt</span> FC状況</label>
+<select id="filter-fc" onchange="updateView()">
+<option value="all">すべて</option>
+<option value="fc">FC済み (FC-0)</option>
+<option value="unfc">未FC (失点あり)</option>
+</select>
+</div>
+<div class="control-group">
+<label><span class="material-symbols-outlined">remove_circle</span> 失点数 (範囲)</label>
+<div class="range-inputs">
+<input id="filter-miss-min" min="0" oninput="updateView()" placeholder="0" type="number"/>
+<span>~</span>
+<input id="filter-miss-max" min="0" oninput="updateView()" placeholder="Max" type="number"/>
+</div>
+</div>
+<div class="control-group">
+<label><span class="material-symbols-outlined">speed</span> 難易度</label>
+<select id="filter-diff" onchange="updateView()"><option value="all">すべて</option><option value="easy">EASY</option><option value="normal">NORMAL</option><option value="hard">HARD</option><option value="expert">EXPERT</option><option value="master">MASTER</option><option value="append">APPEND</option></select>
+</div>
+<div class="control-group">
+<label><span class="material-symbols-outlined">manage_search</span> 曲名検索</label>
+<input id="filter-title" oninput="updateView()" placeholder="曲名を入力..." type="text"/>
+</div>
+<div class="control-group">
+<label><span class="material-symbols-outlined">search</span> レベル検索</label>
+<input id="filter-level" oninput="updateView()" placeholder="" type="number"/>
+</div>
+</div>
+<div class="status-bar">
+<span id="result-count">ログインしてください</span>
+</div>
+<div id="loader">
+<div class="spinner"></div>
+<div id="loader-text">データを読み込み中...</div>
+</div>
+<div class="grid" id="grid"></div>
+</div>
+<div id="batch-actions">
+<button class="btn-batch deselect" onclick="clearSelection()"><span class="material-symbols-outlined">close</span> 選択解除</button>
+<button class="btn-batch delete" onclick="batchDelete()"><span class="material-symbols-outlined">delete</span> 削除</button>
+<button class="btn-batch edit" onclick="batchEdit()"><span class="material-symbols-outlined">edit_note</span> 編集・解析</button>
+<div style="margin-left:auto; display:flex; align-items:center; color:#666;">
+<span id="selected-count">0</span> 件選択中
+        </div>
+</div>
+
+
+
+<div id="toast-container"></div>
+<div class="modal" id="settingsModal" onclick="if(event.target === this) closeSettingsModal()" style="background-color: rgba(0,0,0,0.5);">
+<div class="modal-form-content settings-modal-content">
+<div class="modal-header">
+<span><span class="material-symbols-outlined">settings</span> 読み取り範囲の設定</span>
+<span id="settings-close-btn" style="cursor:pointer;">×</span>
+</div>
+<div class="settings-layout" style="padding: 18px;">
+<div class="settings-left">
+<div class="settings-help">サンプル画像を読み込み、右側の数値を調整してください。設定は端末内に保存されます。</div>
+<input accept="image/*" id="settings-sample-file" type="file"/>
+<div class="settings-preview-wrap">
+<img alt="sample preview" id="settings-preview-img"/>
+<div class="crop-overlay-layer" id="settings-overlay-layer"></div>
+</div>
+</div>
+<div class="settings-right">
+<div id="settings-region-list" style="display:flex;flex-direction:column;gap:12px;overflow:auto;"></div>
+</div>
+</div>
+<div class="form-actions">
+<button class="btn-cancel" id="settings-reset-btn">初期化</button>
+<button class="btn-submit" id="settings-save-btn">保存</button>
+</div>
+</div>
+</div>
+<script>
+window.__resourceFlags = window.__resourceFlags || { gapi: false, gis: false };
+window.gapiLoaded = () => { window.__resourceFlags.gapi = true; window.dispatchEvent(new Event('gapiLoaded')); };
+window.gisLoaded = () => { window.__resourceFlags.gis = true; window.dispatchEvent(new Event('gisLoaded')); };
+</script><script async="" defer="" onload="gapiLoaded()" src="https://apis.google.com/js/api.js"></script><script async="" defer="" onload="gisLoaded()" src="https://accounts.google.com/gsi/client"></script><script src="./js/app.js" type="module"></script></body>
+</html>
