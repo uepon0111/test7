@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>プロセカ リザルト管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    
+    <style>
+      :root {
+        --bg-color: #f4f7f6; --card-bg: #ffffff; --text-color: #333;
+        --diff-EZ: #66DA7E; --diff-NM: #66C9F9; --diff-HD: #F5CC44;
+        --diff-EX: #EA5577; --diff-MA: #BB40F5; --diff-AP: #EE82E2;
+        --fc-color: #FF82FF; --active-color: #e8f0fe; --border-color: #ddd; --selected-border: #007bff;
+      }
+      body { font-family: 'M PLUS Rounded 1c', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; padding-bottom: 80px; }
+      .container { max-width: 1200px; margin: 0 auto; }
+      h2 { display: flex; align-items: center; gap: 10px; color: #444; }
+      .material-symbols-outlined { font-size: 1.2rem; vertical-align: sub; }
+      
+      .auth-section { text-align: right; margin-bottom: 20px; display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-wrap: wrap;}
+      .btn-auth { background-color: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
+      .btn-auth:hover { background-color: #357ae8; }
+      .btn-signout { background-color: #dc3545; }
+      .btn-upload { background-color: #28a745; }
+      .btn-settings { background-color: #6c757d; }
+      .btn-mode { background-color: white; border: 1px solid #ccc; color: #555; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; }
+      .btn-mode.active { background-color: #e8f0fe; color: #007bff; border-color: #007bff; }
+      #auth-status { margin-right: 10px; font-size: 0.9rem; color: #666; }
+
+      .controls { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; align-items: end;}
+      .control-group { display: flex; flex-direction: column; }
+      .control-group label { font-size: 0.8rem; font-weight: bold; color: #777; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+      select, input[type="number"], input[type="text"], input[type="file"] { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; background-color: #fafafa; }
+      
+      .range-inputs { display: flex; align-items: center; gap: 5px; }
+      .range-inputs input { width: 100%; text-align: center; }
+      
+      /* Progress Bar */
+      #progress-container { width: 100%; background-color: #e0e0e0; border-radius: 8px; overflow: hidden; height: 6px; margin-bottom: 15px; display: none; }
+      #progress-bar { width: 0%; height: 100%; background-color: #007bff; transition: width 0.3s; }
+
+      .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: #666; font-weight: bold; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+      
+      .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s; display: flex; flex-direction: column; border: 2px solid transparent; position: relative; cursor: pointer; }
+      .card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+      .card.is-fc { border-color: var(--fc-color); }
+      .card.selected { border-color: var(--selected-border); background-color: #f0f7ff; transform: scale(0.98); }
+      .card.selected::after { content: "check_circle"; font-family: 'Material Symbols Outlined'; position: absolute; top: 10px; right: 10px; font-size: 24px; color: var(--selected-border); z-index: 20; background: white; border-radius: 50%; }
+
+      .card-img-container { width: 100%; height: 140px; background-color: #e0e2e5; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }
+      .card-img { width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s; z-index: 2; position: relative; }
+      .img-loader-spinner { position: absolute; width: 24px; height: 24px; border: 3px solid #ddd; border-top: 3px solid #999; border-radius: 50%; animation: spin 1s linear infinite; z-index: 1; }
+      .fc-badge { position: absolute; top: 8px; right: 8px; background: var(--fc-color); color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 3; }
+      
+      .card-overlay-actions { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 6px; z-index: 10; opacity: 0; transition: opacity 0.2s; }
+      .card:hover .card-overlay-actions { opacity: 1; }
+      .card.select-mode-active .card-overlay-actions { display: none !important; }
+
+      .btn-overlay { width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: 1px solid #ddd; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); color: #555; transition: all 0.2s; }
+      .btn-overlay:hover { transform: scale(1.1); color: #007bff; }
+      .btn-overlay.del:hover { color: #dc3545; background: #fff5f5; }
+
+      .card-body { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; }
+      .song-meta { display: flex; gap: 6px; margin-bottom: 8px; font-size: 0.75rem; }
+      .tag { padding: 4px 8px; border-radius: 4px; font-weight: bold; color: white; }
+      .tag.lvl { background-color: #555; }
+      .tag.diff-EZ { background-color: var(--diff-EZ); }
+      .tag.diff-NM { background-color: var(--diff-NM); }
+      .tag.diff-HD { background-color: var(--diff-HD); color:#333; }
+      .tag.diff-EX { background-color: var(--diff-EX); }
+      .tag.diff-MA { background-color: var(--diff-MA); }
+      .tag.diff-AP { background-color: var(--diff-AP); }
+      .song-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 8px; line-height: 1.4; }
+      .score-info { font-size: 0.8rem; color: #666; display: flex; flex-direction: column; gap:4px; border-top: 1px solid #f0f0f0; padding-top: 8px; margin-top: auto; }
+      .miss-val { font-weight: bold; }
+      .miss-val.zero { color: var(--fc-color); } 
+
+      #loader { display: none; flex-direction: column; align-items: center; margin-top: 50px; color: #666; }
+      .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top: 4px solid var(--diff-MA); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      
+      /* Modals */
+      .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); justify-content: center; align-items: center; }
+      .modal-content-img { max-width: 90%; max-height: 90%; border-radius: 8px; }
+      .modal-form-content { background-color: #fff; border-radius: 12px; width: 95%; max-width: 1000px; height: 85vh; display: flex; flex-direction: column; overflow: hidden; position: relative;}
+      .modal-header { padding: 15px 20px; border-bottom: 1px solid #eee; font-weight: bold; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; background: #fff;}
+      
+      .split-container { display: flex; flex: 1; overflow: hidden; }
+      .sidebar { width: 250px; border-right: 1px solid #eee; overflow-y: auto; background-color: #f8f9fa; display: flex; flex-direction: column; }
+      .sidebar-toolbar { padding: 10px; border-bottom: 1px solid #ddd; background: #fff; display: flex; justify-content: center;}
+      .btn-analyze-all { width: 100%; font-size: 0.8rem; padding: 8px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+      
+      .sidebar-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+      .sidebar-item.active { background-color: var(--active-color); border-left: 4px solid #007bff; }
+      .sidebar-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #ddd; }
+      .sidebar-info { overflow: hidden; font-size: 0.8rem; flex-grow: 1; }
+      .sidebar-title { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      
+      .main-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+      .editor-layout { display: flex; flex-wrap: wrap; gap: 20px; }
+      .preview-pane { flex: 1; min-width: 300px; background: #000; display: flex; justify-content: center; align-items: center; border-radius: 8px; overflow: hidden; max-height: 500px; }
+      .preview-pane img { max-width: 100%; max-height: 100%; object-fit: contain; }
+      .form-pane { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 10px; }
+
+      .form-group { margin-bottom: 5px; }
+      .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; color:#555; }
+      
+      .breakdown-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #f0f2f5; padding: 10px; border-radius: 8px; }
+      .breakdown-item { text-align: center; }
+      .breakdown-item label { font-size: 0.7rem; margin-bottom: 2px; }
+      .breakdown-item input { width: 100%; text-align: center; font-weight: bold; box-sizing: border-box; padding: 6px;}
+
+      .form-actions { padding: 15px 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; background: #fff; }
+      .btn-cancel, .btn-submit { padding: 10px 20px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold;}
+      .btn-cancel { background-color: #6c757d; color: white; }
+      .btn-submit { background-color: #28a745; color: white; }
+      .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
+      
+      .drop-zone { border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; background-color: #fcfcfc; margin: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;}
+      .drop-zone:hover { border-color: #007bff; background-color: #f0f7ff; color: #007bff; }
+      
+      .upload-status { font-weight: bold; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; }
+      .upload-status.processing { background-color: #e2f0ff; color: #007bff; }
+      .upload-status.done { background-color: #d4edda; color: #155724; }
+      .upload-status.error { background-color: #f8d7da; color: #721c24; }
+
+      #batch-actions { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 15px 20px; display: none; justify-content: center; gap: 15px; z-index: 900; box-sizing: border-box; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);}
+      .btn-batch { padding: 10px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; color: white; display: flex; align-items:center; gap:5px;}
+
+      /* OCR Settings Canvas */
+      #settings-workspace { display: flex; flex: 1; overflow: hidden; gap: 15px; padding: 15px;}
+      .settings-canvas-pane { flex: 2; position: relative; background: #333; overflow: hidden; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+      #ocr-canvas { max-width: 100%; max-height: 100%; cursor: crosshair; }
+      .settings-form-pane { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+      .rect-input-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+      .rect-input-group input { padding: 4px; font-size: 0.8rem; text-align: center; }
+
+      /* Toast Notifications */
+      #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;}
+      .toast { background: rgba(40,40,40,0.95); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-weight: bold; display: flex; align-items: center; gap: 8px; animation: slideIn 0.3s forwards, fadeOut 0.3s 3s forwards; }
+      .toast.pb { background: rgba(40, 167, 69, 0.95); }
+      @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      @keyframes fadeOut { to { opacity: 0; display: none; } }
+    </style>
+  </head>
+  <body>
+    <div id="toast-container"></div>
+
+    <div id="imageModal" class="modal" onclick="if(event.target === this) closeImageModal()">
+      <span style="position:absolute; top:20px; right:30px; color:#fff; font-size:40px; cursor:pointer;" onclick="closeImageModal()">&times;</span>
+      <img class="modal-content-img" id="modalImg">
+    </div>
+
+    <div id="batchModal" class="modal">
+      <div class="modal-form-content">
+        <div class="modal-header">
+          <span id="batch-modal-title"><span class="material-symbols-outlined">cloud_upload</span> リザルト管理</span>
+          <span style="cursor:pointer;" onclick="closeBatchModal()">&times;</span>
+        </div>
+        
+        <div id="upload-initial" style="display: flex; flex: 1;">
+            <div id="drop-zone" class="drop-zone" onclick="document.getElementById('up-file').click()">
+            <span class="material-symbols-outlined" style="font-size: 64px; margin-bottom: 10px;">upload_file</span>
+            <div style="font-size: 1.2rem; font-weight: bold;">クリックして画像を選択</div>
+            <div style="font-size: 0.9rem; margin-top: 5px;">または画像をここにドラッグ＆ドロップ</div>
+            <input type="file" id="up-file" accept="image/*" multiple style="display: none;">
+            </div>
+        </div>
+
+        <div id="batch-workspace" class="split-container" style="display: none;">
+            <div class="sidebar">
+                <div class="sidebar-toolbar">
+                    <button class="btn-analyze-all" onclick="analyzeAllInBatch()">一括解析</button>
+                </div>
+                <div id="batch-sidebar-list" style="overflow-y:auto; flex:1;"></div>
+            </div>
+            
+            <div class="main-area">
+                <div id="batch-editor-container" class="editor-layout" style="display: none;">
+                    <div class="preview-pane">
+                        <img id="batch-preview-img" src="" crossorigin="anonymous">
+                    </div>
+                    <div class="form-pane">
+                        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
+                            <button type="button" style="background:#007bff;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;" onclick="reanalyzeCurrentItem()">再解析</button>
+                            <div style="font-size:0.8rem; display:flex; align-items:center; gap:5px;">
+                                適用プロファイル:
+                                <select id="up-profile-select" onchange="changeItemProfile(this.value)" style="padding:4px; font-size:0.8rem;"></select>
+                            </div>
+                        </div>
+
+                        <div class="form-group"><label>曲名</label><input type="text" id="up-title" oninput="updateCurrentItem('title', this.value)"></div>
+                        <div style="display:flex; gap:10px;">
+                            <div class="form-group" style="flex:1;"><label>レベル</label><input type="number" id="up-level" oninput="updateCurrentItem('level', this.value)"></div>
+                            <div class="form-group" style="flex:1;"><label>難易度</label>
+                                <select id="up-diff" onchange="updateCurrentItem('diff', this.value)">
+                                    <option value="EZ">EASY</option><option value="NM">NORMAL</option>
+                                    <option value="HD">HARD</option><option value="EX">EXPERT</option>
+                                    <option value="MA">MASTER</option><option value="AP">APPEND</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>判定内訳 & コンボ</label>
+                            <div class="breakdown-group">
+                                <div class="breakdown-item"><label style="color:#f2a7d4;">PERFECT</label><input type="number" id="up-perfect" oninput="updateCurrentItem('perfect', this.value)"></div>
+                                <div class="breakdown-item"><label style="color:#f7b18a;">GREAT</label><input type="number" id="up-great" oninput="updateCurrentItem('great', this.value)"></div>
+                                <div class="breakdown-item"><label style="color:#8ac5f7;">GOOD</label><input type="number" id="up-good" oninput="updateCurrentItem('good', this.value)"></div>
+                                <div class="breakdown-item"><label style="color:#9bfcc0;">BAD</label><input type="number" id="up-bad" oninput="updateCurrentItem('bad', this.value)"></div>
+                                <div class="breakdown-item"><label style="color:#aaa;">MISS</label><input type="number" id="up-miss-detail" oninput="updateCurrentItem('missDetail', this.value)"></div>
+                                <div class="breakdown-item"><label style="color:#ffd700;">MAX COMBO</label><input type="number" id="up-combo" oninput="updateCurrentItem('combo', this.value)"></div>
+                            </div>
+                            <div style="text-align:right; font-weight:bold; margin-top:5px; font-size:0.9rem;">
+                                総ミス数: <span id="up-total-miss" style="color:var(--diff-MA);">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="batch-empty-msg" style="margin:auto; color:#999; text-align:center;">画像を選択してください</div>
+            </div>
+        </div>
+
+        <div class="modal-header" style="font-size: 0.9rem; padding: 10px 20px; background: #f8f9fa; display:block;" id="batch-msg-area">
+             <span id="batch-status-msg">待機中...</span>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-cancel" onclick="closeBatchModal()">閉じる</button>
+          <button class="btn-submit" id="btn-exec-batch" onclick="handleBatchExecution()" disabled>実行</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+      <div class="modal-form-content">
+        <div class="modal-header">
+          <span><span class="material-symbols-outlined">settings_overscan</span> 読み取り範囲設定</span>
+          <span style="cursor:pointer;" onclick="closeSettingsModal()">&times;</span>
+        </div>
+        <div id="settings-workspace">
+           <div class="settings-canvas-pane">
+              <canvas id="ocr-canvas"></canvas>
+              <div style="position:absolute; bottom:10px; left:10px; z-index:10; background:rgba(255,255,255,0.8); padding:5px; border-radius:4px; font-size:0.8rem;">
+                  参照画像: <input type="file" id="settings-bg-upload" accept="image/*" style="font-size:0.7rem; padding:2px;">
+              </div>
+           </div>
+           <div class="settings-form-pane">
+              <div class="form-group">
+                 <label>プロファイル選択</label>
+                 <select id="set-profile-select" onchange="loadProfileSettings(this.value)"></select>
+                 <div style="display:flex; gap:5px; margin-top:5px;">
+                    <button onclick="createNewProfile()" style="flex:1; padding:5px;">新規</button>
+                    <button onclick="deleteCurrentProfile()" style="flex:1; padding:5px; color:red;">削除</button>
+                 </div>
+              </div>
+              <div class="form-group"><label>プロファイル名</label><input type="text" id="set-prof-name" oninput="syncProfileData()"></div>
+              <div class="form-group">
+                 <label>基準解像度 (自動判定用)</label>
+                 <div style="display:flex; gap:5px;"><input type="number" id="set-prof-w" placeholder="W" oninput="syncProfileData()"> × <input type="number" id="set-prof-h" placeholder="H" oninput="syncProfileData()"></div>
+              </div>
+              <hr style="width:100%; border:0; border-top:1px solid #ddd;">
+              <p style="font-size:0.8rem; color:#666; margin:0;">各矩形の範囲 (X, Y, W, H) %指定。Canvas上でのドラッグ移動・右下リサイズも可能。</p>
+              
+              <div id="rect-inputs-container"></div>
+
+           </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel" onclick="closeSettingsModal()">閉じる</button>
+          <button class="btn-submit" onclick="saveProfiles()">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="auth-section">
+        <span id="auth-status">未ログイン</span>
+        <button id="btn-select-mode" class="btn-mode" onclick="toggleSelectMode()"><span class="material-symbols-outlined">check_box</span> 選択モード</button>
+        <button id="btn-settings" class="btn-auth btn-settings" onclick="openSettingsModal()"><span class="material-symbols-outlined">settings</span> 範囲設定</button>
+        <button id="upload_button" class="btn-auth btn-upload" onclick="openBatchModal('upload')" style="display: none;"><span class="material-symbols-outlined">add_photo_alternate</span> アップロード</button>
+        <button id="authorize_button" class="btn-auth" onclick="handleAuthClick()"><span class="material-symbols-outlined">login</span> ログイン</button>
+        <button id="signout_button" class="btn-auth btn-signout" onclick="handleSignoutClick()" style="display: none;"><span class="material-symbols-outlined">logout</span> ログアウト</button>
+      </div>
+
+      <h2><span class="material-symbols-outlined">library_music</span> リザルト管理</h2>
+      
+      <div id="progress-container"><div id="progress-bar"></div></div>
+
+      <div class="controls">
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">sort</span> 並べ替え基準</label>
+          <div style="display:flex; gap:5px;">
+            <select id="sort-order" onchange="triggerUpdateView()" style="flex:1;">
+                <option value="name">曲名</option>
+                <option value="level" selected>レベル</option>
+                <option value="miss">ミス数</option>
+                <option value="date">追加日</option>
+            </select>
+            <button id="btn-sort-dir" onclick="toggleSortDir()" style="padding:10px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer;" title="昇順/降順">⬇️</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">filter_alt</span> 表示フィルタ</label>
+          <select id="filter-fc" onchange="triggerUpdateView()">
+            <option value="all">すべて</option>
+            <option value="fc">FC済み (0ミス)</option>
+            <option value="unfc">未FC</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">military_tech</span> 自己ベスト</label>
+          <label style="display:flex; align-items:center; gap:5px; height:100%; cursor:pointer; font-size:0.9rem; font-weight:normal;">
+              <input type="checkbox" id="filter-best" onchange="triggerUpdateView()"> 各難易度の最高成績のみ表示
+          </label>
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">speed</span> 難易度</label>
+          <select id="filter-diff" onchange="triggerUpdateView()">
+            <option value="all">すべて</option>
+            <option value="EZ">EASY</option><option value="NM">NORMAL</option>
+            <option value="HD">HARD</option><option value="EX">EXPERT</option>
+            <option value="MA">MASTER</option><option value="AP">APPEND</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">search</span> 検索 (曲名 / Lv)</label>
+          <div style="display:flex; gap:5px;">
+             <input type="text" id="filter-title" placeholder="曲名..." oninput="triggerUpdateView()" style="width:60%;">
+             <input type="number" id="filter-level" placeholder="Lv" oninput="triggerUpdateView()" style="width:40%;">
+          </div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <span id="result-count">ログインしてください</span>
+      </div>
+
+      <div id="loader"><div class="spinner"></div><div id="loader-text">データを読み込み中...</div></div>
+      
+      <div id="grid" class="grid"></div>
+    </div>
+
+    <div id="batch-actions">
+        <button class="btn-batch" style="background-color:#6c757d;" onclick="clearSelection()">選択解除</button>
+        <button class="btn-batch" style="background-color:#dc3545;" onclick="batchDelete()">削除</button>
+        <button class="btn-batch" style="background-color:#007bff;" onclick="batchEdit()">編集</button>
+        <div style="margin-left:auto; display:flex; align-items:center; color:#666;"><span id="selected-count">0</span> 件選択中</div>
+    </div>
+
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+    <script>
+      // GCP Settings
+      const CLIENT_ID = '966636096862-8hrrm5heb4g5r469veoels7u6ifjguuk.apps.googleusercontent.com';
+      const API_KEY = 'AIzaSyC-m1rkHuJTmNK2k-s89bJFshvXCS5MZZ0';
+      const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+      const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata';
+
+      let tokenClient, gapiInited = false, gisInited = false;
+      let allRecords = [], filteredRecords = [];
+      const diffRank = { 'AP':6, 'MA':5, 'EX':4, 'HD':3, 'NM':2, 'EZ':1 };
+      
+      let isSelectMode = false;
+      let selectedIds = new Set();
+      let dbMusics = [], dbDiffs = [];
+      let isSortAsc = false; // default desc for level/date
+
+      // OCR Profiles
+      const defaultProfiles = [
+          { id: 'p_16x9', name: '16:9 (FHD)', width: 1920, height: 1080, rects: { title:{x:0.19,y:0.01,w:0.32,h:0.05}, diff:{x:0.20,y:0.07,w:0.10,h:0.04}, judge:{x:0.10,y:0.35,w:0.20,h:0.50}, combo:{x:0.75,y:0.40,w:0.15,h:0.15} } },
+          { id: 'p_ipad', name: 'iPad (4:3)', width: 2048, height: 1536, rects: { title:{x:0.19,y:0.01,w:0.32,h:0.05}, diff:{x:0.20,y:0.07,w:0.10,h:0.04}, judge:{x:0.10,y:0.35,w:0.20,h:0.50}, combo:{x:0.75,y:0.40,w:0.15,h:0.15} } }
+      ];
+      let ocrProfiles = JSON.parse(localStorage.getItem('prsk_ocr_profiles')) || defaultProfiles;
+
+      window.onload = async function() {
+        try {
+          const [mRes, dRes] = await Promise.all([ fetch('https://sekai-world.github.io/sekai-master-db-diff/musics.json'), fetch('https://sekai-world.github.io/sekai-master-db-diff/musicDifficulties.json') ]);
+          dbMusics = await mRes.json(); dbDiffs = await dRes.json();
+        } catch(e){ console.error("DB Load Error"); }
+        updateProfileSelects();
+      };
+
+      // Toast
+      function showToast(msg, isPB = false) {
+          const container = document.getElementById('toast-container');
+          const toast = document.createElement('div');
+          toast.className = `toast ${isPB ? 'pb' : ''}`;
+          toast.innerHTML = isPB ? `<span class="material-symbols-outlined">celebration</span> ${msg}` : msg;
+          container.appendChild(toast);
+          setTimeout(() => toast.remove(), 3500);
+      }
+
+      // Auth
+      function gapiLoaded() { gapi.load('client', initializeGapiClient); }
+      async function initializeGapiClient() { await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] }); gapiInited = true; }
+      function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' }); gisInited = true; }
+      function handleAuthClick() {
+        tokenClient.callback = async (resp) => { if (resp.error) throw resp; setAuthUI(true); await fetchDataFromDrive(); };
+        if (gapi.client.getToken() === null) tokenClient.requestAccessToken({prompt: 'consent'}); else tokenClient.requestAccessToken({prompt: ''});
+      }
+      function handleSignoutClick() {
+        const token = gapi.client.getToken();
+        if (token) { google.accounts.oauth2.revoke(token.access_token); gapi.client.setToken(''); setAuthUI(false); allRecords = []; renderGrid([]); }
+      }
+      function setAuthUI(isLoggedIn) {
+        document.getElementById('signout_button').style.display = isLoggedIn ? 'inline-flex' : 'none';
+        document.getElementById('upload_button').style.display = isLoggedIn ? 'inline-flex' : 'none';
+        document.getElementById('authorize_button').style.display = isLoggedIn ? 'none' : 'inline-flex';
+        document.getElementById('auth-status').innerText = isLoggedIn ? 'ログイン済み' : '';
+      }
+
+      // Drive API Helpers
+      async function findOrCreateFolder(name, parentId = null) {
+        let query = `mimeType = 'application/vnd.google-apps.folder' and name = '${name}' and trashed = false`;
+        if (parentId) query += ` and '${parentId}' in parents`;
+        const res = await gapi.client.drive.files.list({ q: query, fields: 'files(id)', pageSize: 1 });
+        if (res.result.files.length > 0) return res.result.files[0].id;
+        const meta = { name: name, mimeType: 'application/vnd.google-apps.folder' };
+        if (parentId) meta.parents = [parentId];
+        const created = await gapi.client.drive.files.create({ resource: meta, fields: 'id' });
+        return created.result.id;
+      }
+
+      // Fetch Data
+      async function fetchDataFromDrive() {
+        const loader = document.getElementById('loader'); loader.style.display = 'flex';
+        setProgress(0);
+        
+        try {
+          // New v2 method with appProperties
+          const rootFolderId = await findOrCreateFolder("プロセカリザルト");
+          const v2FolderId = await findOrCreateFolder("v2_results", rootFolderId);
+          
+          // Fetch v2
+          const qV2 = `'${v2FolderId}' in parents and mimeType != 'application/vnd.google-apps.folder' and trashed = false and appProperties has { key='v' and value='2' }`;
+          const v2Files = await fetchAllDriveItems(qV2, "id, name, appProperties, thumbnailLink, createdTime", 50);
+
+          let records = v2Files.map(f => {
+              const p = f.appProperties;
+              const tm = parseInt(p.miss||0) + parseInt(p.bad||0) + parseInt(p.good||0);
+              return {
+                  id: f.id, v: '2', title: p.title, level: parseInt(p.level||0), diff: p.diff,
+                  perfect: parseInt(p.perfect||0), great: parseInt(p.great||0), good: parseInt(p.good||0),
+                  bad: parseInt(p.bad||0), missDetail: parseInt(p.miss||0), combo: parseInt(p.combo||0),
+                  totalMiss: tm, isFC: tm === 0, thumbnail: f.thumbnailLink, createdTime: new Date(f.createdTime).getTime()
+              };
+          });
+
+          // Fetch Legacy (FC folder)
+          const fcFolderId = await findOrCreateFolder("FC", rootFolderId);
+          const qLegacyFolders = `'${fcFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+          const legacyFolders = await fetchAllDriveItems(qLegacyFolders, "id, name", 70);
+          
+          if (legacyFolders.length > 0) {
+              const folderMap = new Map();
+              legacyFolders.forEach(f => {
+                  const match = f.name.match(/^(\d+)([AMEH])\s+(.+)$/);
+                  if (match) folderMap.set(f.id, { level: parseInt(match[1]), diff: match[2] === 'A' ? 'AP' : match[2] === 'M' ? 'MA' : match[2] === 'E' ? 'EX' : 'HD', title: match[3] });
+              });
+              
+              const qLegacyFiles = `name contains 'FC' and mimeType != 'application/vnd.google-apps.folder' and trashed = false`;
+              const legacyFiles = await fetchAllDriveItems(qLegacyFiles, "id, name, parents, thumbnailLink, createdTime", 100);
+              
+              legacyFiles.forEach(f => {
+                 if (!f.parents) return;
+                 const pid = f.parents.find(p => folderMap.has(p));
+                 if (pid) {
+                     const meta = folderMap.get(pid);
+                     const m = f.name.match(/^FC(?:-(\d+))?/);
+                     const tm = m ? (m[1] === undefined ? 0 : parseInt(m[1])) : 0;
+                     records.push({
+                         id: f.id, v: '1', parentId: pid, title: meta.title, level: meta.level, diff: meta.diff,
+                         perfect: 0, great: 0, good: 0, bad: 0, missDetail: tm, combo: 0,
+                         totalMiss: tm, isFC: tm === 0, thumbnail: f.thumbnailLink, createdTime: new Date(f.createdTime).getTime()
+                     });
+                 }
+              });
+          }
+          
+          allRecords = records;
+          setProgress(100);
+          setTimeout(() => { document.getElementById('progress-container').style.display = 'none'; loader.style.display = 'none'; triggerUpdateView(); }, 500);
+
+        } catch(e) { console.error(e); loader.style.display = 'none'; }
+      }
+
+      async function fetchAllDriveItems(query, fields, maxProg) {
+        let items = [], pageToken = null;
+        document.getElementById('progress-container').style.display = 'block';
+        do {
+          const res = await gapi.client.drive.files.list({ q: query, fields: `nextPageToken, files(${fields})`, pageSize: 500, pageToken: pageToken });
+          if (res.result.files) items = items.concat(res.result.files);
+          pageToken = res.result.nextPageToken;
+          setProgress(Math.min(maxProg, items.length/5)); // fake progress
+        } while (pageToken);
+        return items;
+      }
+      function setProgress(pct) { document.getElementById('progress-bar').style.width = `${pct}%`; }
+
+      // Check Personal Best
+      function checkPersonalBest(newData) {
+          const past = allRecords.filter(r => r.title === newData.title && r.diff === newData.diff && r.id !== newData.id);
+          if (past.length === 0) return true;
+          const best = past.reduce((min, p) => (p.totalMiss < min.totalMiss) ? p : ((p.totalMiss === min.totalMiss && p.combo > min.combo) ? p : min));
+          if (newData.totalMiss < best.totalMiss) return true;
+          if (newData.totalMiss === best.totalMiss && newData.combo > best.combo) return true;
+          return false;
+      }
+
+      // Batch Modal & Editor
+      let editorQueue = [], activeItemId = null, currentMode = 'upload';
+      function openBatchModal(mode) {
+        currentMode = mode; document.getElementById('batchModal').style.display = 'flex';
+        editorQueue = []; activeItemId = null;
+        document.getElementById('batch-sidebar-list').innerHTML = "";
+        document.getElementById('batch-editor-container').style.display = 'none';
+        document.getElementById('batch-empty-msg').style.display = 'block';
+        document.getElementById('btn-exec-batch').disabled = true;
+        
+        if (mode === 'upload') {
+            document.getElementById('batch-modal-title').innerHTML = '<span class="material-symbols-outlined">cloud_upload</span> 画像アップロード';
+            document.getElementById('upload-initial').style.display = 'flex';
+            document.getElementById('batch-workspace').style.display = 'none';
+        } else {
+            document.getElementById('batch-modal-title').innerHTML = '<span class="material-symbols-outlined">edit</span> 編集モード';
+            document.getElementById('upload-initial').style.display = 'none';
+            document.getElementById('batch-workspace').style.display = 'flex';
+        }
+      }
+      function closeBatchModal() { document.getElementById('batchModal').style.display = 'none'; }
+
+      // File Drop
+      const dropZone = document.getElementById('drop-zone');
+      dropZone.addEventListener('dragover', e => { e.preventDefault(); });
+      dropZone.addEventListener('drop', e => { e.preventDefault(); if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+      document.getElementById('up-file').addEventListener('change', e => handleFiles(e.target.files));
+
+      async function handleFiles(files) {
+          if(!files.length) return;
+          document.getElementById('upload-initial').style.display = 'none';
+          document.getElementById('batch-workspace').style.display = 'flex';
+          
+          for(let i=0; i<files.length; i++) {
+              const file = files[i];
+              const url = URL.createObjectURL(file);
+              // Auto detect profile based on resolution
+              const img = new Image(); img.src = url;
+              await new Promise(r => img.onload = r);
+              const aspect = img.naturalWidth / img.naturalHeight;
+              
+              let bestProf = ocrProfiles[0].id;
+              let minDiff = Infinity;
+              ocrProfiles.forEach(p => {
+                  const pAspect = p.width / p.height;
+                  const diff = Math.abs(aspect - pAspect);
+                  if (diff < minDiff) { minDiff = diff; bestProf = p.id; }
+              });
+
+              const qId = "new_" + Date.now() + "_" + i;
+              editorQueue.push({ id: qId, file: file, imgUrl: url, status: 'pending', profileId: bestProf, data: { title:'', level:'', diff:'MA', perfect:0, great:0, good:0, bad:0, missDetail:0, combo:0, totalMiss:0, musicId:null }});
+              renderSidebarItem(qId);
+          }
+          await runBatchAnalysis(editorQueue.filter(i => i.status === 'pending'));
+          if(editorQueue.length > 0) selectItem(editorQueue[0].id);
+          checkBatchButton();
+      }
+
+      function renderSidebarItem(id) {
+          const item = editorQueue.find(q => q.id === id);
+          const div = document.createElement('div');
+          div.className = 'sidebar-item'; div.id = `sb-${id}`;
+          div.onclick = () => selectItem(id);
+          div.innerHTML = `<img src="${item.imgUrl}" class="sidebar-thumb" crossorigin="anonymous">
+                           <div class="sidebar-info"><div class="sidebar-title" id="sb-title-${id}">${item.data.title || "未設定"}</div>
+                           <span id="sb-status-${id}" class="upload-status ${item.status==='existing'?'done':item.status}">${item.status}</span></div>
+                           <button onclick="removeBatchItem(event, '${id}')" style="background:none;border:none;cursor:pointer;color:#999;"><span class="material-symbols-outlined">delete</span></button>`;
+          document.getElementById('batch-sidebar-list').appendChild(div);
+      }
+      
+      function removeBatchItem(e, id) { e.stopPropagation(); editorQueue = editorQueue.filter(q => q.id !== id); document.getElementById(`sb-${id}`).remove(); checkBatchButton(); if(activeItemId === id) activeItemId = null;}
+      function checkBatchButton() { document.getElementById('btn-exec-batch').disabled = editorQueue.length === 0; }
+
+      function selectItem(id) {
+          activeItemId = id;
+          const item = editorQueue.find(q => q.id === id);
+          document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+          document.getElementById(`sb-${id}`).classList.add('active');
+          document.getElementById('batch-editor-container').style.display = 'flex';
+          document.getElementById('batch-empty-msg').style.display = 'none';
+          document.getElementById('batch-preview-img').src = item.imgUrl;
+          
+          document.getElementById('up-profile-select').value = item.profileId || ocrProfiles[0].id;
+          document.getElementById('up-title').value = item.data.title;
+          document.getElementById('up-level').value = item.data.level;
+          document.getElementById('up-diff').value = item.data.diff;
+          ['perfect','great','good','bad','missDetail','combo'].forEach(k => document.getElementById(`up-${k==='missDetail'?'miss-detail':k}`).value = item.data[k]);
+          document.getElementById('up-total-miss').innerText = item.data.totalMiss;
+      }
+
+      function updateCurrentItem(field, value) {
+          const item = editorQueue.find(q => q.id === activeItemId); if(!item) return;
+          if(['perfect','great','good','bad','missDetail','combo','level'].includes(field)) item.data[field] = parseInt(value)||0;
+          else item.data[field] = value;
+          
+          if(['good','bad','missDetail'].includes(field)) {
+              item.data.totalMiss = item.data.good + item.data.bad + item.data.missDetail;
+              document.getElementById('up-total-miss').innerText = item.data.totalMiss;
+          }
+          if(field === 'title') document.getElementById(`sb-title-${activeItemId}`).innerText = value;
+          item.status = 'done'; document.getElementById(`sb-status-${activeItemId}`).className = "upload-status done"; document.getElementById(`sb-status-${activeItemId}`).innerText = "OK";
+      }
+      
+      function changeItemProfile(pid) {
+          const item = editorQueue.find(q => q.id === activeItemId);
+          if(item) item.profileId = pid;
+      }
+
+      // OCR Analysis
+      async function analyzeAllInBatch() { await runBatchAnalysis(editorQueue); }
+      async function reanalyzeCurrentItem() { if(activeItemId) await runBatchAnalysis([editorQueue.find(q=>q.id===activeItemId)]); }
+      
+      async function runBatchAnalysis(items) {
+          if(!items.length) return;
+          document.getElementById('batch-status-msg').innerText = "OCR解析中...";
+          const worker = await Tesseract.createWorker(['jpn', 'eng']);
+          
+          for(const item of items) {
+              document.getElementById(`sb-status-${item.id}`).innerText = "処理中";
+              const img = new Image(); img.crossOrigin = "anonymous"; img.src = item.imgUrl;
+              await new Promise(r => { img.onload = r; img.onerror = r; });
+              const prof = ocrProfiles.find(p => p.id === item.profileId) || ocrProfiles[0];
+              
+              try {
+                  // Diff
+                  const dblob = await cropImg(img, prof.rects.diff, true);
+                  const dres = await worker.recognize(dblob, {lang:'eng'});
+                  const dtxt = dres.data.text.toUpperCase();
+                  let dcode = 'MA', dkey = 'master';
+                  if(dtxt.includes("EASY")) { dcode='EZ'; dkey='easy'; }
+                  else if(dtxt.includes("NORMAL")) { dcode='NM'; dkey='normal'; }
+                  else if(dtxt.includes("HARD")) { dcode='HD'; dkey='hard'; }
+                  else if(dtxt.includes("EXPERT")) { dcode='EX'; dkey='expert'; }
+                  else if(dtxt.match(/A?P{2}E?N?D?/)) { dcode='AP'; dkey='append'; }
+
+                  // Title
+                  const tblob = await cropImg(img, prof.rects.title);
+                  const tres = await worker.recognize(tblob, {lang:'jpn'});
+                  const matched = findBestMatchMusic(tres.data.text);
+                  const fTitle = matched ? matched.title : tres.data.text.replace(/\s+/g,'').trim();
+                  const mId = matched ? matched.id : null;
+                  const lvl = mId ? (dbDiffs.find(d=>d.musicId===mId && d.musicDifficulty===dkey)?.playLevel || "") : "";
+
+                  // Judge
+                  const jblob = await cropImg(img, prof.rects.judge);
+                  const jres = await worker.recognize(jblob, {lang:'eng'});
+                  let p=0, g=0, gd=0, b=0, m=0;
+                  jres.data.text.split('\n').forEach(l => {
+                      const num = l.match(/\d+/g) ? parseInt(l.match(/\d+/g).pop()) : 0;
+                      if(/PERFECT/i.test(l)) p = num; else if(/GREAT/i.test(l)) g = num;
+                      else if(/G[O0QD]{2}D/i.test(l)) gd = num; else if(/BAD/i.test(l)) b = num; else if(/MISS/i.test(l)) m = num;
+                  });
+
+                  // Combo
+                  const cblob = await cropImg(img, prof.rects.combo);
+                  const cres = await worker.recognize(cblob, {lang:'eng'});
+                  const cnums = cres.data.text.match(/\d+/g);
+                  const combo = cnums ? Math.max(...cnums.map(Number)) : 0;
+
+                  item.data = { title: fTitle, level: lvl, diff: dcode, perfect: p, great: g, good: gd, bad: b, missDetail: m, totalMiss: gd+b+m, combo: combo, musicId: mId };
+                  item.status = 'done';
+              } catch(e) { item.status = 'error'; }
+              
+              const st = document.getElementById(`sb-status-${item.id}`);
+              st.className = `upload-status ${item.status}`; st.innerText = item.status === 'done' ? "OK" : "ERR";
+              if(item.status === 'done') {
+                  document.getElementById(`sb-title-${item.id}`).innerText = item.data.title;
+                  if(activeItemId === item.id) selectItem(item.id);
+              }
+          }
+          await worker.terminate();
+          document.getElementById('batch-status-msg').innerText = "処理完了";
+      }
+
+      async function cropImg(img, rect, thresh=false) {
+          const cv = document.createElement('canvas'); const ctx = cv.getContext('2d');
+          const w = img.naturalWidth, h = img.naturalHeight;
+          if(thresh) {
+              cv.width = w*rect.w*1.5; cv.height = h*rect.h*1.5;
+              ctx.drawImage(img, w*rect.x, h*rect.y, w*rect.w, h*rect.h, 0,0, cv.width, cv.height);
+              const idata = ctx.getImageData(0,0, cv.width, cv.height);
+              for(let i=0; i<idata.data.length; i+=4) {
+                  const g = 0.299*idata.data[i] + 0.587*idata.data[i+1] + 0.114*idata.data[i+2];
+                  idata.data[i] = idata.data[i+1] = idata.data[i+2] = g > 180 ? 0 : 255;
+              }
+              ctx.putImageData(idata,0,0);
+          } else {
+              cv.width = w*rect.w; cv.height = h*rect.h;
+              ctx.filter = 'grayscale(100%) contrast(150%)';
+              ctx.drawImage(img, w*rect.x, h*rect.y, w*rect.w, h*rect.h, 0,0, cv.width, cv.height);
+          }
+          return new Promise(r => cv.toBlob(r, 'image/png'));
+      }
+
+      function normalizeString(str) { return str ? str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).toLowerCase().replace(/[\s\-_]/g, '') : ""; }
+      function findBestMatchMusic(text) {
+          if(!dbMusics.length) return null;
+          const target = normalizeString(text); if(!target) return null;
+          let best = null, minScore = Infinity;
+          for(const m of dbMusics) {
+              const dTitle = normalizeString(m.title);
+              // Simple levenshtein
+              let s1=target, s2=dTitle; if(s1.length>s2.length) [s1,s2]=[s2,s1];
+              let dist = Array.from({length:s1.length+1},(_,i)=>i);
+              for(let i2=0;i2<s2.length;i2++){
+                  let nDist=[i2+1];
+                  for(let i1=0;i1<s1.length;i1++){
+                      nDist.push(s1[i1]===s2[i2]?dist[i1]:1+Math.min(dist[i1],dist[i1+1],nDist[nDist.length-1]));
+                  }
+                  dist=nDist;
+              }
+              const score = dist[dist.length-1]/Math.max(s1.length, s2.length);
+              if(score < minScore) { minScore = score; best = m; }
+          }
+          return best;
+      }
+
+      // Execute Save (Drive v2 structure)
+      async function handleBatchExecution() {
+          const btn = document.getElementById('btn-exec-batch'); btn.disabled = true; btn.innerText = "保存中...";
+          const rootFolderId = await findOrCreateFolder("プロセカリザルト");
+          const v2FolderId = await findOrCreateFolder("v2_results", rootFolderId);
+          const accessToken = gapi.client.getToken().access_token;
+          let successCount = 0;
+
+          for(const item of [...editorQueue]) {
+              try {
+                  const isPB = currentMode === 'upload' && checkPersonalBest(item.data);
+                  
+                  const appProps = { v: '2', title: item.data.title, level: String(item.data.level), diff: item.data.diff, perfect: String(item.data.perfect), great: String(item.data.great), good: String(item.data.good), bad: String(item.data.bad), miss: String(item.data.missDetail), combo: String(item.data.combo) };
+                  const fName = `[${item.data.diff}] ${item.data.title} - ${item.data.totalMiss}`;
+                  
+                  if (currentMode === 'upload') {
+                      const meta = { name: fName, parents: [v2FolderId], appProperties: appProps };
+                      const form = new FormData();
+                      form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+                      form.append('file', item.file);
+                      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: new Headers({'Authorization':'Bearer '+accessToken}), body: form });
+                      if(!res.ok) throw new Error("Upload failed");
+                      if(isPB) showToast(`${item.data.title} の自己ベストを更新しました！`, true);
+                  } else {
+                      // Edit existing (migrate to v2 if v1)
+                      if (item.v === '1') {
+                         await gapi.client.drive.files.update({ fileId: item.originalId, addParents: v2FolderId, removeParents: item.originalParent, resource: { name: fName, appProperties: appProps } });
+                      } else {
+                         await gapi.client.drive.files.update({ fileId: item.originalId, resource: { name: fName, appProperties: appProps } });
+                      }
+                  }
+                  
+                  editorQueue = editorQueue.filter(q => q.id !== item.id);
+                  document.getElementById(`sb-${item.id}`).remove();
+                  successCount++;
+              } catch(e) { document.getElementById(`sb-status-${item.id}`).innerText = "失敗"; }
+          }
+          
+          alert(`${successCount}件完了`);
+          if(editorQueue.length === 0) { closeBatchModal(); await fetchDataFromDrive(); }
+          else checkBatchButton();
+      }
+
+      async function batchEdit() {
+          if(!selectedIds.size) return;
+          openBatchModal('edit');
+          const targets = allRecords.filter(r => selectedIds.has(r.id));
+          targets.forEach(rec => {
+              const qId = "edit_" + rec.id;
+              editorQueue.push({
+                  id: qId, file: null, imgUrl: rec.thumbnail?rec.thumbnail.replace('=s220','=w1600'):'', status: 'existing', v: rec.v, originalId: rec.id, originalParent: rec.parentId,
+                  data: { title:rec.title, level:rec.level, diff:rec.diff, perfect:rec.perfect, great:rec.great, good:rec.good, bad:rec.bad, missDetail:rec.missDetail, totalMiss:rec.totalMiss, combo:rec.combo }
+              });
+              renderSidebarItem(qId);
+          });
+          if(editorQueue.length) selectItem(editorQueue[0].id);
+          checkBatchButton();
+      }
+
+      // View & Sorting
+      function toggleSortDir() { isSortAsc = !isSortAsc; document.getElementById('btn-sort-dir').innerText = isSortAsc ? "⬆️" : "⬇️"; triggerUpdateView(); }
+      function triggerUpdateView() {
+          document.getElementById('grid').innerHTML = ''; document.getElementById('loader').style.display='flex'; document.getElementById('loader-text').innerText='フィルタ適用中...';
+          setTimeout(updateViewCore, 10); // yield to paint
+      }
+
+      function updateViewCore() {
+          const fc = document.getElementById('filter-fc').value, diff = document.getElementById('filter-diff').value;
+          const bestOnly = document.getElementById('filter-best').checked;
+          const sTitle = document.getElementById('filter-title').value.toLowerCase(), sLevel = document.getElementById('filter-level').value;
+          
+          let list = allRecords.filter(r => {
+              if(fc==='fc' && !r.isFC) return false; if(fc==='unfc' && r.isFC) return false;
+              if(diff!=='all' && r.diff!==diff) return false;
+              if(sLevel && String(r.level)!==sLevel) return false;
+              if(sTitle && !r.title.toLowerCase().includes(sTitle)) return false;
+              return true;
+          });
+
+          if (bestOnly) {
+              const map = new Map();
+              list.forEach(r => {
+                  const key = r.title + "_" + r.diff;
+                  if(!map.has(key)) map.set(key, r);
+                  else {
+                      const ex = map.get(key);
+                      if(r.totalMiss < ex.totalMiss || (r.totalMiss === ex.totalMiss && r.combo > ex.combo)) map.set(key, r);
+                  }
+              });
+              list = Array.from(map.values());
+          }
+
+          const sType = document.getElementById('sort-order').value;
+          const sign = isSortAsc ? 1 : -1; // -1 means DESC (default for level/date)
+          
+          list.sort((a,b) => {
+              const tDiff = a.title.localeCompare(b.title, 'ja'), lDiff = a.level - b.level;
+              const dfDiff = diffRank[a.diff] - diffRank[b.diff], mDiff = a.totalMiss - b.totalMiss, cDiff = a.createdTime - b.createdTime;
+              
+              if(sType === 'name') return (tDiff || dfDiff || mDiff) * (isSortAsc ? -1 : 1); // string default asc
+              if(sType === 'level') return (lDiff || dfDiff || -tDiff || -mDiff) * sign;
+              if(sType === 'miss') return (mDiff || lDiff || dfDiff || -tDiff) * (isSortAsc ? -1 : 1); // miss default asc
+              if(sType === 'date') return (cDiff) * sign;
+          });
+
+          filteredRecords = list;
+          renderGrid(list);
+          document.getElementById('loader').style.display='none';
+      }
+
+      function renderGrid(records) {
+          const grid = document.getElementById('grid');
+          document.getElementById('result-count').innerText = `表示: ${records.length} 件`;
+          if(!records.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;">データなし</div>'; return; }
+
+          let html = '';
+          records.forEach(rec => {
+              const thumb = rec.thumbnail ? rec.thumbnail.replace('=s220','=w600') : '';
+              const isSel = selectedIds.has(rec.id) ? 'selected' : '';
+              const bdg = rec.isFC ? `<div class="fc-badge"><span class="material-symbols-outlined" style="font-size:1rem;">crown</span> FULL COMBO</div>` : '';
+              const missStr = rec.isFC ? '<span class="miss-val zero">0</span>' : `<span class="miss-val">${rec.totalMiss}</span>`;
+              
+              const act = isSelectMode ? `toggleSelection('${rec.id}')` : `openImageModal('${rec.thumbnail?.replace('=s220','=w1600')}')`;
+              const ov = !isSelectMode ? `<div class="card-overlay-actions">
+                  <div class="btn-overlay" onclick="event.stopPropagation(); individualEdit('${rec.id}')"><span class="material-symbols-outlined">edit</span></div>
+                  <div class="btn-overlay del" onclick="event.stopPropagation(); individualDelete('${rec.id}')"><span class="material-symbols-outlined">delete</span></div>
+              </div>` : '';
+
+              html += `<div class="card ${rec.isFC?'is-fc':''} ${isSel} ${isSelectMode?'select-mode-active':''}" id="card-${rec.id}" onclick="${act}">
+                  <div class="card-img-container">${bdg}${ov}
+                     ${thumb ? `<img src="${thumb}" class="card-img" loading="lazy" onload="this.style.opacity=1;">` : ''}
+                  </div>
+                  <div class="card-body">
+                      <div class="song-meta"><span class="tag lvl">Lv.${rec.level}</span><span class="tag diff-${rec.diff}">${rec.diff}</span></div>
+                      <div class="song-title">${rec.title.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}</div>
+                      <div class="score-info">
+                          <div style="display:flex; justify-content:space-between;"><span>Miss: ${missStr}</span><span>Combo: <b>${rec.combo||'-'}</b></span></div>
+                          <div style="display:flex; justify-content:space-between; font-size:0.7rem;"><span>P:${rec.perfect||'-'} / G:${rec.great||'-'}</span></div>
+                      </div>
+                  </div>
+              </div>`;
+          });
+          grid.innerHTML = html;
+      }
+
+      // Selection & Delete
+      function toggleSelectMode() { isSelectMode = !isSelectMode; document.getElementById('btn-select-mode').classList.toggle('active', isSelectMode); if(!isSelectMode){ selectedIds.clear(); updateSelUI(); } renderGrid(filteredRecords); }
+      function toggleSelection(id) { if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id); updateSelUI(); document.getElementById(`card-${id}`).classList.toggle('selected'); }
+      function updateSelUI() { document.getElementById('batch-actions').style.display = selectedIds.size>0 ? 'flex' : 'none'; document.getElementById('selected-count').innerText = selectedIds.size; }
+      function clearSelection() { selectedIds.clear(); updateSelUI(); renderGrid(filteredRecords); }
+      function individualEdit(id) { selectedIds.clear(); selectedIds.add(id); batchEdit(); }
+      async function individualDelete(id) { if(confirm("削除しますか？")) { await gapi.client.drive.files.delete({fileId:id}); await fetchDataFromDrive(); } }
+      async function batchDelete() {
+          if(!confirm(`${selectedIds.size}件削除しますか？`)) return;
+          for(const id of selectedIds) await gapi.client.drive.files.delete({fileId:id});
+          selectedIds.clear(); updateSelUI(); await fetchDataFromDrive();
+      }
+      function openImageModal(src) { if(src) { document.getElementById('imageModal').style.display="flex"; document.getElementById('modalImg').src=src; } }
+      function closeImageModal() { document.getElementById('imageModal').style.display="none"; }
+
+      // --- Settings Editor (Canvas GUI) ---
+      let canvasBgImg = null, activeSetProfile = null;
+      let dragState = { type: null, key: null, startX:0, startY:0, orig:null };
+
+      function updateProfileSelects() {
+          const sels = [document.getElementById('set-profile-select'), document.getElementById('up-profile-select')];
+          sels.forEach(sel => {
+              if(!sel) return;
+              const cur = sel.value; sel.innerHTML = '';
+              ocrProfiles.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.name} (${p.width}x${p.height})</option>`);
+              if(ocrProfiles.find(p=>p.id===cur)) sel.value = cur; else sel.value = ocrProfiles[0].id;
+          });
+      }
+      function openSettingsModal() { document.getElementById('settingsModal').style.display = 'flex'; loadProfileSettings(document.getElementById('set-profile-select').value); }
+      function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
+      
+      function loadProfileSettings(id) {
+          activeSetProfile = JSON.parse(JSON.stringify(ocrProfiles.find(p=>p.id===id))); // deep copy
+          document.getElementById('set-prof-name').value = activeSetProfile.name;
+          document.getElementById('set-prof-w').value = activeSetProfile.width;
+          document.getElementById('set-prof-h').value = activeSetProfile.height;
+          renderRectInputs();
+          drawCanvas();
+      }
+      function createNewProfile() {
+          const np = JSON.parse(JSON.stringify(ocrProfiles[0]));
+          np.id = 'p_' + Date.now(); np.name = "新規プロファイル";
+          ocrProfiles.push(np); updateProfileSelects();
+          document.getElementById('set-profile-select').value = np.id; loadProfileSettings(np.id);
+      }
+      function deleteCurrentProfile() {
+          if(ocrProfiles.length <= 1) return alert("最後のプロファイルは削除できません");
+          ocrProfiles = ocrProfiles.filter(p=>p.id !== activeSetProfile.id);
+          updateProfileSelects(); loadProfileSettings(ocrProfiles[0].id);
+      }
+      function syncProfileData() {
+          activeSetProfile.name = document.getElementById('set-prof-name').value;
+          activeSetProfile.width = parseInt(document.getElementById('set-prof-w').value) || 1920;
+          activeSetProfile.height = parseInt(document.getElementById('set-prof-h').value) || 1080;
+          Object.keys(activeSetProfile.rects).forEach(k => {
+              activeSetProfile.rects[k].x = parseFloat(document.getElementById(`ri-${k}-x`).value) || 0;
+              activeSetProfile.rects[k].y = parseFloat(document.getElementById(`ri-${k}-y`).value) || 0;
+              activeSetProfile.rects[k].w = parseFloat(document.getElementById(`ri-${k}-w`).value) || 0;
+              activeSetProfile.rects[k].h = parseFloat(document.getElementById(`ri-${k}-h`).value) || 0;
+          });
+          drawCanvas();
+      }
+      function saveProfiles() {
+          const idx = ocrProfiles.findIndex(p=>p.id===activeSetProfile.id);
+          if(idx>=0) ocrProfiles[idx] = activeSetProfile;
+          localStorage.setItem('prsk_ocr_profiles', JSON.stringify(ocrProfiles));
+          updateProfileSelects();
+          showToast("設定を保存しました"); closeSettingsModal();
+      }
+
+      function renderRectInputs() {
+          const container = document.getElementById('rect-inputs-container'); container.innerHTML = '';
+          const labels = {title:"曲名", diff:"難易度", judge:"判定", combo:"コンボ"};
+          Object.keys(activeSetProfile.rects).forEach(k => {
+             const r = activeSetProfile.rects[k];
+             container.innerHTML += `<div style="margin-bottom:10px;"><label style="font-size:0.8rem; font-weight:bold;">${labels[k]}</label>
+                <div class="rect-input-group">
+                   <input type="number" step="0.01" id="ri-${k}-x" value="${r.x}" oninput="syncProfileData()">
+                   <input type="number" step="0.01" id="ri-${k}-y" value="${r.y}" oninput="syncProfileData()">
+                   <input type="number" step="0.01" id="ri-${k}-w" value="${r.w}" oninput="syncProfileData()">
+                   <input type="number" step="0.01" id="ri-${k}-h" value="${r.h}" oninput="syncProfileData()">
+                </div></div>`;
+          });
+      }
+
+      // Canvas Interaction
+      const cv = document.getElementById('ocr-canvas'); const ctx = cv.getContext('2d');
+      document.getElementById('settings-bg-upload').addEventListener('change', e => {
+          if(!e.target.files.length) return;
+          const url = URL.createObjectURL(e.target.files[0]);
+          canvasBgImg = new Image(); canvasBgImg.onload = () => { cv.width = canvasBgImg.naturalWidth; cv.height = canvasBgImg.naturalHeight; drawCanvas(); };
+          canvasBgImg.src = url;
+      });
+
+      function drawCanvas() {
+          if(!activeSetProfile) return;
+          if(!canvasBgImg) { cv.width = activeSetProfile.width; cv.height = activeSetProfile.height; }
+          ctx.clearRect(0,0,cv.width,cv.height);
+          if(canvasBgImg) ctx.drawImage(canvasBgImg, 0,0);
+          else { ctx.fillStyle = '#444'; ctx.fillRect(0,0,cv.width,cv.height); }
+          
+          const colors = {title:"#00ff00", diff:"#ff00ff", judge:"#00ffff", combo:"#ffff00"};
+          Object.keys(activeSetProfile.rects).forEach(k => {
+             const r = activeSetProfile.rects[k];
+             const px = r.x * cv.width, py = r.y * cv.height, pw = r.w * cv.width, ph = r.h * cv.height;
+             ctx.strokeStyle = colors[k]; ctx.lineWidth = 2; ctx.strokeRect(px, py, pw, ph);
+             ctx.fillStyle = `rgba(0,0,0,0.5)`; ctx.fillRect(px, py, pw, ph);
+             ctx.fillStyle = colors[k]; ctx.font = "14px Arial"; ctx.fillText(k, px+2, py+14);
+             // Resize handle
+             ctx.fillRect(px+pw-8, py+ph-8, 8, 8);
+          });
+      }
+
+      function getHit(x, y) {
+          const cw = cv.width, ch = cv.height;
+          for(const k of Object.keys(activeSetProfile.rects)) {
+              const r = activeSetProfile.rects[k];
+              const px = r.x*cw, py = r.y*ch, pw = r.w*cw, ph = r.h*ch;
+              if(x >= px+pw-10 && x <= px+pw && y >= py+ph-10 && y <= py+ph) return {k, type:'resize'};
+              if(x >= px && x <= px+pw && y >= py && y <= py+ph) return {k, type:'move'};
+          }
+          return null;
+      }
+      
+      cv.addEventListener('mousedown', e => {
+          const rect = cv.getBoundingClientRect();
+          const scaleX = cv.width / rect.width, scaleY = cv.height / rect.height;
+          const x = (e.clientX - rect.left) * scaleX, y = (e.clientY - rect.top) * scaleY;
+          const hit = getHit(x, y);
+          if(hit) {
+              dragState = { type: hit.type, key: hit.k, startX: x, startY: y, orig: { ...activeSetProfile.rects[hit.k] } };
+          }
+      });
+      cv.addEventListener('mousemove', e => {
+          if(!dragState.type) return;
+          const rect = cv.getBoundingClientRect();
+          const scaleX = cv.width / rect.width, scaleY = cv.height / rect.height;
+          const x = (e.clientX - rect.left) * scaleX, y = (e.clientY - rect.top) * scaleY;
+          const dx = (x - dragState.startX) / cv.width, dy = (y - dragState.startY) / cv.height;
+          
+          if(dragState.type === 'move') {
+              activeSetProfile.rects[dragState.key].x = Math.max(0, Math.min(1, dragState.orig.x + dx));
+              activeSetProfile.rects[dragState.key].y = Math.max(0, Math.min(1, dragState.orig.y + dy));
+          } else if(dragState.type === 'resize') {
+              activeSetProfile.rects[dragState.key].w = Math.max(0.01, dragState.orig.w + dx);
+              activeSetProfile.rects[dragState.key].h = Math.max(0.01, dragState.orig.h + dy);
+          }
+          renderRectInputs(); drawCanvas();
+      });
+      cv.addEventListener('mouseup', () => dragState.type = null);
+      cv.addEventListener('mouseleave', () => dragState.type = null);
+
+    </script>
+  </body>
+</html>
