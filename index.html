@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>プロセカ リザルト管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    
+    <link rel="stylesheet" href="./assets/styles.css">
+  </head>
+  <body>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <div id="imageModal" class="modal" onclick="if(event.target === this) closeImageModal()">
+      <span class="close-btn" onclick="closeImageModal()">&times;</span>
+      <img class="modal-content-img" id="modalImg">
+    </div>
+
+    <div id="batchModal" class="modal" style="background-color: rgba(0,0,0,0.5);">
+      <div class="modal-form-content">
+        <div class="modal-header">
+          <span id="batch-modal-title"><span class="material-symbols-outlined">cloud_upload</span> 画像アップロード・編集</span>
+          <span style="cursor:pointer;" onclick="closeBatchModal()">&times;</span>
+        </div>
+        
+        <div id="upload-initial" style="display: flex; flex: 1;">
+            <div id="drop-zone" class="drop-zone" onclick="document.getElementById('up-file').click()">
+            <span class="material-symbols-outlined" style="font-size: 64px; margin-bottom: 10px;">upload_file</span>
+            <div style="font-size: 1.2rem; font-weight: bold;">クリックして画像を選択</div>
+            <div style="font-size: 0.9rem; margin-top: 5px;">または画像をここにドラッグ＆ドロップ</div>
+            <input type="file" id="up-file" accept="image/*" multiple style="display: none;">
+            </div>
+        </div>
+
+        <div id="batch-workspace" class="split-container" style="display: none;">
+            <div class="sidebar">
+                <div class="sidebar-toolbar">
+                    <button class="btn-analyze-all" onclick="analyzeAllInBatch()">
+                        <span class="material-symbols-outlined">analytics</span> 一括解析 (すべて)
+                    </button>
+                </div>
+                <div id="batch-sidebar-list" style="overflow-y:auto; flex:1;"></div>
+            </div>
+            
+            <div class="main-area">
+                <div id="batch-editor-container" class="editor-layout" style="display: none;">
+                    <div class="preview-pane">
+                        <img id="batch-preview-img" src="" crossorigin="anonymous">
+                    </div>
+                    <div class="form-pane">
+                        <button type="button" class="btn-reanalyze" onclick="reanalyzeCurrentItem()">
+                            <span class="material-symbols-outlined" style="font-size:1rem;">analytics</span> この画像を再解析
+                        </button>
+
+                        <div class="form-group">
+                            <label>機種</label>
+                            <select id="up-device" style="width: 100%; box-sizing: border-box;" onchange="updateCurrentItem('devicePresetId', this.value)"></select>
+                            <div id="preview-device-name" style="font-size:0.8rem; color:#667; margin-top:4px;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>曲名</label>
+                            <input type="text" id="up-title" style="width: 100%; box-sizing: border-box;" oninput="updateCurrentItem('title', this.value)">
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <div class="form-group" style="flex:1;">
+                                <label>レベル</label>
+                                <input type="number" id="up-level" style="width: 100%; box-sizing: border-box;" oninput="updateCurrentItem('level', this.value)">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>難易度</label>
+                                <select id="up-diff" style="width: 100%; box-sizing: border-box;" onchange="updateCurrentItem('difficultyRaw', this.value)">
+                                    <option value="EASY">EASY</option>
+                                    <option value="NORMAL">NORMAL</option>
+                                    <option value="HARD">HARD</option>
+                                    <option value="EXPERT">EXPERT</option>
+                                    <option value="MASTER">MASTER</option>
+                                    <option value="APPEND">APPEND</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>判定内訳</label>
+                            <div class="breakdown-group">
+                                <div class="breakdown-item">
+                                    <label style="color:#ffd966;">PERFECT</label>
+                                    <input type="number" id="up-perfect" min="0" value="0" oninput="updateCurrentItem('perfect', this.value)">
+                                </div>
+                                <div class="breakdown-item">
+                                    <label style="color:#ffbf5e;">GREAT</label>
+                                    <input type="number" id="up-great" min="0" value="0" oninput="updateCurrentItem('great', this.value)">
+                                </div>
+                                <div class="breakdown-item">
+                                    <label style="color:#8ac5f7;">GOOD</label>
+                                    <input type="number" id="up-good" min="0" value="0" oninput="updateCurrentItem('good', this.value)">
+                                </div>
+                                <div class="breakdown-item">
+                                    <label style="color:#9bfcc0;">BAD</label>
+                                    <input type="number" id="up-bad" min="0" value="0" oninput="updateCurrentItem('bad', this.value)">
+                                </div>
+                                <div class="breakdown-item">
+                                    <label style="color:#e0e0e0;">MISS</label>
+                                    <input type="number" id="up-miss-detail" min="0" value="0" oninput="updateCurrentItem('miss', this.value)">
+                                </div>
+                                <div class="breakdown-item">
+                                    <label style="color:#d8b4fe;">COMBO</label>
+                                    <input type="number" id="up-combo" min="0" value="0" oninput="updateCurrentItem('combo', this.value)">
+                                </div>
+                            </div>
+                            <div class="total-score">
+                                総ミス数: <span id="up-total-miss" style="font-size:1.2rem; color:var(--diff-master);">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="batch-empty-msg" style="margin:auto; color:#999; text-align:center;">
+                    左のリストから画像を選択してください
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-header" style="font-size: 0.9rem; padding: 10px 20px; background: #f8f9fa; border-top: 1px solid #eee; border-bottom: none; display:block;" id="batch-msg-area">
+             <span id="batch-status-msg">待機中...</span>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-cancel" onclick="closeBatchModal()">閉じる</button>
+          <button class="btn-submit" id="btn-exec-batch" onclick="handleBatchExecution()" disabled>実行</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="auth-section">
+        <span id="auth-status">未ログイン</span>
+
+        <button id="btn-select-mode" class="btn-mode" onclick="toggleSelectMode()">
+            <span class="material-symbols-outlined">check_box</span> 選択モード
+        </button>
+        
+        <button id="upload_button" class="btn-auth btn-upload" onclick="openBatchModal('upload')" style="display: none;">
+          <span class="material-symbols-outlined">add_photo_alternate</span> アップロード
+        </button>
+        <button id="settings_button" class="btn-auth btn-mode" onclick="openSettingsModal()" style="display: none;">
+          <span class="material-symbols-outlined">tune</span> 設定
+        </button>
+
+        <button id="authorize_button" class="btn-auth" onclick="handleAuthClick()">
+          <span class="material-symbols-outlined">login</span> Googleでログイン
+        </button>
+        <button id="signout_button" class="btn-auth btn-signout" onclick="handleSignoutClick()" style="display: none;">
+          <span class="material-symbols-outlined">logout</span> ログアウト
+        </button>
+      </div>
+
+      <h2><span class="material-symbols-outlined">library_music</span> リザルト管理 (My Drive)</h2>
+      
+      <div class="controls">
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">sort</span> 並べ替え</label>
+          <select id="sort-order" onchange="updateView()">
+            <option value="title">名前順</option>
+            <option value="level">楽曲レベル順</option>
+            <option value="miss">ミス数順</option>
+            <option value="date">追加日順</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">swap_vert</span> 昇順/降順</label>
+          <select id="sort-direction" onchange="updateView()">
+            <option value="asc" selected>昇順</option>
+            <option value="desc">降順</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">filter_alt</span> FC状況</label>
+          <select id="filter-fc" onchange="updateView()">
+            <option value="all">すべて</option>
+            <option value="fc">FC済み (FC-0)</option>
+            <option value="unfc">未FC (失点あり)</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">remove_circle</span> 失点数 (範囲)</label>
+          <div class="range-inputs">
+            <input type="number" id="filter-miss-min" placeholder="0" min="0" oninput="updateView()">
+            <span>~</span>
+            <input type="number" id="filter-miss-max" placeholder="Max" min="0" oninput="updateView()">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">speed</span> 難易度</label>
+          <select id="filter-diff" onchange="updateView()">
+            <option value="all">すべて</option>
+            <option value="EASY">EASY</option>
+            <option value="NORMAL">NORMAL</option>
+            <option value="HARD">HARD</option>
+            <option value="EXPERT">EXPERT</option>
+            <option value="MASTER">MASTER</option>
+            <option value="APPEND">APPEND</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">manage_search</span> 曲名検索</label>
+          <input type="text" id="filter-title" placeholder="曲名を入力..." oninput="updateView()">
+        </div>
+
+        <div class="control-group">
+          <label><span class="material-symbols-outlined">search</span> レベル検索</label>
+          <input type="number" id="filter-level" placeholder="" oninput="updateView()">
+        </div>
+      </div>
+
+      <div class="toggle-row" style="margin: 10px 0 4px;">
+        <label class="switch"><input type="checkbox" id="filter-best-only"><span>自己ベストのみ表示</span></label>
+      </div>
+      <div id="view-progress" class="progress-wrap"><div id="view-progress-bar" class="progress-bar"></div></div>
+      <div class="progress-text"><span id="view-progress-label">待機中</span><span id="result-count">0 件</span></div>
+
+      <div class="status-bar">
+        <span id="status-msg">ログインしてください</span>
+      </div>
+
+      <div id="loader">
+        <div class="spinner"></div>
+        <div id="loader-text">データを読み込み中...</div>
+      </div>
+      
+      <div id="grid" class="grid"></div>
+    </div>
+
+    <div id="batch-actions">
+        <button class="btn-batch deselect" onclick="clearSelection()"><span class="material-symbols-outlined">close</span> 選択解除</button>
+        <button class="btn-batch delete" onclick="batchDelete()"><span class="material-symbols-outlined">delete</span> 削除</button>
+        <button class="btn-batch edit" onclick="batchEdit()"><span class="material-symbols-outlined">edit_note</span> 編集・解析</button>
+        <div style="margin-left:auto; display:flex; align-items:center; color:#666;">
+            <span id="selected-count">0</span> 件選択中
+        </div>
+    </div>
+<script type="module" src="./src/app.js"></script>
+
+    <div id="settings-modal" class="modal settings-modal" style="background-color: rgba(0,0,0,0.5); display:none;">
+      <div class="modal-form-content" style="width:min(1200px, 96vw);">
+        <div class="modal-header">
+          <span><span class="material-symbols-outlined">tune</span> 読み取り範囲設定</span>
+          <span style="cursor:pointer;" onclick="closeSettingsModal()">&times;</span>
+        </div>
+        <div class="settings-grid">
+          <div class="settings-panel">
+            <div class="control-group">
+              <label>設定中の機種</label>
+              <select id="settings-preset-select"></select>
+            </div>
+            <div class="control-group">
+              <label>機種名</label>
+              <input id="preset-name" type="text">
+            </div>
+            <div style="display:flex; gap:10px;">
+              <div class="control-group" style="flex:1;">
+                <label>横(px)</label>
+                <input id="preset-width" type="number" min="0">
+              </div>
+              <div class="control-group" style="flex:1;">
+                <label>縦(px)</label>
+                <input id="preset-height" type="number" min="0">
+              </div>
+            </div>
+            <div class="control-group">
+              <label>サンプル画像</label>
+              <input id="sample-file" type="file" accept="image/*">
+            </div>
+            <div class="preset-list" id="preset-list"></div>
+            <div class="region-help">ボックスをドラッグで移動、右下の丸をドラッグでサイズ変更できます。数値入力でも同時に反映されます。</div>
+            <div class="form-actions" style="justify-content:flex-start; gap:8px;">
+              <button class="btn-submit" onclick="syncPresetForm()">保存</button>
+              <button class="btn-cancel" onclick="closeSettingsModal()">閉じる</button>
+            </div>
+          </div>
+          <div class="settings-panel">
+            <div class="settings-preview">
+              <img id="settings-preview-img" src="" alt="sample" data-fallback="">
+              <div id="region-layer" class="region-layer"></div>
+            </div>
+            <div style="padding-top: 10px;">
+              <div class="region-inputs">
+                <input id="rect-diff-x" type="number" step="0.1" min="0" max="100">
+                <input id="rect-diff-y" type="number" step="0.1" min="0" max="100">
+                <input id="rect-diff-w" type="number" step="0.1" min="0" max="100">
+                <input id="rect-diff-h" type="number" step="0.1" min="0" max="100">
+
+                <input id="rect-title-x" type="number" step="0.1" min="0" max="100">
+                <input id="rect-title-y" type="number" step="0.1" min="0" max="100">
+                <input id="rect-title-w" type="number" step="0.1" min="0" max="100">
+                <input id="rect-title-h" type="number" step="0.1" min="0" max="100">
+
+                <input id="rect-result-x" type="number" step="0.1" min="0" max="100">
+                <input id="rect-result-y" type="number" step="0.1" min="0" max="100">
+                <input id="rect-result-w" type="number" step="0.1" min="0" max="100">
+                <input id="rect-result-h" type="number" step="0.1" min="0" max="100">
+
+                <input id="rect-combo-x" type="number" step="0.1" min="0" max="100">
+                <input id="rect-combo-y" type="number" step="0.1" min="0" max="100">
+                <input id="rect-combo-w" type="number" step="0.1" min="0" max="100">
+                <input id="rect-combo-h" type="number" step="0.1" min="0" max="100">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions" style="padding: 0 18px 18px;">
+          <button class="btn-cancel" onclick="closeSettingsModal()">閉じる</button>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
