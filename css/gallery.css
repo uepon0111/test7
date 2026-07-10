@@ -1,0 +1,81 @@
+/**
+ * gallery.css
+ * ---------------------------------------------------------------------------
+ * index.html の一覧画面（絞り込み・並び替えコントロール、カードグリッド、
+ * 画像拡大モーダルの詳細スタッツ表示、選択モードの下部バー）のスタイル。
+ * ---------------------------------------------------------------------------
+ */
+
+/* Controls */
+.controls { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; align-items: end; }
+.control-group { display: flex; flex-direction: column; }
+.control-group label { font-size: 0.8rem; font-weight: bold; color: #777; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+
+.sort-field-row { display: flex; gap: 6px; }
+.sort-field-row select { flex: 1; min-width: 0; }
+.btn-sort-dir { padding: 10px 12px; flex-shrink: 0; }
+
+.range-inputs { display: flex; align-items: center; gap: 5px; }
+.range-inputs input { width: 100%; text-align: center; }
+
+.status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9rem; color: #666; font-weight: bold; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+
+/* Card */
+.card { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; border: 2px solid transparent; position: relative; cursor: pointer; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+.card.is-fc { border-color: var(--fc-color); }
+
+/* Selection Mode Styles */
+.card.selected { border-color: var(--selected-border); background-color: #f0f7ff; transform: scale(0.98); }
+.card.selected::after { content: "check_circle"; font-family: 'Material Symbols Outlined'; position: absolute; top: 10px; right: 10px; font-size: 24px; color: var(--selected-border); z-index: 20; background: white; border-radius: 50%; }
+
+.card-img-container { width: 100%; height: 140px; background-color: #e0e2e5; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }
+.card-img { width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s ease-in; position: relative; z-index: 2; }
+.img-loader-spinner { position: absolute; width: 24px; height: 24px; border: 3px solid #ddd; border-top: 3px solid #999; border-radius: 50%; animation: spin 1s linear infinite; z-index: 1; }
+
+.fc-badge { position: absolute; top: 8px; right: 8px; background: var(--fc-color); color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 4px; z-index: 3; }
+
+/* Overlay Actions (Edit/Delete) */
+.card-overlay-actions { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 6px; z-index: 10; opacity: 0; transition: opacity 0.2s; }
+.card:hover .card-overlay-actions { opacity: 1; }
+.card.select-mode-active .card-overlay-actions { display: none !important; }
+
+.btn-overlay { width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: 1px solid #ddd; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); color: #555; transition: all 0.2s; }
+.btn-overlay:hover { transform: scale(1.1); color: #007bff; }
+.btn-overlay.del:hover { color: #dc3545; background: #fff5f5; }
+
+.card-body { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; }
+.song-meta { display: flex; gap: 6px; margin-bottom: 8px; font-size: 0.75rem; flex-wrap: wrap; }
+.tag { padding: 4px 8px; border-radius: 4px; font-weight: bold; color: white; letter-spacing: 0.5px; white-space: nowrap; }
+.tag.lvl { background-color: #555; }
+.tag.diff-EZ { background-color: var(--diff-easy); color: #1c5c34; }
+.tag.diff-NM { background-color: var(--diff-normal); color: #23425a; }
+.tag.diff-HD { background-color: var(--diff-hard); color: #5a4200; }
+.tag.diff-EX { background-color: var(--diff-expert); }
+.tag.diff-MS { background-color: var(--diff-master); }
+.tag.diff-AP { background-color: var(--diff-append); color: #6b1257; }
+
+.song-title { font-weight: bold; font-size: 0.95rem; margin-bottom: 12px; line-height: 1.4; word-break: break-word; }
+.score-info { font-size: 0.9rem; color: #666; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 8px; margin-top: auto; }
+.miss-val { font-weight: bold; }
+.miss-val.zero { color: var(--fc-color); }
+
+/* 画像拡大モーダル + 詳細スタッツ */
+.modal-viewer { display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 92vw; max-height: 92vh; }
+.modal-content-img { max-width: 90vw; max-height: 68vh; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); object-fit: contain; }
+.modal-stats { background: #fff; border-radius: 10px; padding: 14px 18px; width: min(90vw, 480px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.modal-stats-title { font-weight: bold; font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; word-break: break-word; }
+.modal-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mstat { background: #f4f7f6; border-radius: 8px; padding: 8px 6px; text-align: center; }
+.mstat-label { display: block; font-size: 0.7rem; color: #888; font-weight: bold; letter-spacing: 0.5px; }
+.mstat-val { display: block; font-size: 1.1rem; font-weight: bold; color: #333; margin-top: 2px; }
+.modal-stats-date { margin-top: 10px; font-size: 0.75rem; color: #888; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+.best-flag { color: #d6a300; font-weight: bold; }
+
+/* Batch Selection Bar */
+#batch-actions { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 15px 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: none; justify-content: center; gap: 15px; z-index: 900; box-sizing: border-box; flex-wrap: wrap; }
+.btn-batch { padding: 10px 20px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; color: white; font-family: inherit; }
+.btn-batch.delete { background-color: #dc3545; }
+.btn-batch.edit { background-color: #007bff; }
+.btn-batch.deselect { background-color: #6c757d; }

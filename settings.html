@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>読み取り範囲の設定 - プロセカ リザルト管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/settings.css">
+  </head>
+  <body>
+    <div class="container">
+
+      <div class="settings-header">
+        <a href="index.html" class="back-link">
+          <span class="material-symbols-outlined">arrow_back</span> 一覧に戻る
+        </a>
+        <h2 style="margin:0;"><span class="material-symbols-outlined">tune</span> OCR読み取り範囲の設定</h2>
+      </div>
+
+      <div class="settings-lead">
+        <span class="material-symbols-outlined" style="vertical-align:middle; font-size:1rem;">info</span>
+        リザルト画面のサンプル画像をアップロードし、曲名・難易度・判定内訳（PERFECT/GREAT/GOOD/BAD/MISS）・コンボ数を読み取る範囲を機種（画面解像度）ごとに調整できます。
+        矩形はドラッグで移動、四隅のハンドルでリサイズできます。数値入力欄からも同じ範囲を直接指定でき、どちらを操作してももう一方に即座に反映されます。
+        アップロード画面では、画像の解像度・縦横比から最も近いプロファイルが自動的に選ばれます（手動での切り替えも可能です）。
+      </div>
+
+      <div class="settings-layout">
+        <div class="profile-sidebar">
+          <div class="profile-sidebar-header">
+            <span><span class="material-symbols-outlined" style="font-size:1rem; vertical-align:middle;">smartphone</span> 機種プロファイル</span>
+          </div>
+          <div id="profile-list"></div>
+          <button class="btn-new-profile" id="btn-new-profile" onclick="SettingsMain.createNewProfile()">
+            <span class="material-symbols-outlined" style="font-size:1rem;">add</span> 新規プロファイル
+          </button>
+        </div>
+
+        <div class="settings-main">
+          <div class="profile-name-row">
+            <label><span class="material-symbols-outlined" style="font-size:1rem; vertical-align:middle;">label</span> プロファイル名</label>
+            <input type="text" id="profile-name-input" placeholder="例: iPhone14 / Pixel7 など"
+              oninput="SettingsMain.onProfileNameChange(this.value)">
+          </div>
+          <div id="ref-resolution-display">基準解像度: 未設定</div>
+
+          <div id="sample-drop-zone" class="sample-drop-zone">
+            <span class="material-symbols-outlined" style="font-size:3rem;">add_photo_alternate</span>
+            <div style="font-weight:bold;">サンプル画像をアップロード</div>
+            <div style="font-size:0.8rem;">クリックまたはドラッグ＆ドロップ（このページ内でのみ使用し、保存はされません）</div>
+          </div>
+          <input type="file" id="sample-file-input" accept="image/*" style="display:none;">
+
+          <div id="region-editor-wrapper" style="display:none;">
+            <img id="sample-img" alt="サンプル画像">
+          </div>
+
+          <div class="sample-toolbar" id="sample-toolbar-row">
+            <div class="region-controls-heading">
+              <span class="material-symbols-outlined">crop</span> 読み取り範囲（ドラッグ操作 / 数値入力）
+            </div>
+            <div class="sample-toolbar-actions">
+              <button type="button" class="btn-mode" id="btn-replace-sample">
+                <span class="material-symbols-outlined" style="font-size:1rem;">sync</span> 画像を差し替え
+              </button>
+              <button type="button" class="btn-mode" onclick="SettingsMain.resetRegionsToDefault()">
+                <span class="material-symbols-outlined" style="font-size:1rem;">restart_alt</span> デフォルトに戻す
+              </button>
+            </div>
+          </div>
+
+          <div id="region-controls-list"></div>
+
+          <div class="settings-actions">
+            <div class="settings-actions-left">
+              <button type="button" class="btn-mode" id="btn-delete-profile" onclick="SettingsMain.deleteActiveProfile()">
+                <span class="material-symbols-outlined" style="font-size:1rem;">delete</span> このプロファイルを削除
+              </button>
+            </div>
+            <button type="button" class="btn-auth btn-upload" onclick="SettingsMain.saveCurrentProfile()">
+              <span class="material-symbols-outlined">save</span> このプロファイルを保存
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/device-profiles.js"></script>
+    <script src="js/region-editor.js"></script>
+    <script src="js/settings-main.js"></script>
+  </body>
+</html>
