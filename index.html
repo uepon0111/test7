@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロセカ 楽曲データベース</title>
+    <style>
+        :root {
+            --primary: #3cc;
+            --bg-color: #121212;
+            --card-bg: #242424;
+            --text-main: #f0f0f0;
+            --text-sub: #aaa;
+            --diff-easy: #66cc22;
+            --diff-normal: #33aaff;
+            --diff-hard: #ffaa00;
+            --diff-expert: #ee4466;
+            --diff-master: #cc22aa;
+            --diff-append: #ee88ff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-y: scroll;
+        }
+
+        header {
+            background-color: #1a1a1a;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        h1 { font-size: 24px; margin-bottom: 15px; text-align: center; color: var(--primary); }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 5px;
+            background: #333;
+            padding: 5px;
+            border-radius: 8px;
+            align-items: center;
+        }
+
+        button, select {
+            background-color: #444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        button:hover, select:hover { background-color: #555; }
+        button.active { background-color: var(--primary); color: #000; font-weight: bold; }
+
+        main { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+
+        #loading { text-align: center; padding: 50px; font-size: 1.2rem; }
+
+        /* Grid Layouts */
+        #music-list { display: grid; gap: 20px; }
+        #music-list.grid-3 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+        #music-list.grid-5 { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+        #music-list.grid-1 { grid-template-columns: 1fr; }
+
+        /* Music Card */
+        .music-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .music-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(51,204,204,0.3); }
+
+        .music-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+        
+        .music-info { padding: 15px; display: flex; flex-direction: column; gap: 5px; flex-grow: 1; }
+        .music-title { font-size: 16px; font-weight: bold; line-height: 1.4; }
+        .music-kana { font-size: 11px; color: var(--text-sub); }
+        .music-meta { font-size: 12px; color: var(--text-sub); margin-top: auto; }
+
+        /* Grid-1 (List View) Overrides */
+        #music-list.grid-1 .music-card { flex-direction: row; height: 120px; }
+        #music-list.grid-1 .music-card img { width: 120px; height: 120px; }
+        #music-list.grid-1 .music-info { justify-content: center; }
+        #music-list.grid-1 .music-title { font-size: 20px; }
+
+        /* Modal */
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100; opacity: 0; pointer-events: none; transition: 0.3s;
+            padding: 20px;
+        }
+        #modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        #modal-content {
+            background: var(--card-bg); width: 100%; max-width: 900px;
+            max-height: 90vh; border-radius: 15px; overflow-y: auto;
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
+        }
+
+        #modal-close {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(255,255,255,0.2); width: 36px; height: 36px;
+            border-radius: 50%; font-size: 20px; text-align: center;
+            line-height: 36px; padding: 0; z-index: 2;
+        }
+
+        .modal-header { display: flex; gap: 20px; padding: 30px; background: #1a1a1a; flex-wrap: wrap; }
+        .modal-thumb { width: 200px; height: 200px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .modal-title-area { flex: 1; min-width: 250px; }
+        .modal-id { background: var(--primary); color: #000; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 5px; }
+        .modal-tags { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
+        .tag-badge { background: #444; padding: 4px 10px; border-radius: 4px; font-size: 12px; }
+        .tag-badge.newly-written { background: #e91e63; color: white; }
+
+        .modal-body-content { padding: 30px; }
+        .info-grid { display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; margin-bottom: 30px; font-size: 14px; }
+        .info-label { color: var(--text-sub); }
+
+        .diff-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; text-align: center; }
+        .diff-table th, .diff-table td { padding: 10px; border: 1px solid #444; }
+        .diff-table th { background: #333; }
+        .diff-name { font-weight: bold; }
+        .diff-easy { color: var(--diff-easy); }
+        .diff-normal { color: var(--diff-normal); }
+        .diff-hard { color: var(--diff-hard); }
+        .diff-expert { color: var(--diff-expert); }
+        .diff-master { color: var(--diff-master); }
+        .diff-append { color: var(--diff-append); }
+
+        .vocal-section { margin-bottom: 30px; }
+        .vocal-item { background: #333; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 15px; }
+        .vocal-chars { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .char-icon-container { display: flex; flex-direction: column; align-items: center; width: 60px; }
+        .char-icon { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #555; }
+        .char-name { font-size: 10px; text-align: center; margin-top: 4px; line-height: 1.2; word-break: break-all; }
+        audio { width: 100%; height: 40px; outline: none; }
+
+        .btn-link {
+            display: inline-block; background: #e50914; color: white;
+            text-decoration: none; padding: 10px 20px; border-radius: 5px;
+            font-weight: bold; transition: 0.2s; text-align: center; width: 100%;
+        }
+        .btn-link:hover { background: #f40612; transform: scale(1.02); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #music-list.grid-3 { grid-template-columns: repeat(2, 1fr); }
+            #music-list.grid-5 { grid-template-columns: repeat(3, 1fr); }
+            .modal-header { flex-direction: column; align-items: center; text-align: center; }
+            .modal-tags { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>プロセカ 楽曲データベース</h1>
+    <div class="controls">
+        <div class="control-group">
+            <button data-view="1" class="view-btn">1列</button>
+            <button data-view="3" class="view-btn active">3列</button>
+            <button data-view="5" class="view-btn">5列</button>
+        </div>
+        <div class="control-group">
+            <select id="sort-type">
+                <option value="id">ID順</option>
+                <option value="title">タイトル順</option>
+                <option value="publishedAt" selected>公開日時順</option>
+                <option value="level">楽曲レベル順</option>
+            </select>
+            <select id="sort-difficulty" style="display: none;">
+                <option value="easy">EASY</option>
+                <option value="normal">NORMAL</option>
+                <option value="hard">HARD</option>
+                <option value="expert">EXPERT</option>
+                <option value="master" selected>MASTER</option>
+                <option value="append">APPEND</option>
+            </select>
+            <button id="sort-order" data-order="desc">▼ 降順</button>
+        </div>
+        <div class="control-group">
+            <select id="filter-tag">
+                <option value="all">ユニット: すべて</option>
+            </select>
+            <select id="filter-written">
+                <option value="all">書き下ろし: すべて</option>
+                <option value="true">書き下ろしのみ</option>
+                <option value="false">その他</option>
+            </select>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div id="loading">データを読み込み中... (少々お待ちください)</div>
+    <div id="music-list" class="grid-3" style="display: none;"></div>
+</main>
+
+<div id="modal-overlay">
+    <div id="modal-content">
+        <button id="modal-close">&times;</button>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<script>
+/**
+ * 定数・マッピング
+ */
+const BASE_URL = "https://sekai-world.github.io/sekai-master-db-diff";
+const ASSET_BASE = "https://storage.sekai.best/sekai-jp-assets";
+
+const TAG_MAP = {
+    "vocaloid": "バーチャル・シンガー",
+    "light_sound": "Leo/need",
+    "idol": "MORE MORE JUMP!",
+    "street": "Vivid BAD SQUAD",
+    "theme_park": "ワンダーランズ×ショウタイム",
+    "school_refusal": "25時、ナイトコードで。",
+    "other": "その他"
+};
+
+const DIFF_ORDER = ["easy", "normal", "hard", "expert", "master", "append"];
+
+let masterData = [];
+let filteredData = [];
+let gameCharsDict = {};
+let outCharsDict = {};
+
+// DOM Elements
+const musicListEl = document.getElementById('music-list');
+const loadingEl = document.getElementById('loading');
+const modalOverlay = document.getElementById('modal-overlay');
+const modalBody = document.getElementById('modal-body');
+const sortTypeEl = document.getElementById('sort-type');
+const sortDiffEl = document.getElementById('sort-difficulty');
+const sortOrderBtn = document.getElementById('sort-order');
+const filterTagEl = document.getElementById('filter-tag');
+const filterWrittenEl = document.getElementById('filter-written');
+const viewBtns = document.querySelectorAll('.view-btn');
+
+/**
+ * データフェッチと初期化
+ */
+async function init() {
+    try {
+        const [
+            musics, difficulties, vocals, 
+            gameChars, outChars, tags, originals
+        ] = await Promise.all([
+            fetch(`${BASE_URL}/musics.json`).then(r => r.json()),
+            fetch(`${BASE_URL}/musicDifficulties.json`).then(r => r.json()),
+            fetch(`${BASE_URL}/musicVocals.json`).then(r => r.json()),
+            fetch(`${BASE_URL}/gameCharacters.json`).then(r => r.json()),
+            fetch(`${BASE_URL}/outsideCharacters.json`).then(r => r.json()),
+            fetch(`${BASE_URL}/musicTags.json`).then(r => r.json()),
+            fetch(`${BASE_URL}/musicOriginals.json`).then(r => r.json())
+        ]);
+
+        // 辞書化（高速検索用）
+        gameChars.forEach(c => gameCharsDict[c.id] = c);
+        outChars.forEach(c => outCharsDict[c.id] = c);
+
+        const diffDict = groupById(difficulties, 'musicId');
+        const vocalDict = groupById(vocals, 'musicId');
+        const tagDict = groupById(tags, 'musicId');
+        const originalDict = reduceById(originals, 'musicId');
+
+        // タグの動的生成
+        const uniqueTags = new Set(tags.map(t => t.musicTag));
+        uniqueTags.forEach(tag => {
+            const option = document.createElement('option');
+            option.value = tag;
+            option.textContent = TAG_MAP[tag] || tag;
+            filterTagEl.appendChild(option);
+        });
+
+        // 統合データの作成
+        masterData = musics.map(music => ({
+            ...music,
+            difficulties: diffDict[music.id] || [],
+            vocals: vocalDict[music.id] || [],
+            tags: (tagDict[music.id] || []).map(t => t.musicTag),
+            originalVideo: originalDict[music.id] ? originalDict[music.id].videoLink : null
+        }));
+
+        loadingEl.style.display = 'none';
+        musicListEl.style.display = 'grid';
+
+        applyFiltersAndSort();
+        setupEventListeners();
+
+    } catch (error) {
+        console.error("データの読み込みに失敗しました:", error);
+        loadingEl.textContent = "データの読み込みに失敗しました。時間をおいて再読み込みしてください。";
+    }
+}
+
+// ユーティリティ: 配列をIDでグループ化
+function groupById(array, keyName) {
+    return array.reduce((acc, curr) => {
+        const key = curr[keyName];
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(curr);
+        return acc;
+    }, {});
+}
+// ユーティリティ: 配列をIDで単一オブジェクトに
+function reduceById(array, keyName) {
+    return array.reduce((acc, curr) => {
+        acc[curr[keyName]] = curr;
+        return acc;
+    }, {});
+}
+
+/**
+ * IDを3桁ゼロ埋め
+ */
+function padId(id) {
+    return String(id).padStart(3, '0');
+}
+
+/**
+ * フィルタ・ソート適用とレンダリング
+ */
+function applyFiltersAndSort() {
+    const tagFilter = filterTagEl.value;
+    const writtenFilter = filterWrittenEl.value;
+    const sType = sortTypeEl.value;
+    const sDiff = sortDiffEl.value;
+    const isAsc = sortOrderBtn.dataset.order === 'asc';
+
+    // Filter
+    filteredData = masterData.filter(music => {
+        if (tagFilter !== 'all' && !music.tags.includes(tagFilter)) return false;
+        if (writtenFilter !== 'all' && String(music.isNewlyWrittenMusic) !== writtenFilter) return false;
+        return true;
+    });
+
+    // Sort
+    filteredData.sort((a, b) => {
+        let valA, valB;
+
+        if (sType === 'id') {
+            valA = a.id; valB = b.id;
+        } else if (sType === 'title') {
+            valA = a.pronunciation || a.title; 
+            valB = b.pronunciation || b.title;
+        } else if (sType === 'publishedAt') {
+            valA = a.publishedAt; valB = b.publishedAt;
+        } else if (sType === 'level') {
+            const diffA = a.difficulties.find(d => d.musicDifficulty === sDiff);
+            const diffB = b.difficulties.find(d => d.musicDifficulty === sDiff);
+            valA = diffA ? diffA.playLevel : -1;
+            valB = diffB ? diffB.playLevel : -1;
+        }
+
+        if (valA === valB) return 0;
+        
+        // 文字列の比較
+        if (typeof valA === 'string' && typeof valB === 'string') {
+            return isAsc ? valA.localeCompare(valB, 'ja') : valB.localeCompare(valA, 'ja');
+        }
+        
+        // 数値の比較
+        return isAsc ? valA - valB : valB - valA;
+    });
+
+    renderList();
+}
+
+/**
+ * リストの描画
+ */
+function renderList() {
+    musicListEl.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
+    filteredData.forEach(music => {
+        const card = document.createElement('div');
+        card.className = 'music-card';
+        card.onclick = () => openModal(music);
+
+        const img = document.createElement('img');
+        const paddedId = padId(music.id);
+        img.src = `${ASSET_BASE}/music/jacket/jacket_s_${paddedId}/jacket_s_${paddedId}.png`;
+        img.loading = "lazy";
+        img.onerror = () => { img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; }; // ダミー画像
+
+        const info = document.createElement('div');
+        info.className = 'music-info';
+
+        const title = document.createElement('div');
+        title.className = 'music-title';
+        title.textContent = music.title;
+
+        const kana = document.createElement('div');
+        kana.className = 'music-kana';
+        kana.textContent = music.pronunciation || '';
+
+        const meta = document.createElement('div');
+        meta.className = 'music-meta';
+        meta.textContent = `ID: ${music.id} | ${new Date(music.publishedAt).toLocaleDateString('ja-JP')}`;
+
+        info.appendChild(title);
+        info.appendChild(kana);
+        info.appendChild(meta);
+        
+        card.appendChild(img);
+        card.appendChild(info);
+        fragment.appendChild(card);
+    });
+
+    musicListEl.appendChild(fragment);
+}
+
+/**
+ * モーダルを開く
+ */
+function openModal(music) {
+    const paddedId = padId(music.id);
+    const jacketUrl = `${ASSET_BASE}/music/jacket/jacket_s_${paddedId}/jacket_s_${paddedId}.png`;
+    const dateStr = new Date(music.publishedAt).toLocaleString('ja-JP');
+
+    let tagsHtml = music.tags.map(t => `<span class="tag-badge">${TAG_MAP[t] || t}</span>`).join('');
+    if (music.isNewlyWrittenMusic) {
+        tagsHtml += `<span class="tag-badge newly-written">書き下ろし</span>`;
+    }
+
+    // 難易度表
+    let diffRows = '';
+    DIFF_ORDER.forEach(diffName => {
+        const diffData = music.difficulties.find(d => d.musicDifficulty === diffName);
+        if (diffData) {
+            diffRows += `
+                <tr>
+                    <td class="diff-name diff-${diffName}">${diffName.toUpperCase()}</td>
+                    <td>Lv. ${diffData.playLevel}</td>
+                    <td>${diffData.totalNoteCount} notes</td>
+                </tr>
+            `;
+        }
+    });
+
+    // ボーカルと音声
+    let vocalsHtml = '';
+    music.vocals.forEach(vocal => {
+        let charsHtml = '';
+        vocal.characters.forEach(charInfo => {
+            if (charInfo.characterType === 'game_character') {
+                const char = gameCharsDict[charInfo.characterId];
+                const name = char ? `${char.firstName||''} ${char.givenName||''}`.trim() : 'Unknown';
+                const iconUrl = `${ASSET_BASE}/character/character_sd_l/chr_sp_${charInfo.characterId}.png`;
+                charsHtml += `
+                    <div class="char-icon-container">
+                        <img src="${iconUrl}" class="char-icon" onerror="this.style.display='none'">
+                        <span class="char-name">${name}</span>
+                    </div>
+                `;
+            } else {
+                const char = outCharsDict[charInfo.characterId];
+                const name = char ? char.name : 'Unknown';
+                charsHtml += `
+                    <div class="char-icon-container">
+                        <div class="char-icon" style="display:flex;align-items:center;justify-content:center;font-size:12px;">OUT</div>
+                        <span class="char-name">${name}</span>
+                    </div>
+                `;
+            }
+        });
+
+        const audioUrl = `${ASSET_BASE}/music/long/${vocal.assetbundleName}/${vocal.assetbundleName}.mp3`;
+        
+        vocalsHtml += `
+            <div class="vocal-item">
+                <div class="vocal-chars">${charsHtml}</div>
+                <audio controls preload="none">
+                    <source src="${audioUrl}" type="audio/mpeg">
+                    ブラウザが音声再生に対応していません。
+                </audio>
+            </div>
+        `;
+    });
+
+    modalBody.innerHTML = `
+        <div class="modal-header">
+            <img src="${jacketUrl}" class="modal-thumb" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
+            <div class="modal-title-area">
+                <div class="modal-id">ID: ${music.id}</div>
+                <div class="music-kana">${music.pronunciation || ''}</div>
+                <h2>${music.title}</h2>
+                <div class="modal-tags">${tagsHtml}</div>
+            </div>
+        </div>
+        <div class="modal-body-content">
+            <div class="info-grid">
+                <div class="info-label">作詞</div><div>${music.lyricist || '-'}</div>
+                <div class="info-label">作曲</div><div>${music.composer || '-'}</div>
+                <div class="info-label">編曲</div><div>${music.arranger || '-'}</div>
+                <div class="info-label">公開日時</div><div>${dateStr}</div>
+            </div>
+            
+            <h3>難易度</h3>
+            <table class="diff-table">
+                ${diffRows || '<tr><td colspan="3">データがありません</td></tr>'}
+            </table>
+
+            <h3>ボーカルバージョン</h3>
+            <div class="vocal-section">
+                ${vocalsHtml || '<p>音声データがありません。</p>'}
+            </div>
+
+            ${music.originalVideo ? `
+                <a href="${music.originalVideo}" target="_blank" class="btn-link" onclick="return confirm('外部サイト(YouTube等)へ移動します。よろしいですか？')">
+                    オリジナルビデオを視聴する
+                </a>
+            ` : ''}
+        </div>
+    `;
+
+    // 複数オーディオの同時再生防止
+    const audios = modalBody.querySelectorAll('audio');
+    audios.forEach(audio => {
+        audio.addEventListener('play', () => {
+            audios.forEach(a => { if (a !== audio) a.pause(); });
+        });
+    });
+
+    modalOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * イベントリスナー登録
+ */
+function setupEventListeners() {
+    // 表示切り替え
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            viewBtns.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            const view = e.target.dataset.view;
+            musicListEl.className = `grid-${view}`;
+        });
+    });
+
+    // ソート項目変更
+    sortTypeEl.addEventListener('change', (e) => {
+        sortDiffEl.style.display = e.target.value === 'level' ? 'inline-block' : 'none';
+        applyFiltersAndSort();
+    });
+
+    sortDiffEl.addEventListener('change', applyFiltersAndSort);
+
+    // 昇順/降順トグル
+    sortOrderBtn.addEventListener('click', (e) => {
+        const isAsc = e.target.dataset.order === 'asc';
+        e.target.dataset.order = isAsc ? 'desc' : 'asc';
+        e.target.textContent = isAsc ? '▼ 降順' : '▲ 昇順';
+        applyFiltersAndSort();
+    });
+
+    // フィルタ変更
+    filterTagEl.addEventListener('change', applyFiltersAndSort);
+    filterWrittenEl.addEventListener('change', applyFiltersAndSort);
+
+    // モーダル閉じる
+    document.getElementById('modal-close').addEventListener('click', () => {
+        modalOverlay.classList.remove('active');
+        document.body.style.overflow = 'scroll';
+        // 音声停止
+        const audios = modalBody.querySelectorAll('audio');
+        audios.forEach(a => a.pause());
+    });
+
+    // 背景クリックでモーダル閉じる
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            document.getElementById('modal-close').click();
+        }
+    });
+}
+
+// 実行
+init();
+
+</script>
+</body>
+</html>
