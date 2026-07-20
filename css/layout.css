@@ -1,0 +1,185 @@
+/* ==========================================================================
+   App shell layout
+   Breakpoints used across the app:
+     xs   : < 480px   (small phone, portrait)
+     sm   : 480-767px (large phone / phone landscape)
+     md   : 768-1023px(tablet)
+     lg   : 1024px+   (tablet landscape / desktop)
+   ========================================================================== */
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+}
+
+/* ---- Loading / error screens ---- */
+.screen-state {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--color-ink-muted);
+}
+
+.screen-state__title {
+  font-size: 16px;
+  color: var(--color-ink);
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Header ---- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  background: rgba(251, 251, 254, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-border);
+  padding: 10px 16px;
+  padding-top: calc(10px + var(--safe-top));
+}
+
+.app-header__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.app-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.app-wordmark__mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.app-wordmark__mark .icon {
+  width: 15px;
+  height: 15px;
+}
+
+.app-wordmark__text {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .app-wordmark__text { display: inline; }
+}
+
+.app-header__spacer {
+  flex: 1;
+}
+
+/* ---- Main content ---- */
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 16px 24px;
+}
+
+/* ---- Filter / sort rail ---- */
+.control-rail {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 10px 16px 4px;
+}
+
+.control-rail__toggles {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-sort-panel {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 16px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height var(--duration-slow) var(--ease-standard),
+              opacity var(--duration-base) var(--ease-standard),
+              padding var(--duration-slow) var(--ease-standard);
+}
+
+.filter-sort-panel.open {
+  max-height: 900px;
+  opacity: 1;
+  padding: 4px 16px 18px;
+}
+
+/* ---- Overlays (settings, confirm dialog) shared positioning ---- */
+.overlay-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(27, 26, 34, 0.42);
+  z-index: var(--z-overlay);
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-standard);
+}
+
+.overlay-scrim.open {
+  opacity: 1;
+}
+
+/* Bottom padding so content never sits under the persistent mini player */
+.app-main--with-player {
+  padding-bottom: calc(var(--player-height) + var(--safe-bottom) + 24px);
+}
+
+@media (min-width: 1024px) {
+  .app-header {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .app-main {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .control-rail,
+  .filter-sort-panel {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}

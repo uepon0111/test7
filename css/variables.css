@@ -1,0 +1,93 @@
+/* ==========================================================================
+   Design Tokens
+   Palette: paper white base + "Stage Violet" / "Cyan Pulse" accent duo.
+   Chosen to avoid generic AI-cliche palettes (warm cream+terracotta,
+   near-black+acid green, newspaper hairline) while keeping the
+   user-specified white base with clear accent colors.
+   ========================================================================== */
+
+:root {
+  /* ---- Surfaces & ink ---- */
+  --color-bg: #fbfbfe;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f4f2fb;
+  --color-surface-raised: #ffffff;
+  --color-border: #e7e5f0;
+  --color-border-strong: #d8d5e8;
+
+  --color-ink: #1b1a22;
+  --color-ink-muted: #6e6c7c;
+  --color-ink-faint: #9997a8;
+
+  /* ---- Accent duo ---- */
+  --color-accent: #6851f0;
+  --color-accent-strong: #4e3adb;
+  --color-accent-soft: #efeaff;
+  --color-accent-2: #00c2b8;
+  --color-accent-2-soft: #e1faf8;
+
+  --color-danger: #e5484d;
+  --color-danger-soft: #fdecec;
+  --color-warning-soft: #fff4e0;
+
+  /* ---- Difficulty scale (rhythm-game convention) ---- */
+  --diff-easy: #4cd37a;
+  --diff-normal: #4a9de0;
+  --diff-hard: #f5a623;
+  --diff-expert: #f0526e;
+  --diff-master: #b15ce0;
+  --diff-append-bg: #2b2833;
+  --diff-append-fg: #00e6da;
+
+  /* ---- Unit tag colors (decorative, non-official) ---- */
+  --unit-vocaloid: #00b3ab;
+  --unit-light_music_club: #4caf50;
+  --unit-idol: #ff6fa5;
+  --unit-street: #ff7a3d;
+  --unit-theme_park: #f2b705;
+  --unit-school_refusal: #d63864;
+  --unit-other: #8b899a;
+  --unit-all: #6e6c7c;
+
+  /* ---- Typography ---- */
+  --font-display: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Sans", sans-serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* ---- Radii ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 1px 2px rgba(27, 26, 34, 0.06);
+  --shadow-md: 0 4px 16px rgba(27, 26, 34, 0.08);
+  --shadow-lg: 0 12px 32px rgba(27, 26, 34, 0.14);
+  --shadow-accent: 0 6px 20px rgba(104, 81, 240, 0.25);
+
+  /* ---- Layout ---- */
+  --header-height: 60px;
+  --player-height: 68px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --content-max-width: 1400px;
+
+  /* ---- Motion ---- */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+
+  /* ---- Z-index scale ---- */
+  --z-header: 30;
+  --z-panel: 25;
+  --z-player: 40;
+  --z-overlay: 50;
+  --z-dialog: 60;
+  --z-toast: 70;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Reserved: app intentionally stays light per spec (white base). */
+}
