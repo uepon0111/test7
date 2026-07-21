@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="no-referrer">
     <title>Sekai Music DB</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
@@ -461,7 +460,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 16px; 
+            gap: 16px;
         }
         .player-buttons button {
             background: transparent;
@@ -613,113 +612,6 @@
             .music-item .title { font-size: 11px; }
             .modal-content { width: 95%; height: 90vh; }
         }
-
-        /* Debug Panel */
-        .debug-panel {
-            position: fixed;
-            right: 16px;
-            bottom: 16px;
-            width: min(420px, calc(100vw - 32px));
-            max-height: 42vh;
-            background: rgba(15, 23, 42, 0.96);
-            color: #e2e8f0;
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            border-radius: 14px;
-            box-shadow: 0 16px 40px rgba(0,0,0,0.24);
-            z-index: 3000;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        .debug-panel.collapsed .debug-body,
-        .debug-panel.collapsed .debug-footer {
-            display: none;
-        }
-        .debug-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 10px 12px;
-            background: rgba(30, 41, 59, 0.95);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-        }
-        .debug-header strong {
-            font-size: 13px;
-            letter-spacing: .02em;
-        }
-        .debug-header .debug-actions {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        .debug-btn {
-            appearance: none;
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            background: rgba(15, 23, 42, 0.8);
-            color: #e2e8f0;
-            border-radius: 999px;
-            padding: 5px 10px;
-            font-size: 11px;
-            cursor: pointer;
-        }
-        .debug-btn:hover { background: rgba(30, 41, 59, 1); }
-        .debug-body {
-            padding: 10px 12px;
-            overflow: auto;
-            font-size: 11px;
-            line-height: 1.45;
-        }
-        .debug-row {
-            padding: 6px 0;
-            border-bottom: 1px dashed rgba(148, 163, 184, 0.18);
-            word-break: break-word;
-        }
-        .debug-row:last-child { border-bottom: none; }
-        .debug-ts {
-            color: #94a3b8;
-            margin-right: 8px;
-            white-space: nowrap;
-        }
-        .debug-tag {
-            display: inline-block;
-            min-width: 52px;
-            text-align: center;
-            font-weight: 700;
-            border-radius: 999px;
-            padding: 1px 7px;
-            margin-right: 8px;
-            background: rgba(148, 163, 184, 0.2);
-            color: #e2e8f0;
-        }
-        .debug-tag.ok { background: rgba(34, 197, 94, 0.2); color: #bbf7d0; }
-        .debug-tag.warn { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
-        .debug-tag.err { background: rgba(239, 68, 68, 0.2); color: #fecaca; }
-        .debug-footer {
-            padding: 10px 12px;
-            border-top: 1px solid rgba(148, 163, 184, 0.2);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            background: rgba(30, 41, 59, 0.92);
-        }
-        .debug-kv {
-            display: grid;
-            grid-template-columns: 90px 1fr;
-            gap: 6px 8px;
-            font-size: 11px;
-        }
-        .debug-kv .k { color: #94a3b8; }
-        .debug-kv .v { color: #e2e8f0; word-break: break-all; }
-        .debug-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-        .asset-link {
-            color: #67e8f9;
-            text-decoration: none;
-            word-break: break-all;
-        }
-        .asset-link:hover { text-decoration: underline; }
-
         @media (max-width: 480px) {
             .layout-1 .music-item img { width: 48px; height: 48px; margin-right: 12px; }
             .layout-3 { grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -780,7 +672,6 @@
     <!-- Sort Panel -->
     <div id="sort-panel" class="panel">
         <div class="sort-controls">
-            <!-- 初期値を公開日時順に設定 -->
             <select id="sort-key">
                 <option value="id">ID順</option>
                 <option value="title">タイトル（名前）順</option>
@@ -795,7 +686,6 @@
                 <option value="master">Master</option>
                 <option value="append">Append</option>
             </select>
-            <!-- アイコンを初期状態で降順（arrow_downward）に設定 -->
             <button class="icon-btn active" id="btn-sort-order" title="昇順/降順切り替え">
                 <span class="material-icons-round" id="sort-order-icon">arrow_downward</span>
             </button>
@@ -838,28 +728,6 @@
         </div>
     </div>
 
-
-    <!-- Debug Panel -->
-    <div id="debug-panel" class="debug-panel">
-        <div class="debug-header">
-            <strong>Debug Console</strong>
-            <div class="debug-actions">
-                <button class="debug-btn" id="dbg-toggle">折りたたみ</button>
-                <button class="debug-btn" id="dbg-run">再診断</button>
-                <button class="debug-btn" id="dbg-clear">消去</button>
-            </div>
-        </div>
-        <div class="debug-body" id="debug-body"></div>
-        <div class="debug-footer">
-            <div class="debug-kv">
-                <div class="k">ページ</div><div class="v debug-mono" id="dbg-page"></div>
-                <div class="k">選択曲</div><div class="v debug-mono" id="dbg-music"></div>
-                <div class="k">音声URL</div><div class="v debug-mono" id="dbg-audio"></div>
-                <div class="k">画像URL</div><div class="v debug-mono" id="dbg-image"></div>
-            </div>
-        </div>
-    </div>
-
     <script>
         const DB_BASE = 'https://sekai-world.github.io/sekai-master-db-diff';
         const ASSET_BASE = 'https://storage.sekai.best/sekai-jp-assets';
@@ -874,152 +742,7 @@
         let searchTerm = '';
         let activeTag = 'all';
         let activeWritten = 'all';
-
-        const DEBUG_MODE = true; // デバッグ版では常時表示
-        const debugState = {
-            entries: [],
-            lastSelectedMusic: null,
-            lastAudioUrl: '',
-            lastImageUrl: '',
-            lastFetches: [],
-            panelCollapsed: false
-        };
-
-        function tsNow() {
-            return new Date().toLocaleTimeString('ja-JP', { hour12: false });
-        }
-
-        function escapeHtml(s) {
-            return String(s)
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#39;');
-        }
-
-        function updateDebugMeta() {
-            const page = document.getElementById('dbg-page');
-            const music = document.getElementById('dbg-music');
-            const audioUrl = document.getElementById('dbg-audio');
-            const imageUrl = document.getElementById('dbg-image');
-            if (page) page.textContent = location.href;
-            if (music) music.textContent = debugState.lastSelectedMusic ? `${debugState.lastSelectedMusic.id} / ${debugState.lastSelectedMusic.title}` : '-';
-            if (audioUrl) audioUrl.innerHTML = debugState.lastAudioUrl ? `<a class="asset-link" href="${escapeHtml(debugState.lastAudioUrl)}" target="_blank" rel="noreferrer noopener">${escapeHtml(debugState.lastAudioUrl)}</a>` : '-';
-            if (imageUrl) imageUrl.innerHTML = debugState.lastImageUrl ? `<a class="asset-link" href="${escapeHtml(debugState.lastImageUrl)}" target="_blank" rel="noreferrer noopener">${escapeHtml(debugState.lastImageUrl)}</a>` : '-';
-        }
-
-        function logDebug(level, label, message, extra = '') {
-            const body = document.getElementById('debug-body');
-            const row = document.createElement('div');
-            row.className = 'debug-row';
-            const tagClass = level === 'ok' ? 'ok' : level === 'warn' ? 'warn' : level === 'err' ? 'err' : '';
-            row.innerHTML = `
-                <span class="debug-ts">${escapeHtml(tsNow())}</span>
-                <span class="debug-tag ${tagClass}">${escapeHtml(label)}</span>
-                <span>${escapeHtml(message)}${extra ? `<br><span class="debug-mono">${escapeHtml(extra)}</span>` : ''}</span>
-            `;
-            if (body) {
-                body.prepend(row);
-                while (body.children.length > 120) body.removeChild(body.lastElementChild);
-            }
-            debugState.entries.unshift({ level, label, message, extra, time: Date.now() });
-            if (level === 'err') console.error(`[${label}] ${message}`, extra);
-            else if (level === 'warn') console.warn(`[${label}] ${message}`, extra);
-            else console.log(`[${label}] ${message}`, extra);
-            updateDebugMeta();
-        }
-
-        async function probeUrl(url, label) {
-            try {
-                const res = await fetch(url, { method: 'GET', mode: 'cors', cache: 'no-store', credentials: 'omit' });
-                const ct = res.headers.get('content-type') || '-';
-                logDebug(res.ok ? 'ok' : 'warn', label, `${res.status} ${res.statusText}`, ct);
-                return res;
-            } catch (err) {
-                logDebug('err', label, 'Fetch failed', `${url}\n${err?.name || 'Error'}: ${err?.message || err}`);
-                return null;
-            }
-        }
-
-        function setResourceUrl(kind, url) {
-            if (kind === 'audio') debugState.lastAudioUrl = url;
-            if (kind === 'image') debugState.lastImageUrl = url;
-            updateDebugMeta();
-        }
-
-        function attachImageDebug(imgEl, url, label) {
-            setResourceUrl('image', url);
-            imgEl.setAttribute('referrerpolicy', 'no-referrer');
-            imgEl.addEventListener('load', () => logDebug('ok', label, 'Image loaded', url), { once: true });
-            imgEl.addEventListener('error', () => logDebug('err', label, 'Image error', url), { once: true });
-        }
-
-        function audioErrorToString(audioEl) {
-            const err = audioEl.error;
-            if (!err) return 'unknown';
-            const map = {
-                1: 'MEDIA_ERR_ABORTED',
-                2: 'MEDIA_ERR_NETWORK',
-                3: 'MEDIA_ERR_DECODE',
-                4: 'MEDIA_ERR_SRC_NOT_SUPPORTED'
-            };
-            return `${map[err.code] || 'MEDIA_ERR_UNKNOWN'} (${err.code})`;
-        }
-
-        function bindAudioDebug() {
-            const events = ['loadstart', 'loadedmetadata', 'loadeddata', 'canplay', 'canplaythrough', 'progress', 'stalled', 'suspend', 'waiting', 'playing', 'pause', 'ended', 'abort', 'emptied', 'seeking', 'seeked', 'durationchange', 'timeupdate', 'error'];
-            events.forEach(ev => {
-                audio.addEventListener(ev, () => {
-                    if (ev === 'error') {
-                        logDebug('err', 'AUDIO', `error: ${audioErrorToString(audio)}`, audio.src || '(no src)');
-                    } else if (ev === 'loadedmetadata') {
-                        logDebug('ok', 'AUDIO', `loadedmetadata duration=${isFinite(audio.duration) ? audio.duration.toFixed(2) : 'NaN'}`, audio.src || '(no src)');
-                    } else if (ev === 'playing') {
-                        logDebug('ok', 'AUDIO', `playing currentTime=${audio.currentTime.toFixed(2)}`, audio.src || '(no src)');
-                    } else if (ev === 'ended') {
-                        logDebug('warn', 'AUDIO', 'ended', audio.src || '(no src)');
-                    } else if (ev === 'stalled' || ev === 'waiting' || ev === 'abort' || ev === 'emptied' || ev === 'suspend') {
-                        logDebug('warn', 'AUDIO', ev, audio.src || '(no src)');
-                    }
-                });
-            });
-        }
-
-        async function fetchJson(name, url) {
-            logDebug('warn', 'FETCH', `request ${name}`, url);
-            try {
-                const res = await fetch(url, { cache: 'no-store', credentials: 'omit' });
-                logDebug(res.ok ? 'ok' : 'warn', 'FETCH', `${name} -> ${res.status} ${res.statusText}`, `${url}\ncontent-type=${res.headers.get('content-type') || '-'}`);
-                if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-                return await res.json();
-            } catch (err) {
-                logDebug('err', 'FETCH', `${name} failed`, `${url}\n${err?.name || 'Error'}: ${err?.message || err}`);
-                throw err;
-            }
-        }
-
-        function runDiagnostics() {
-            const checks = [];
-            if (currentMusic) {
-                const jacketUrl = getJacketUrl(currentMusic.id);
-                setResourceUrl('image', jacketUrl);
-                checks.push(probeUrl(jacketUrl, 'JACKET'));
-                const mVocals = vocalMap.get(currentMusic.id) || [];
-                if (mVocals[0]) {
-                    const audioUrl = `${ASSET_BASE}/music/long/${mVocals[0].assetbundleName}/${mVocals[0].assetbundleName}.mp3`;
-                    setResourceUrl('audio', audioUrl);
-                    checks.push(probeUrl(audioUrl, 'AUDIO'));
-                }
-            } else {
-                logDebug('warn', 'DIAG', '曲が未選択です');
-            }
-            checks.push(probeUrl(`${DB_BASE}/musics.json`, 'DB'));
-            Promise.allSettled(checks).then(() => logDebug('ok', 'DIAG', '診断完了'));
-        }
-
         let selectedChars = new Set();
-        // 初期状態を公開日時順(publishedAt)の降順(desc)に設定
         let sortKey = 'publishedAt';
         let sortOrder = 'desc';
         let sortDiff = 'master';
@@ -1054,13 +777,13 @@
         async function init() {
             try {
                 const results = await Promise.all([
-                    fetchJson('musics', `${DB_BASE}/musics.json`),
-                    fetchJson('musicDifficulties', `${DB_BASE}/musicDifficulties.json`),
-                    fetchJson('musicVocals', `${DB_BASE}/musicVocals.json`),
-                    fetchJson('gameCharacters', `${DB_BASE}/gameCharacters.json`),
-                    fetchJson('outsideCharacters', `${DB_BASE}/outsideCharacters.json`),
-                    fetchJson('musicTags', `${DB_BASE}/musicTags.json`),
-                    fetchJson('musicOriginals', `${DB_BASE}/musicOriginals.json`)
+                    fetch(`${DB_BASE}/musics.json`).then(r => r.json()),
+                    fetch(`${DB_BASE}/musicDifficulties.json`).then(r => r.json()),
+                    fetch(`${DB_BASE}/musicVocals.json`).then(r => r.json()),
+                    fetch(`${DB_BASE}/gameCharacters.json`).then(r => r.json()),
+                    fetch(`${DB_BASE}/outsideCharacters.json`).then(r => r.json()),
+                    fetch(`${DB_BASE}/musicTags.json`).then(r => r.json()),
+                    fetch(`${DB_BASE}/musicOriginals.json`).then(r => r.json())
                 ]);
 
                 [musics, difficulties, vocals, gameChars, outsideChars, tags, originals] = results;
@@ -1223,22 +946,6 @@
 
             // Audio Listeners
             setupAudioListeners();
-            bindAudioDebug();
-
-            // Debug Panel Wiring
-            document.getElementById('dbg-toggle').addEventListener('click', () => {
-                debugState.panelCollapsed = !debugState.panelCollapsed;
-                document.getElementById('debug-panel').classList.toggle('collapsed', debugState.panelCollapsed);
-                document.getElementById('dbg-toggle').textContent = debugState.panelCollapsed ? '展開' : '折りたたみ';
-            });
-            document.getElementById('dbg-clear').addEventListener('click', () => {
-                debugState.entries = [];
-                const body = document.getElementById('debug-body');
-                if (body) body.innerHTML = '';
-                logDebug('ok', 'DIAG', 'ログを消去しました');
-            });
-            document.getElementById('dbg-run').addEventListener('click', runDiagnostics);
-            logDebug('ok', 'BOOT', 'Debug UI ready');
         }
 
         // Logic Utils
@@ -1322,7 +1029,7 @@
                 el.className = 'music-item';
                 el.onclick = () => openDetail(m);
                 el.innerHTML = `
-                    <img src="${getJacketUrl(m.id)}" alt="jacket" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
+                    <img src="${getJacketUrl(m.id)}" alt="jacket" loading="lazy" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
                     <div class="info-container">
                         <div class="title">${m.title}</div>
                         <div class="meta">${getTagName(m.id)}</div>
@@ -1336,9 +1043,7 @@
         // Modal Logic
         function openDetail(music) {
             currentMusic = music;
-            debugState.lastSelectedMusic = music;
             document.getElementById('modal-title-top').textContent = music.title;
-            updateDebugMeta();
             const body = document.getElementById('modal-body-content');
             body.innerHTML = ''; // reset
 
@@ -1354,7 +1059,6 @@
             const img = document.createElement('img');
             img.className = 'detail-jacket';
             img.src = getJacketUrl(music.id);
-            attachImageDebug(img, img.src, 'DETAIL JACKET');
             img.onerror = () => { img.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; };
             imgCont.appendChild(img);
             body.appendChild(imgCont);
@@ -1401,19 +1105,10 @@
 
                 // ボーカル切替時
                 btn.onclick = () => {
-                    if (btn.classList.contains('active')) return;
-
                     vCont.querySelectorAll('.vocal-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     
-                    // 音声を強制停止し、再生時間を0:00にリセットする
-                    audio.pause();
-                    audio.currentTime = 0;
-                    
                     loadAudio(music, v, false);
-                    
-                    // UIを即座にリセット状態へ更新する
-                    syncPlayerUI();
                 };
                 vCont.appendChild(btn);
             });
@@ -1531,8 +1226,6 @@
             // 初回または別曲の選択時の自動読み込み
             if (mVocals.length > 0) {
                 const targetVocal = mVocals[0];
-                const expectedSrc = `${ASSET_BASE}/music/long/${targetVocal.assetbundleName}/${targetVocal.assetbundleName}.mp3`;
-                logDebug('warn', 'AUTO', '初回ボーカルを読み込み', expectedSrc);
                 if (!audio.src || !audio.src.includes(targetVocal.assetbundleName)) {
                     loadAudio(music, targetVocal, false);
                 }
@@ -1553,11 +1246,18 @@
             const isNewSrc = !audio.src.endsWith(vocal.assetbundleName + '.mp3');
             
             if (isNewSrc) {
+                audio.pause();
                 audio.src = url;
+                try {
+                    audio.currentTime = 0;
+                } catch (e) {}
                 audio.load();
+            } else if (audio.ended) {
+                audio.currentTime = skipSilence ? 8 : 0;
             }
 
             setupMediaSession(music, vocal);
+            syncPlayerUI(); // ボーカル切替時にも即座にUIを同期
 
             if (autoPlay) {
                 startPlay();
@@ -1565,22 +1265,33 @@
         }
 
         function startPlay() {
-            const doPlay = () => {
-                // スキップ判定（冒頭または再生完了後の頭出し）
-                if (skipSilence && (audio.currentTime < 0.5 || audio.ended)) {
+            const resetPositionIfNeeded = () => {
+                if (audio.ended || (audio.duration && audio.currentTime >= audio.duration - 0.5)) {
+                    audio.currentTime = skipSilence ? 8 : 0;
+                } else if (skipSilence && audio.currentTime < 0.5) {
                     audio.currentTime = 8;
-                } else if (audio.ended) {
-                    audio.currentTime = 0;
                 }
-                audio.play().catch(e => console.log('Playback prevented:', e));
             };
 
-            if (audio.readyState >= 1) { // メタデータ読み込み完了済み
+            const doPlay = () => {
+                resetPositionIfNeeded();
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        console.log('Playback prevented or interrupted:', e);
+                        syncPlayerUI();
+                    });
+                }
+            };
+
+            if (audio.readyState >= 1) {
                 doPlay();
-            } else { // メタデータ読み込み待機
-                // バックグラウンドでリソース解放された時のため、明示的にロードを開始
+            } else {
                 audio.load();
-                audio.addEventListener('loadedmetadata', doPlay, { once: true });
+                const onLoaded = () => {
+                    doPlay();
+                };
+                audio.addEventListener('loadedmetadata', onLoaded, { once: true });
             }
         }
 
@@ -1602,8 +1313,11 @@
                 if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
             });
             audio.addEventListener('ended', () => {
-                // 再生終了時：スキップ位置または最初へリセットし、再再生を可能にする
-                audio.currentTime = skipSilence ? 8 : 0;
+                try {
+                    audio.currentTime = skipSilence ? 8 : 0;
+                } catch (e) {
+                    console.error(e);
+                }
                 syncPlayerUI();
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.playbackState = 'paused';
@@ -1620,8 +1334,7 @@
                 updatePositionState();
             });
             audio.addEventListener('loadedmetadata', () => {
-                const dur = document.getElementById('time-duration');
-                if (dur) dur.textContent = formatTime(audio.duration);
+                syncPlayerUI();
                 updatePositionState();
             });
             audio.onerror = () => {
@@ -1701,19 +1414,8 @@
             }
         }
 
-        window.addEventListener('error', (e) => {
-            logDebug('err', 'WINDOW', e.message || 'error', e.filename ? `${e.filename}:${e.lineno}:${e.colno}` : '');
-        });
-        window.addEventListener('unhandledrejection', (e) => {
-            const reason = e.reason;
-            logDebug('err', 'PROMISE', reason?.message || String(reason), reason?.stack || '');
-        });
-
         // Start
-        window.addEventListener('DOMContentLoaded', () => {
-            logDebug('ok', 'BOOT', 'DOMContentLoaded');
-            init();
-        });
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
