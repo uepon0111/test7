@@ -272,6 +272,13 @@
             border-radius: var(--radius-sm);
             margin-bottom: 8px;
         }
+        .music-item .info-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
         .music-item .title {
             width: 100%;
             font-size: 14px;
@@ -296,15 +303,19 @@
             flex-direction: row;
             text-align: left;
             align-items: center;
-            padding: 16px;
+            padding: 12px 16px;
         }
         .layout-1 .music-item img {
-            width: 64px;
-            height: 64px;
+            width: 60px;
+            height: 60px;
             margin-bottom: 0;
             margin-right: 16px;
+            flex-shrink: 0;
         }
-        .layout-1 .music-item .title { font-size: 16px; }
+        .layout-1 .music-item .info-container {
+            align-items: flex-start;
+        }
+        .layout-1 .music-item .title { font-size: 15px; }
         
         .layout-3 { grid-template-columns: repeat(3, 1fr); }
         .layout-5 { grid-template-columns: repeat(5, 1fr); }
@@ -373,44 +384,63 @@
             text-align: center;
         }
         .detail-jacket {
-            width: 200px;
-            height: 200px;
+            width: 180px;
+            height: 180px;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-md);
             object-fit: cover;
         }
 
+        /* Expanded Vocal Selector (要件1対応) */
         .vocal-selector {
             display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 8px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
         }
         .vocal-btn {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 16px;
+            gap: 8px;
+            padding: 6px 12px;
             border: 1px solid var(--border-color);
-            border-radius: 24px;
-            background: var(--secondary-bg);
+            border-radius: 20px;
+            background: var(--primary-bg);
             cursor: pointer;
             transition: all 0.2s;
-            white-space: nowrap;
+            user-select: none;
+            color: var(--text-main);
         }
         .vocal-btn.active {
-            background: rgba(0, 188, 212, 0.1);
+            background: rgba(0, 188, 212, 0.12);
             border-color: var(--accent-color);
+            color: var(--accent-color);
+            font-weight: bold;
         }
-        .vocal-btn img {
+        .vocal-btn-icons {
+            display: flex;
+            align-items: center;
+        }
+        .vocal-btn-icons img {
             width: 24px;
             height: 24px;
             border-radius: 50%;
             object-fit: cover;
+            margin-left: -6px;
+            border: 1.5px solid var(--primary-bg);
+            background: var(--secondary-bg);
         }
-        .vocal-btn span {
-            font-size: 13px;
-            font-weight: 500;
+        .vocal-btn-icons img:first-child {
+            margin-left: 0;
+        }
+        .vocal-btn-label {
+            font-size: 12px;
+            white-space: nowrap;
         }
 
         .player-controls {
@@ -569,19 +599,21 @@
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Responsive Adjustments */
+        /* Responsive Adjustments (要件2対応) */
         @media (max-width: 768px) {
-            #btn-layout-5 { display: none !important; }
-            .layout-5 { grid-template-columns: repeat(3, 1fr); }
-            .layout-3 { gap: 8px; }
+            .layout-5 { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+            .layout-3 { grid-template-columns: repeat(3, 1fr); gap: 8px; }
             .music-item { padding: 8px; }
-            .music-item .title { font-size: 12px; }
-            .modal-content { width: 95%; height: 95vh; }
+            .music-item .title { font-size: 11px; }
+            .modal-content { width: 95%; height: 90vh; }
         }
         @media (max-width: 480px) {
-            .layout-3, .layout-5 { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            .layout-1 .music-item img { width: 48px; height: 48px; margin-right: 12px; }
+            .layout-3 { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            .layout-5 { grid-template-columns: repeat(5, 1fr); gap: 4px; }
             .music-item { padding: 6px; }
             .music-item .title { font-size: 10px; }
+            .music-item .meta { font-size: 9px; }
             .header-top { flex-wrap: wrap; }
             .search-bar { order: 1; width: 100%; min-width: 100%; }
             .controls { order: 2; width: 100%; justify-content: space-between; }
@@ -606,6 +638,7 @@
                 <button class="icon-btn" id="btn-filter" title="絞り込み"><span class="material-icons-round">filter_alt</span></button>
                 <button class="icon-btn" id="btn-sort" title="並び替え"><span class="material-icons-round">sort</span></button>
                 <div style="width: 1px; height: 24px; background: var(--border-color); margin: 0 4px;"></div>
+                <!-- 左から1列, 3列, 5列 (要件2) -->
                 <button class="icon-btn" id="btn-layout-1" title="1列表示"><span class="material-icons-round">view_list</span></button>
                 <button class="icon-btn active" id="btn-layout-3" title="3列表示"><span class="material-icons-round">view_module</span></button>
                 <button class="icon-btn" id="btn-layout-5" title="5列表示"><span class="material-icons-round">grid_view</span></button>
@@ -667,7 +700,7 @@
                 <button class="icon-btn" id="btn-close-modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-body" id="modal-body-content">
-                <!-- 要素はJSで順序通り生成・配置します -->
+                <!-- 要素は順序通り生成・配置されます -->
             </div>
         </div>
     </div>
@@ -705,15 +738,16 @@
         let searchTerm = '';
         let activeTag = 'all';
         let activeWritten = 'all';
-        let selectedChars = new Set(); // e.g., 'game_1', 'outside_3'
+        let selectedChars = new Set();
         let sortKey = 'id';
-        let sortOrder = 'asc'; // 'asc' or 'desc'
+        let sortOrder = 'asc';
         let sortDiff = 'master';
         let skipSilence = localStorage.getItem('skipSilence') === 'true';
 
         // Audio State
         const audio = new Audio();
         let currentMusicId = null;
+        let isSeeking = false; // シークバー操作中の制御フラグ
 
         const TAG_DEF = [
             { id: 'all', icon: 'apps', label: '全て' },
@@ -777,23 +811,22 @@
 
         // Setup UI Listeners & Filters
         function setupUI() {
-            // Layout
-            const layoutBtns = ['btn-layout-1', 'btn-layout-3', 'btn-layout-5'];
-            layoutBtns.forEach((id, idx) => {
-                document.getElementById(id).addEventListener('click', () => {
-                    layoutBtns.forEach(btn => document.getElementById(btn).classList.remove('active'));
-                    document.getElementById(id).classList.add('active');
+            // Layout (要件2: 1列, 3列, 5列)
+            const layoutBtns = [
+                { id: 'btn-layout-1', name: 'layout-1' },
+                { id: 'btn-layout-3', name: 'layout-3' },
+                { id: 'btn-layout-5', name: 'layout-5' }
+            ];
+            
+            layoutBtns.forEach(item => {
+                const btnEl = document.getElementById(item.id);
+                btnEl.addEventListener('click', () => {
+                    layoutBtns.forEach(b => document.getElementById(b.id).classList.remove('active'));
+                    btnEl.classList.add('active');
                     const list = document.getElementById('music-list');
-                    list.className = `list-container layout-${idx === 0 ? 1 : idx === 1 ? 3 : 5}`;
-                    currentLayout = `layout-${idx === 0 ? 1 : idx === 1 ? 3 : 5}`;
+                    list.className = `list-container ${item.name}`;
+                    currentLayout = item.name;
                 });
-            });
-
-            // Window resize logic for layout-5
-            window.addEventListener('resize', () => {
-                if (window.innerWidth <= 768) {
-                    if (currentLayout === 'layout-5') document.getElementById('btn-layout-3').click();
-                }
             });
 
             // Panels
@@ -847,7 +880,7 @@
                 const div = document.createElement('div');
                 div.className = 'char-item';
                 div.innerHTML = `
-                    <img src="${ASSET_BASE}/character/character_sd_l/chr_sp_${c.id}.png" alt="${c.givenName}" loading="lazy" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
+                    <img src="${ASSET_BASE}/character/character_sd_l/chr_sp_${c.id}.png" alt="${c.givenName || ''}" loading="lazy" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
                     <span>${c.firstName || ''}${c.givenName || ''}</span>
                 `;
                 div.onclick = () => toggleCharFilter(`game_${c.id}`, div);
@@ -886,7 +919,7 @@
                 sortDiff = e.target.value;
                 renderList();
             });
-            document.getElementById('btn-sort-order').addEventListener('click', (e) => {
+            document.getElementById('btn-sort-order').addEventListener('click', () => {
                 sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
                 document.getElementById('sort-order-icon').textContent = sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward';
                 renderList();
@@ -906,7 +939,7 @@
                 localStorage.setItem('skipSilence', skipSilence);
             });
 
-            // Audio Global Listeners
+            // Audio Listeners
             setupAudioListeners();
         }
 
@@ -923,7 +956,7 @@
         };
 
         const formatTime = (sec) => {
-            if (isNaN(sec)) return '0:00';
+            if (isNaN(sec) || !isFinite(sec)) return '0:00';
             const m = Math.floor(sec / 60);
             const s = Math.floor(sec % 60);
             return `${m}:${s.toString().padStart(2, '0')}`;
@@ -938,23 +971,19 @@
         // Render List
         function renderList() {
             let filtered = musics.filter(m => {
-                // Search
                 if (searchTerm) {
                     const s = searchTerm;
                     const matchText = [m.title, m.pronunciation, m.lyricist, m.composer, m.arranger].join(' ').toLowerCase();
                     if (!matchText.includes(s)) return false;
                 }
-                // Tag Filter
                 if (activeTag !== 'all') {
                     const mTags = tagMap.get(m.id) || [];
                     if (!mTags.includes(activeTag)) return false;
                 }
-                // Written Filter
                 if (activeWritten !== 'all') {
                     if (activeWritten === 'newly' && !m.isNewlyWrittenMusic) return false;
                     if (activeWritten === 'cover' && m.isNewlyWrittenMusic) return false;
                 }
-                // Char Filter (AND)
                 if (selectedChars.size > 0) {
                     const mVocals = vocalMap.get(m.id) || [];
                     const allCharsInMusic = new Set();
@@ -996,8 +1025,10 @@
                 el.onclick = () => openDetail(m);
                 el.innerHTML = `
                     <img src="${getJacketUrl(m.id)}" alt="jacket" loading="lazy" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
-                    <div class="title">${m.title}</div>
-                    <div class="meta">${getTagName(m.id)}</div>
+                    <div class="info-container">
+                        <div class="title">${m.title}</div>
+                        <div class="meta">${getTagName(m.id)}</div>
+                    </div>
                 `;
                 fragment.appendChild(el);
             });
@@ -1011,8 +1042,7 @@
             const body = document.getElementById('modal-body-content');
             body.innerHTML = ''; // reset
 
-            // Strict Ordering:
-            // 1. 楽曲タイトル (headerで対応済、body内にも指示通り配置)
+            // 1. 楽曲タイトル
             const h2 = document.createElement('h2');
             h2.style.margin = '0';
             h2.textContent = music.title;
@@ -1028,44 +1058,63 @@
             imgCont.appendChild(img);
             body.appendChild(imgCont);
 
-            // 3. ボーカル選択
+            // 3. ボーカル選択 (要件1: 視認性・領域改善)
             const vCont = document.createElement('div');
             vCont.className = 'vocal-selector';
             const mVocals = vocalMap.get(music.id) || [];
+            
             mVocals.forEach((v, i) => {
                 const btn = document.createElement('div');
-                btn.className = `vocal-btn ${i === 0 ? 'active' : ''}`;
+                const isCurrentVocal = audio.src.includes(v.assetbundleName);
+                btn.className = `vocal-btn ${isCurrentVocal || (i === 0 && !audio.src) ? 'active' : ''}`;
                 
+                const iconsContainer = document.createElement('div');
+                iconsContainer.className = 'vocal-btn-icons';
                 let vocalNames = [];
+
                 (v.characters || []).forEach(c => {
                     if (c.characterType === 'game_character') {
                         const gc = gameCharMap.get(c.characterId);
+                        const name = gc ? `${gc.firstName || ''}${gc.givenName || ''}` : 'Unknown';
+                        vocalNames.push(name);
+
                         const cImg = document.createElement('img');
                         cImg.src = `${ASSET_BASE}/character/character_sd_l/chr_sp_${c.characterId}.png`;
-                        cImg.title = `${gc?.firstName||''}${gc?.givenName||''}`;
-                        cImg.onerror = () => { cImg.style.display='none'; };
-                        btn.appendChild(cImg);
-                        vocalNames.push(cImg.title);
+                        cImg.title = name;
+                        cImg.onerror = () => { cImg.style.display = 'none'; };
+                        iconsContainer.appendChild(cImg);
                     } else {
                         const oc = outCharMap.get(c.characterId);
-                        const span = document.createElement('span');
-                        span.textContent = oc?.name || 'Unknown';
-                        btn.appendChild(span);
-                        vocalNames.push(span.textContent);
+                        const name = oc?.name || 'Unknown';
+                        vocalNames.push(name);
                     }
                 });
+
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'vocal-btn-label';
+                labelSpan.textContent = vocalNames.join(', ') || 'Vocal';
                 v.displayName = vocalNames.join(', ');
+
+                btn.appendChild(iconsContainer);
+                btn.appendChild(labelSpan);
 
                 btn.onclick = () => {
                     vCont.querySelectorAll('.vocal-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    loadAudio(music, v);
+                    
+                    // ボーカル切替時：再生中なら再生位置を継続して維持
+                    const isPlaying = !audio.paused;
+                    const pos = audio.currentTime;
+                    loadAudio(music, v, isPlaying);
+                    if (isPlaying) {
+                        audio.currentTime = pos;
+                    }
                 };
                 vCont.appendChild(btn);
             });
             body.appendChild(vCont);
 
-            // 4. 再生バー
+            // 4. 再生バー (要件3: ドラッグ中の挙動改善)
             const pCont = document.createElement('div');
             pCont.className = 'player-controls';
             pCont.innerHTML = `
@@ -1082,26 +1131,34 @@
             `;
             body.appendChild(pCont);
 
-            // Bind player events for this modal instance
+            // Bind player events
+            const seekBar = pCont.querySelector('#seek-bar');
             pCont.querySelector('#play-pause-btn').onclick = togglePlay;
             pCont.querySelector('#btn-back').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 5); };
             pCont.querySelector('#btn-forward').onclick = () => { if(audio.duration) audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); };
-            const seekBar = pCont.querySelector('#seek-bar');
-            seekBar.oninput = (e) => {
-                if (audio.duration) {
-                    audio.currentTime = (e.target.value / 100) * audio.duration;
+            
+            // シークバー制御のデバッグ (操作中に時間がジャンプしないよう修正)
+            const startSeek = () => { isSeeking = true; };
+            const finishSeek = () => {
+                if (isSeeking && audio.duration) {
+                    audio.currentTime = (seekBar.value / 100) * audio.duration;
+                    isSeeking = false;
                 }
             };
-            // sync initial UI if same song is playing
-            syncPlayerUI();
+            seekBar.addEventListener('mousedown', startSeek);
+            seekBar.addEventListener('touchstart', startSeek, { passive: true });
+            seekBar.addEventListener('input', (e) => {
+                if (audio.duration) {
+                    const time = (e.target.value / 100) * audio.duration;
+                    const cur = document.getElementById('time-current');
+                    if (cur) cur.textContent = formatTime(time);
+                }
+            });
+            seekBar.addEventListener('change', finishSeek);
+            seekBar.addEventListener('mouseup', finishSeek);
+            seekBar.addEventListener('touchend', finishSeek);
 
-            // 5. 楽曲id
-            // 6. 楽曲タイトル・読み方
-            // 7. ユニットタグ
-            // 8. 作詞
-            // 9. 作曲
-            // 10. 編曲
-            // 11. 公開日時
+            // 5~11. メタ情報一覧
             const infoCont = document.createElement('div');
             infoCont.className = 'info-list';
             const infos = [
@@ -1130,7 +1187,6 @@
                                   <div class="info-value"><a href="${origLink}" target="_blank" class="link-btn" id="orig-video-link"><span class="material-icons-round">open_in_new</span>YouTube</a></div>`;
                 body.appendChild(lRow);
                 
-                // Confirm before leaving
                 setTimeout(() => {
                     const lNode = document.getElementById('orig-video-link');
                     if(lNode) {
@@ -1159,13 +1215,14 @@
             tableCont.innerHTML = tableHTML;
             body.appendChild(tableCont);
 
-            // Show modal
+            // Show modal & Sync UI
             document.getElementById('detail-modal').classList.add('show');
+            syncPlayerUI();
             
-            // Auto load first vocal if source is different
+            // 初回または別曲の選択時の自動読み込み
             if (mVocals.length > 0) {
                 const expectedSrc = `${ASSET_BASE}/music/long/${mVocals[0].assetbundleName}/${mVocals[0].assetbundleName}.mp3`;
-                if (audio.src !== expectedSrc) {
+                if (!audio.src || (audio.src !== expectedSrc && !audio.src.includes(music.id))) {
                     loadAudio(music, mVocals[0], false);
                 }
             }
@@ -1173,7 +1230,6 @@
 
         document.getElementById('btn-close-modal').addEventListener('click', () => {
             document.getElementById('detail-modal').classList.remove('show');
-            // Do not stop audio to allow background playback
         });
 
         // Audio System
@@ -1184,54 +1240,61 @@
                 audio.load();
             }
             setupMediaSession(music, vocal);
-            if (autoPlay) audio.play().catch(e=>console.log(e));
+            if (autoPlay) {
+                audio.play().catch(e => console.log('Playback prevented:', e));
+            }
         }
 
         function togglePlay() {
             if (audio.paused) {
-                if (audio.currentTime === 0 && skipSilence) {
+                if (audio.currentTime < 0.5 && skipSilence) {
                     audio.currentTime = 8;
                 }
-                audio.play().catch(e => console.log('Playback prevented', e));
+                audio.play().catch(e => console.log('Playback prevented:', e));
             } else {
                 audio.pause();
             }
         }
 
         function setupAudioListeners() {
-            audio.addEventListener('play', () => {
-                const i = document.getElementById('play-icon');
-                if(i) i.textContent = 'pause';
-            });
-            audio.addEventListener('pause', () => {
-                const i = document.getElementById('play-icon');
-                if(i) i.textContent = 'play_arrow';
-            });
+            audio.addEventListener('play', syncPlayerUI);
+            audio.addEventListener('pause', syncPlayerUI);
             audio.addEventListener('timeupdate', () => {
+                if (isSeeking) return; // シーク操作中は描画更新を止める
                 const cur = document.getElementById('time-current');
                 const bar = document.getElementById('seek-bar');
                 if (cur && bar && audio.duration) {
                     cur.textContent = formatTime(audio.currentTime);
                     bar.value = (audio.currentTime / audio.duration) * 100;
                 }
+                if ('mediaSession' in navigator && audio.duration) {
+                    try {
+                        navigator.mediaSession.setPositionState({
+                            duration: audio.duration,
+                            playbackRate: audio.playbackRate,
+                            position: audio.currentTime
+                        });
+                    } catch(e) {}
+                }
             });
             audio.addEventListener('loadedmetadata', () => {
                 const dur = document.getElementById('time-duration');
                 if (dur) dur.textContent = formatTime(audio.duration);
             });
+            audio.onerror = () => {
+                syncPlayerUI();
+            };
         }
 
         function syncPlayerUI() {
             const i = document.getElementById('play-icon');
-            if(i) i.textContent = audio.paused ? 'play_arrow' : 'pause';
+            if (i) i.textContent = audio.paused ? 'play_arrow' : 'pause';
             const cur = document.getElementById('time-current');
             const dur = document.getElementById('time-duration');
             const bar = document.getElementById('seek-bar');
-            if(audio.readyState >= 1) {
-                if(dur) dur.textContent = formatTime(audio.duration);
-                if(cur) cur.textContent = formatTime(audio.currentTime);
-                if(bar && audio.duration) bar.value = (audio.currentTime / audio.duration) * 100;
-            }
+            if (dur && audio.duration) dur.textContent = formatTime(audio.duration);
+            if (cur) cur.textContent = formatTime(audio.currentTime);
+            if (bar && audio.duration && !isSeeking) bar.value = (audio.currentTime / audio.duration) * 100;
         }
 
         function setupMediaSession(music, vocal) {
