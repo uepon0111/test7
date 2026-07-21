@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 追加: 外部リソース取得時のリファラー起因のCORSエラーを防ぐ -->
+    <meta name="referrer" content="no-referrer">
     <title>Sekai Music DB</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
@@ -729,6 +731,18 @@
     </div>
 
     <script>
+        // 追加: 画像取得失敗時にキャッシュバスターを付加して1度だけ再試行するCORS対策用関数
+        function handleImageError(img) {
+            if (!img.dataset.retried) {
+                img.dataset.retried = 'true';
+                const url = new URL(img.src, window.location.href);
+                url.searchParams.set('t', Date.now());
+                img.src = url.toString();
+            } else {
+                img.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+            }
+        }
+
         const DB_BASE = 'https://sekai-world.github.io/sekai-master-db-diff';
         const ASSET_BASE = 'https://storage.sekai.best/sekai-jp-assets';
 
@@ -753,6 +767,7 @@
         let currentMusic = null;
         let currentVocal = null;
         let isSeeking = false; 
+        let audioRetryCount = 0; // 追加: 再生失敗回数を記録しリトライを制御
 
         const TAG_DEF = [
             { id: 'all', icon: 'apps', label: '全て' },
@@ -885,7 +900,7 @@
                 const div = document.createElement('div');
                 div.className = 'char-item';
                 div.innerHTML = `
-                    <img src="${ASSET_BASE}/character/character_sd_l/chr_sp_${c.id}.png" alt="${c.givenName || ''}" loading="lazy" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
+                    <img src="${ASSET_BASE}/character/character_sd_l/chr_sp_${c.id}.png" alt="${c.givenName || ''}" loading="lazy" onerror="handleImageError(this)">
                     <span>${c.firstName || ''}${c.givenName || ''}</span>
                 `;
                 div.onclick = () => toggleCharFilter(`game_${c.id}`, div);
@@ -972,6 +987,9 @@
             const tagId = mTags.find(t => t !== 'all') || 'other';
             return TAG_DEF.find(t => t.id === tagId)?.label || 'その他';
         };
+        
+        // Audio Base URL 取得ヘルパー
+        const getAudioBaseUrl = (vocal) => `${ASSET_BASE}/music/long/${vocal.assetbundleName}/${vocal.assetbundleName}.mp3`;
 
         // Render List
         function renderList() {
@@ -1029,7 +1047,7 @@
                 el.className = 'music-item';
                 el.onclick = () => openDetail(m);
                 el.innerHTML = `
-                    <img src="${getJacketUrl(m.id)}" alt="jacket" loading="lazy" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
+                    <img src="${getJacketUrl(m.id)}" alt="jacket" loading="lazy" onerror="handleImageError(this)">
                     <div class="info-container">
                         <div class="title">${m.title}</div>
                         <div class="meta">${getTagName(m.id)}</div>
@@ -1059,7 +1077,7 @@
             const img = document.createElement('img');
             img.className = 'detail-jacket';
             img.src = getJacketUrl(music.id);
-            img.onerror = () => { img.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; };
+            img.onerror = function() { handleImageError(this); };
             imgCont.appendChild(img);
             body.appendChild(imgCont);
 
@@ -1086,7 +1104,16 @@
                         const cImg = document.createElement('img');
                         cImg.src = `${ASSET_BASE}/character/character_sd_l/chr_sp_${c.characterId}.png`;
                         cImg.title = name;
-                        cImg.onerror = () => { cImg.style.display = 'none'; };
+                        cImg.onerror = function() {
+                            if (!this.dataset.retried) {
+                                this.dataset.retried = 'true';
+                                const url = new URL(this.src, window.location.href);
+                                url.searchParams.set('t', Date.now());
+                                this.src = url.toString();
+                            } else {
+                                this.style.display = 'none';
+                            }
+                        };
                         iconsContainer.appendChild(cImg);
                     } else {
                         const oc = outCharMap.get(c.characterId);
@@ -1226,7 +1253,8 @@
             // 初回または別曲の選択時の自動読み込み
             if (mVocals.length > 0) {
                 const targetVocal = mVocals[0];
-                if (!audio.src || !audio.src.includes(targetVocal.assetbundleName)) {
+                const targetUrl = getAudioBaseUrl(targetVocal);
+                if (!audio.src || (audio.src.split('?')[0] !== targetUrl)) {
                     loadAudio(music, targetVocal, false);
                 }
             }
@@ -1242,18 +1270,22 @@
         function loadAudio(music, vocal, autoPlay = false) {
             currentMusic = music;
             currentVocal = vocal;
-            const url = `${ASSET_BASE}/music/long/${vocal.assetbundleName}/${vocal.assetbundleName}.mp3`;
-            const isNewSrc = !audio.src.endsWith(vocal.assetbundleName + '.mp3');
+            audioRetryCount = 0; // リセット
+            const baseUrl = getAudioBaseUrl(vocal);
+            
+            // クエリパラメータを除外したベースURLで比較し、同一曲での不要なリロードを回避
+            const currentUrl = audio.src ? audio.src.split('?')[0] : '';
+            const isNewSrc = currentUrl !== baseUrl;
             
             if (isNewSrc) {
                 audio.pause();
-                audio.src = url;
+                audio.src = baseUrl;
                 try {
                     audio.currentTime = 0;
                 } catch (e) {}
                 audio.load();
             } else if (audio.ended) {
-                try { audio.currentTime = skipSilence ? 8 : 0; } catch (e) {}
+                audio.currentTime = skipSilence ? 8 : 0;
             }
 
             setupMediaSession(music, vocal);
@@ -1266,38 +1298,57 @@
 
         function startPlay() {
             const resetPositionIfNeeded = () => {
-                try {
-                    if (audio.ended || (audio.duration && audio.currentTime >= audio.duration - 0.5)) {
-                        audio.currentTime = skipSilence ? 8 : 0;
-                    } else if (skipSilence && audio.currentTime < 0.5) {
-                        audio.currentTime = 8;
-                    }
-                } catch (e) {
-                    // メタデータ未ロード時などの例外は無視
+                if (audio.ended || (audio.duration && audio.currentTime >= audio.duration - 0.5)) {
+                    audio.currentTime = skipSilence ? 8 : 0;
+                } else if (skipSilence && audio.currentTime < 0.5) {
+                    audio.currentTime = 8;
                 }
             };
 
-            resetPositionIfNeeded();
-
-            const playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(e => {
-                    console.log('Playback prevented or interrupted:', e);
-                    // バックグラウンド等でリソースが解放された場合のエラー対策
-                    // NotAllowedError (自動再生制限) 以外なら強制リロードを試みる
-                    if (e.name !== 'NotAllowedError') {
-                        audio.load();
-                        const retryPromise = audio.play();
-                        if (retryPromise !== undefined) {
-                            retryPromise.catch(err => {
-                                console.error('Retry failed:', err);
-                                syncPlayerUI();
-                            });
+            const doPlay = () => {
+                resetPositionIfNeeded();
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        audioRetryCount = 0; // 成功したらリトライカウンタをリセット
+                    }).catch(e => {
+                        console.log('Playback prevented or interrupted:', e);
+                        // ユーザーの操作が必須な場合（NotAllowedError）以外でエラーが出た際、リソース解放対策としてURLにタイムスタンプを付与してリロード
+                        if (e.name !== 'NotAllowedError' && audioRetryCount < 2 && currentVocal) {
+                            audioRetryCount++;
+                            console.log(`Retrying audio playback (Attempt ${audioRetryCount})...`);
+                            const baseUrl = getAudioBaseUrl(currentVocal);
+                            const savedTime = isFinite(audio.currentTime) ? audio.currentTime : 0;
+                            
+                            audio.src = `${baseUrl}?t=${Date.now()}`;
+                            audio.load();
+                            
+                            const onCanPlay = () => {
+                                if (savedTime > 0) audio.currentTime = savedTime;
+                                const retryPromise = audio.play();
+                                if (retryPromise !== undefined) {
+                                    retryPromise.catch(err => {
+                                        console.error('Retry playback failed:', err);
+                                        syncPlayerUI();
+                                    });
+                                }
+                            };
+                            audio.addEventListener('canplay', onCanPlay, { once: true });
+                        } else {
+                            syncPlayerUI();
                         }
-                    } else {
-                        syncPlayerUI();
-                    }
-                });
+                    });
+                }
+            };
+
+            if (audio.readyState >= 1) {
+                doPlay();
+            } else {
+                audio.load();
+                const onLoaded = () => {
+                    doPlay();
+                };
+                audio.addEventListener('loadedmetadata', onLoaded, { once: true });
             }
         }
 
@@ -1340,15 +1391,36 @@
                 updatePositionState();
             });
             audio.addEventListener('loadedmetadata', () => {
-                // 初回ロード時にも無音スキップを反映
-                if (skipSilence && audio.currentTime < 0.5) {
-                    try { audio.currentTime = 8; } catch (e) {}
-                }
                 syncPlayerUI();
                 updatePositionState();
             });
+            
+            // オーディオ取得・ネットワークエラー時の自動復旧
             audio.onerror = () => {
-                syncPlayerUI();
+                console.error("Audio error encountered:", audio.error);
+                if (audioRetryCount < 2 && currentVocal) {
+                    audioRetryCount++;
+                    const baseUrl = getAudioBaseUrl(currentVocal);
+                    const savedTime = isFinite(audio.currentTime) ? audio.currentTime : 0;
+                    const playIconState = document.getElementById('play-icon')?.textContent === 'pause';
+                    
+                    audio.src = `${baseUrl}?t=${Date.now()}`;
+                    audio.load();
+                    
+                    const onCanPlay = () => {
+                        if (savedTime > 0) audio.currentTime = savedTime;
+                        // エラー直前まで再生されていた場合は再開する
+                        if (playIconState) {
+                            const retryPromise = audio.play();
+                            if (retryPromise !== undefined) {
+                                retryPromise.catch(e => console.error(e));
+                            }
+                        }
+                    };
+                    audio.addEventListener('canplay', onCanPlay, { once: true });
+                } else {
+                    syncPlayerUI();
+                }
             };
         }
 
