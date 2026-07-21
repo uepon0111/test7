@@ -392,7 +392,6 @@
             object-fit: cover;
         }
 
-        /* ボーカル選択欄の修正：flex-shrink:0 とスクロール設定で潰れを完全に解消 */
         .vocal-selector {
             display: flex;
             flex-wrap: wrap;
@@ -461,7 +460,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 24px;
+            gap: 16px; /* ボタン追加に伴い、狭い画面でも収まるよう24pxから16pxに変更 */
         }
         .player-buttons button {
             background: transparent;
@@ -1104,13 +1103,12 @@
                 btn.appendChild(iconsContainer);
                 btn.appendChild(labelSpan);
 
-                // ボーカル切替時：再生状態を引き継ぎつつロード
+                // ボーカル切替時：自動再生を防ぐため常にfalseを渡す
                 btn.onclick = () => {
                     vCont.querySelectorAll('.vocal-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     
-                    const isPlaying = !audio.paused;
-                    loadAudio(music, v, isPlaying);
+                    loadAudio(music, v, false);
                 };
                 vCont.appendChild(btn);
             });
@@ -1126,9 +1124,11 @@
                     <span id="time-duration">0:00</span>
                 </div>
                 <div class="player-buttons">
-                    <button id="btn-back"><span class="material-icons-round">replay_5</span></button>
+                    <button id="btn-back-10" title="10秒戻る"><span class="material-icons-round">replay_10</span></button>
+                    <button id="btn-back-5" title="5秒戻る"><span class="material-icons-round">replay_5</span></button>
                     <button id="play-pause-btn"><span class="material-icons-round" id="play-icon">play_arrow</span></button>
-                    <button id="btn-forward"><span class="material-icons-round">forward_5</span></button>
+                    <button id="btn-forward-5" title="5秒進む"><span class="material-icons-round">forward_5</span></button>
+                    <button id="btn-forward-10" title="10秒進む"><span class="material-icons-round">forward_10</span></button>
                 </div>
             `;
             body.appendChild(pCont);
@@ -1136,8 +1136,10 @@
             // Bind player events
             const seekBar = pCont.querySelector('#seek-bar');
             pCont.querySelector('#play-pause-btn').onclick = togglePlay;
-            pCont.querySelector('#btn-back').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 5); updatePositionState(); };
-            pCont.querySelector('#btn-forward').onclick = () => { if(audio.duration) audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); updatePositionState(); };
+            pCont.querySelector('#btn-back-10').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 10); updatePositionState(); };
+            pCont.querySelector('#btn-back-5').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 5); updatePositionState(); };
+            pCont.querySelector('#btn-forward-5').onclick = () => { if(audio.duration) audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); updatePositionState(); };
+            pCont.querySelector('#btn-forward-10').onclick = () => { if(audio.duration) audio.currentTime = Math.min(audio.duration, audio.currentTime + 10); updatePositionState(); };
             
             const startSeek = () => { isSeeking = true; };
             const finishSeek = () => {
@@ -1270,6 +1272,8 @@
             if (audio.readyState >= 1) { // メタデータ読み込み完了済み
                 doPlay();
             } else { // メタデータ読み込み待機
+                // バックグラウンドでリソース解放された時のため、明示的にロードを開始
+                audio.load();
                 audio.addEventListener('loadedmetadata', doPlay, { once: true });
             }
         }
