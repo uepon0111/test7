@@ -382,6 +382,7 @@
         /* Detail Elements */
         .detail-jacket-container {
             text-align: center;
+            flex-shrink: 0;
         }
         .detail-jacket {
             width: 180px;
@@ -391,17 +392,19 @@
             object-fit: cover;
         }
 
-        /* ボーカル選択欄の修正：max-height制限を撤廃して高さを確保 */
+        /* ボーカル選択欄の修正：flex-shrink:0 とスクロール設定で潰れを完全に解消 */
         .vocal-selector {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            max-height: none; 
+            max-height: 180px; 
             overflow-y: auto;
-            padding: 8px;
+            padding: 10px;
             background: var(--secondary-bg);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
+            flex-shrink: 0;
+            width: 100%;
         }
         .vocal-btn {
             display: inline-flex;
@@ -415,6 +418,8 @@
             transition: all 0.2s;
             user-select: none;
             color: var(--text-main);
+            flex-shrink: 0;
+            min-height: 36px;
         }
         .vocal-btn.active {
             background: rgba(0, 188, 212, 0.12);
@@ -450,6 +455,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            flex-shrink: 0;
         }
         .player-buttons {
             display: flex;
@@ -745,7 +751,8 @@
 
         // Audio State
         const audio = new Audio();
-        let currentMusicId = null;
+        let currentMusic = null;
+        let currentVocal = null;
         let isSeeking = false; 
 
         const TAG_DEF = [
@@ -1036,7 +1043,7 @@
 
         // Modal Logic
         function openDetail(music) {
-            currentMusicId = music.id;
+            currentMusic = music;
             document.getElementById('modal-title-top').textContent = music.title;
             const body = document.getElementById('modal-body-content');
             body.innerHTML = ''; // reset
@@ -1065,7 +1072,7 @@
             mVocals.forEach((v, i) => {
                 const btn = document.createElement('div');
                 const isCurrentVocal = audio.src.includes(v.assetbundleName);
-                btn.className = `vocal-btn ${isCurrentVocal || (i === 0 && !audio.src) ? 'active' : ''}`;
+                btn.className = `vocal-btn ${isCurrentVocal || (i === 0 && !audio.src.includes(music.id)) ? 'active' : ''}`;
                 
                 const iconsContainer = document.createElement('div');
                 iconsContainer.className = 'vocal-btn-icons';
@@ -1097,7 +1104,7 @@
                 btn.appendChild(iconsContainer);
                 btn.appendChild(labelSpan);
 
-                // ボーカル切替時の処理を修正（最初から再生）
+                // ボーカル切替時：再生状態を引き継ぎつつロード
                 btn.onclick = () => {
                     vCont.querySelectorAll('.vocal-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
@@ -1129,14 +1136,15 @@
             // Bind player events
             const seekBar = pCont.querySelector('#seek-bar');
             pCont.querySelector('#play-pause-btn').onclick = togglePlay;
-            pCont.querySelector('#btn-back').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 5); };
-            pCont.querySelector('#btn-forward').onclick = () => { if(audio.duration) audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); };
+            pCont.querySelector('#btn-back').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 5); updatePositionState(); };
+            pCont.querySelector('#btn-forward').onclick = () => { if(audio.duration) audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); updatePositionState(); };
             
             const startSeek = () => { isSeeking = true; };
             const finishSeek = () => {
                 if (isSeeking && audio.duration) {
                     audio.currentTime = (seekBar.value / 100) * audio.duration;
                     isSeeking = false;
+                    updatePositionState();
                 }
             };
             seekBar.addEventListener('mousedown', startSeek);
@@ -1215,67 +1223,96 @@
             
             // 初回または別曲の選択時の自動読み込み
             if (mVocals.length > 0) {
-                const expectedSrc = `${ASSET_BASE}/music/long/${mVocals[0].assetbundleName}/${mVocals[0].assetbundleName}.mp3`;
-                if (!audio.src || (audio.src !== expectedSrc && !audio.src.includes(music.id))) {
-                    loadAudio(music, mVocals[0], false);
+                const targetVocal = mVocals[0];
+                const expectedSrc = `${ASSET_BASE}/music/long/${targetVocal.assetbundleName}/${targetVocal.assetbundleName}.mp3`;
+                if (!audio.src || !audio.src.includes(targetVocal.assetbundleName)) {
+                    loadAudio(music, targetVocal, false);
                 }
             }
         }
 
-        // 閉じるボタンのイベントに音声停止を追加
+        // 閉じるボタンのイベント
         document.getElementById('btn-close-modal').addEventListener('click', () => {
             document.getElementById('detail-modal').classList.remove('show');
-            audio.pause(); // 閉じた際に再生を停止させる
+            audio.pause();
         });
 
         // Audio System
         function loadAudio(music, vocal, autoPlay = false) {
+            currentMusic = music;
+            currentVocal = vocal;
             const url = `${ASSET_BASE}/music/long/${vocal.assetbundleName}/${vocal.assetbundleName}.mp3`;
-            if (audio.src !== url) {
+            const isNewSrc = !audio.src.endsWith(vocal.assetbundleName + '.mp3');
+            
+            if (isNewSrc) {
                 audio.src = url;
-                audio.load(); // ソース変更時に自動的にcurrentTimeが0に戻ります
+                audio.load();
             }
+
             setupMediaSession(music, vocal);
+
             if (autoPlay) {
+                startPlay();
+            }
+        }
+
+        function startPlay() {
+            const doPlay = () => {
+                // スキップ判定（冒頭または再生完了後の頭出し）
+                if (skipSilence && (audio.currentTime < 0.5 || audio.ended)) {
+                    audio.currentTime = 8;
+                } else if (audio.ended) {
+                    audio.currentTime = 0;
+                }
                 audio.play().catch(e => console.log('Playback prevented:', e));
+            };
+
+            if (audio.readyState >= 1) { // メタデータ読み込み完了済み
+                doPlay();
+            } else { // メタデータ読み込み待機
+                audio.addEventListener('loadedmetadata', doPlay, { once: true });
             }
         }
 
         function togglePlay() {
             if (audio.paused) {
-                if (audio.currentTime < 0.5 && skipSilence) {
-                    audio.currentTime = 8;
-                }
-                audio.play().catch(e => console.log('Playback prevented:', e));
+                startPlay();
             } else {
                 audio.pause();
             }
         }
 
         function setupAudioListeners() {
-            audio.addEventListener('play', syncPlayerUI);
-            audio.addEventListener('pause', syncPlayerUI);
+            audio.addEventListener('play', () => {
+                syncPlayerUI();
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+            });
+            audio.addEventListener('pause', () => {
+                syncPlayerUI();
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+            });
+            audio.addEventListener('ended', () => {
+                // 再生終了時：スキップ位置または最初へリセットし、再再生を可能にする
+                audio.currentTime = skipSilence ? 8 : 0;
+                syncPlayerUI();
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'paused';
+                }
+            });
             audio.addEventListener('timeupdate', () => {
-                if (isSeeking) return; // シーク操作中は描画更新を止める
+                if (isSeeking) return;
                 const cur = document.getElementById('time-current');
                 const bar = document.getElementById('seek-bar');
                 if (cur && bar && audio.duration) {
                     cur.textContent = formatTime(audio.currentTime);
                     bar.value = (audio.currentTime / audio.duration) * 100;
                 }
-                if ('mediaSession' in navigator && audio.duration) {
-                    try {
-                        navigator.mediaSession.setPositionState({
-                            duration: audio.duration,
-                            playbackRate: audio.playbackRate,
-                            position: audio.currentTime
-                        });
-                    } catch(e) {}
-                }
+                updatePositionState();
             });
             audio.addEventListener('loadedmetadata', () => {
                 const dur = document.getElementById('time-duration');
                 if (dur) dur.textContent = formatTime(audio.duration);
+                updatePositionState();
             });
             audio.onerror = () => {
                 syncPlayerUI();
@@ -1293,6 +1330,22 @@
             if (bar && audio.duration && !isSeeking) bar.value = (audio.currentTime / audio.duration) * 100;
         }
 
+        function updatePositionState() {
+            if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+                if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+                    try {
+                        navigator.mediaSession.setPositionState({
+                            duration: audio.duration,
+                            playbackRate: audio.playbackRate || 1.0,
+                            position: Math.min(audio.currentTime, audio.duration)
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            }
+        }
+
         function setupMediaSession(music, vocal) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -1303,10 +1356,38 @@
                         { src: getJacketUrl(music.id), sizes: '512x512', type: 'image/png' }
                     ]
                 });
-                navigator.mediaSession.setActionHandler('play', () => togglePlay());
-                navigator.mediaSession.setActionHandler('pause', () => togglePlay());
-                navigator.mediaSession.setActionHandler('seekbackward', () => { audio.currentTime = Math.max(0, audio.currentTime - 5); });
-                navigator.mediaSession.setActionHandler('seekforward', () => { if(audio.duration) audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); });
+
+                const actionHandlers = [
+                    ['play', () => startPlay()],
+                    ['pause', () => audio.pause()],
+                    ['seekbackward', (details) => {
+                        const skipTime = details.seekOffset || 5;
+                        audio.currentTime = Math.max(audio.currentTime - skipTime, 0);
+                        updatePositionState();
+                    }],
+                    ['seekforward', (details) => {
+                        const skipTime = details.seekOffset || 5;
+                        if (audio.duration) {
+                            audio.currentTime = Math.min(audio.currentTime + skipTime, audio.duration);
+                        }
+                        updatePositionState();
+                    }],
+                    ['seekto', (details) => {
+                        if (details.seekTime !== undefined && audio.duration) {
+                            audio.currentTime = Math.min(Math.max(details.seekTime, 0), audio.duration);
+                            updatePositionState();
+                        }
+                    }]
+                ];
+
+                for (const [action, handler] of actionHandlers) {
+                    try {
+                        navigator.mediaSession.setActionHandler(action, handler);
+                    } catch (error) {
+                        console.log(`The media session action "${action}" is not supported yet.`);
+                    }
+                }
+                updatePositionState();
             }
         }
 
