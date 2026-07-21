@@ -391,12 +391,12 @@
             object-fit: cover;
         }
 
-        /* Expanded Vocal Selector (要件1対応) */
+        /* ボーカル選択欄の修正：max-height制限を撤廃して高さを確保 */
         .vocal-selector {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            max-height: 180px;
+            max-height: none; 
             overflow-y: auto;
             padding: 8px;
             background: var(--secondary-bg);
@@ -599,7 +599,7 @@
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Responsive Adjustments (要件2対応) */
+        /* Responsive Adjustments */
         @media (max-width: 768px) {
             .layout-5 { grid-template-columns: repeat(5, 1fr); gap: 6px; }
             .layout-3 { grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -638,7 +638,6 @@
                 <button class="icon-btn" id="btn-filter" title="絞り込み"><span class="material-icons-round">filter_alt</span></button>
                 <button class="icon-btn" id="btn-sort" title="並び替え"><span class="material-icons-round">sort</span></button>
                 <div style="width: 1px; height: 24px; background: var(--border-color); margin: 0 4px;"></div>
-                <!-- 左から1列, 3列, 5列 (要件2) -->
                 <button class="icon-btn" id="btn-layout-1" title="1列表示"><span class="material-icons-round">view_list</span></button>
                 <button class="icon-btn active" id="btn-layout-3" title="3列表示"><span class="material-icons-round">view_module</span></button>
                 <button class="icon-btn" id="btn-layout-5" title="5列表示"><span class="material-icons-round">grid_view</span></button>
@@ -747,7 +746,7 @@
         // Audio State
         const audio = new Audio();
         let currentMusicId = null;
-        let isSeeking = false; // シークバー操作中の制御フラグ
+        let isSeeking = false; 
 
         const TAG_DEF = [
             { id: 'all', icon: 'apps', label: '全て' },
@@ -811,7 +810,7 @@
 
         // Setup UI Listeners & Filters
         function setupUI() {
-            // Layout (要件2: 1列, 3列, 5列)
+            // Layout 
             const layoutBtns = [
                 { id: 'btn-layout-1', name: 'layout-1' },
                 { id: 'btn-layout-3', name: 'layout-3' },
@@ -1058,7 +1057,7 @@
             imgCont.appendChild(img);
             body.appendChild(imgCont);
 
-            // 3. ボーカル選択 (要件1: 視認性・領域改善)
+            // 3. ボーカル選択
             const vCont = document.createElement('div');
             vCont.className = 'vocal-selector';
             const mVocals = vocalMap.get(music.id) || [];
@@ -1098,23 +1097,19 @@
                 btn.appendChild(iconsContainer);
                 btn.appendChild(labelSpan);
 
+                // ボーカル切替時の処理を修正（最初から再生）
                 btn.onclick = () => {
                     vCont.querySelectorAll('.vocal-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     
-                    // ボーカル切替時：再生中なら再生位置を継続して維持
                     const isPlaying = !audio.paused;
-                    const pos = audio.currentTime;
                     loadAudio(music, v, isPlaying);
-                    if (isPlaying) {
-                        audio.currentTime = pos;
-                    }
                 };
                 vCont.appendChild(btn);
             });
             body.appendChild(vCont);
 
-            // 4. 再生バー (要件3: ドラッグ中の挙動改善)
+            // 4. 再生バー
             const pCont = document.createElement('div');
             pCont.className = 'player-controls';
             pCont.innerHTML = `
@@ -1137,7 +1132,6 @@
             pCont.querySelector('#btn-back').onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 5); };
             pCont.querySelector('#btn-forward').onclick = () => { if(audio.duration) audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); };
             
-            // シークバー制御のデバッグ (操作中に時間がジャンプしないよう修正)
             const startSeek = () => { isSeeking = true; };
             const finishSeek = () => {
                 if (isSeeking && audio.duration) {
@@ -1228,8 +1222,10 @@
             }
         }
 
+        // 閉じるボタンのイベントに音声停止を追加
         document.getElementById('btn-close-modal').addEventListener('click', () => {
             document.getElementById('detail-modal').classList.remove('show');
+            audio.pause(); // 閉じた際に再生を停止させる
         });
 
         // Audio System
@@ -1237,7 +1233,7 @@
             const url = `${ASSET_BASE}/music/long/${vocal.assetbundleName}/${vocal.assetbundleName}.mp3`;
             if (audio.src !== url) {
                 audio.src = url;
-                audio.load();
+                audio.load(); // ソース変更時に自動的にcurrentTimeが0に戻ります
             }
             setupMediaSession(music, vocal);
             if (autoPlay) {
