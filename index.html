@@ -460,7 +460,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 16px; /* ボタン追加に伴い、狭い画面でも収まるよう24pxから16pxに変更 */
+            gap: 16px; 
         }
         .player-buttons button {
             background: transparent;
@@ -672,10 +672,11 @@
     <!-- Sort Panel -->
     <div id="sort-panel" class="panel">
         <div class="sort-controls">
+            <!-- 初期値を公開日時順に設定 -->
             <select id="sort-key">
                 <option value="id">ID順</option>
                 <option value="title">タイトル（名前）順</option>
-                <option value="publishedAt">公開日時順</option>
+                <option value="publishedAt" selected>公開日時順</option>
                 <option value="level">楽曲レベル順</option>
             </select>
             <select id="sort-diff" disabled>
@@ -686,8 +687,9 @@
                 <option value="master">Master</option>
                 <option value="append">Append</option>
             </select>
+            <!-- アイコンを初期状態で降順（arrow_downward）に設定 -->
             <button class="icon-btn active" id="btn-sort-order" title="昇順/降順切り替え">
-                <span class="material-icons-round" id="sort-order-icon">arrow_upward</span>
+                <span class="material-icons-round" id="sort-order-icon">arrow_downward</span>
             </button>
         </div>
     </div>
@@ -743,8 +745,9 @@
         let activeTag = 'all';
         let activeWritten = 'all';
         let selectedChars = new Set();
-        let sortKey = 'id';
-        let sortOrder = 'asc';
+        // 初期状態を公開日時順(publishedAt)の降順(desc)に設定
+        let sortKey = 'publishedAt';
+        let sortOrder = 'desc';
         let sortDiff = 'master';
         let skipSilence = localStorage.getItem('skipSilence') === 'true';
 
@@ -1103,12 +1106,21 @@
                 btn.appendChild(iconsContainer);
                 btn.appendChild(labelSpan);
 
-                // ボーカル切替時：自動再生を防ぐため常にfalseを渡す
+                // ボーカル切替時
                 btn.onclick = () => {
+                    if (btn.classList.contains('active')) return;
+
                     vCont.querySelectorAll('.vocal-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     
+                    // 音声を強制停止し、再生時間を0:00にリセットする
+                    audio.pause();
+                    audio.currentTime = 0;
+                    
                     loadAudio(music, v, false);
+                    
+                    // UIを即座にリセット状態へ更新する
+                    syncPlayerUI();
                 };
                 vCont.appendChild(btn);
             });
