@@ -1253,7 +1253,7 @@
                 } catch (e) {}
                 audio.load();
             } else if (audio.ended) {
-                audio.currentTime = skipSilence ? 8 : 0;
+                try { audio.currentTime = skipSilence ? 8 : 0; } catch (e) {}
             }
 
             setupMediaSession(music, vocal);
@@ -1266,32 +1266,38 @@
 
         function startPlay() {
             const resetPositionIfNeeded = () => {
-                if (audio.ended || (audio.duration && audio.currentTime >= audio.duration - 0.5)) {
-                    audio.currentTime = skipSilence ? 8 : 0;
-                } else if (skipSilence && audio.currentTime < 0.5) {
-                    audio.currentTime = 8;
+                try {
+                    if (audio.ended || (audio.duration && audio.currentTime >= audio.duration - 0.5)) {
+                        audio.currentTime = skipSilence ? 8 : 0;
+                    } else if (skipSilence && audio.currentTime < 0.5) {
+                        audio.currentTime = 8;
+                    }
+                } catch (e) {
+                    // メタデータ未ロード時などの例外は無視
                 }
             };
 
-            const doPlay = () => {
-                resetPositionIfNeeded();
-                const playPromise = audio.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(e => {
-                        console.log('Playback prevented or interrupted:', e);
+            resetPositionIfNeeded();
+
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                    console.log('Playback prevented or interrupted:', e);
+                    // バックグラウンド等でリソースが解放された場合のエラー対策
+                    // NotAllowedError (自動再生制限) 以外なら強制リロードを試みる
+                    if (e.name !== 'NotAllowedError') {
+                        audio.load();
+                        const retryPromise = audio.play();
+                        if (retryPromise !== undefined) {
+                            retryPromise.catch(err => {
+                                console.error('Retry failed:', err);
+                                syncPlayerUI();
+                            });
+                        }
+                    } else {
                         syncPlayerUI();
-                    });
-                }
-            };
-
-            if (audio.readyState >= 1) {
-                doPlay();
-            } else {
-                audio.load();
-                const onLoaded = () => {
-                    doPlay();
-                };
-                audio.addEventListener('loadedmetadata', onLoaded, { once: true });
+                    }
+                });
             }
         }
 
@@ -1334,6 +1340,10 @@
                 updatePositionState();
             });
             audio.addEventListener('loadedmetadata', () => {
+                // 初回ロード時にも無音スキップを反映
+                if (skipSilence && audio.currentTime < 0.5) {
+                    try { audio.currentTime = 8; } catch (e) {}
+                }
                 syncPlayerUI();
                 updatePositionState();
             });
