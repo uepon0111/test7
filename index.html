@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#252a50">
+  <title>プロセカ リザルト画像リーダー</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>プロセカ リザルト画像リーダー</h1>
+      <p>画像内のレイアウト境界を自動検出し、A〜I領域をOCRします。</p>
+    </div>
+    <div class="header-actions">
+      <label class="button primary">画像を選択<input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" hidden></label>
+      <button id="runButton" class="button" disabled>読み取り開始</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <div class="panel-title"><h2>入力画像</h2><span id="imageInfo" class="muted">未選択</span></div>
+      <div class="input-stage">
+        <img id="sourceImage" alt="入力画像" hidden>
+        <div id="emptyState" class="empty">リザルト画面のスクリーンショットを選択してください。</div>
+        <canvas id="sourceCanvas" hidden></canvas>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title"><h2>取得結果</h2><span id="status" class="status">待機中</span></div>
+      <div class="result-grid">
+        <div class="result-item"><span>楽曲タイトル</span><strong id="resultTitle">—</strong></div>
+        <div class="result-item"><span>難易度</span><strong id="resultDifficulty">—</strong></div>
+        <div class="result-item"><span>楽曲レベル</span><strong id="resultLevel">—</strong></div>
+        <div class="result-item"><span>PERFECT</span><strong id="resultPerfect">—</strong></div>
+        <div class="result-item"><span>GREAT</span><strong id="resultGreat">—</strong></div>
+        <div class="result-item"><span>GOOD</span><strong id="resultGood">—</strong></div>
+        <div class="result-item"><span>BAD</span><strong id="resultBad">—</strong></div>
+        <div class="result-item"><span>MISS</span><strong id="resultMiss">—</strong></div>
+        <div class="result-item"><span>COMBO</span><strong id="resultCombo">—</strong></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title"><h2>位置検出</h2><button id="toggleOverlay" class="button small" disabled>オーバーレイ表示</button></div>
+      <div class="overlay-stage">
+        <canvas id="overlayCanvas"></canvas>
+      </div>
+      <div class="coords" id="coords"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title"><h2>A〜I領域</h2><span class="muted">左: 処理前 / 右: 2値化後</span></div>
+      <div id="regionGrid" class="region-grid"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title"><h2>デバッグ</h2><span class="muted">失敗時は候補位置・走査プロファイル・OCR原文を確認できます。</span></div>
+      <div class="debug-actions">
+        <button id="downloadDebug" class="button" disabled>デバッグJSON保存</button>
+        <button id="downloadOverlay" class="button" disabled>オーバーレイ画像保存</button>
+      </div>
+      <details open><summary>走査プロファイル</summary><div id="scanProfiles" class="scan-profiles"></div></details>
+      <details><summary>OCR原文</summary><pre id="ocrRaw" class="debug-pre">—</pre></details>
+      <details><summary>検出詳細</summary><pre id="debugJson" class="debug-pre">—</pre></details>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
