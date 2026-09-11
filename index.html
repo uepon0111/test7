@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#ffffff" />
-<title>プロセカ リザルト画像解析 - Step 1・2・3・4・5・9 スキャン</title>
+<title>プロセカ リザルト画像解析 - Step 1〜17</title>
 <style>
   :root{
     --bg:#f5f7fb;
@@ -3078,126 +3078,6 @@ async function runAllOcr(){
   }catch(err){for(const w of Object.values(workerCache)){try{await w.terminate();}catch{}};el.ocrGlobalStatus.textContent='OCR中にエラーが発生しました: '+(err?.message||String(err));throw err;}
   finally{el.runOcrBtn.disabled=false;el.clearOcrBtn.disabled=false;renderRegions(a);}
 }
-function drawRegionOverlay(ctx,a){
-  const regs=a?.regions16?.regions||{};
-  const palette={A:'#9b59b6',B:'#e67e22',C:'#2e86de',D:'#e91e63',E:'#8e44ad',F:'#16a085',G:'#d35400',H:'#c0392b',I:'#00a8cc'};
-  ctx.save();
-  ctx.lineWidth=3;
-  for(const [key,r] of Object.entries(regs)){
-    if(!r) continue;
-    const col=palette[key]||'#555';
-    ctx.fillStyle=col;
-    ctx.globalAlpha=.10;
-    ctx.fillRect(r.x,r.y,r.width,r.height);
-    ctx.globalAlpha=.72;
-    ctx.strokeStyle=col;
-    ctx.setLineDash([]);
-    ctx.strokeRect(r.x+.5,r.y+.5,Math.max(0,r.width-1),Math.max(0,r.height-1));
-  }
-  ctx.restore();
-}
-
-function drawAnnotatedScanH(ctx,x1,x2,y,color='#1473e6',width=2,alpha=.75){
-  if(!Number.isFinite(y)) return;
-  ctx.save();
-  ctx.strokeStyle=color; ctx.lineWidth=width; ctx.globalAlpha=alpha;
-  ctx.setLineDash([8,7]);
-  ctx.beginPath(); ctx.moveTo(x1,y+.5); ctx.lineTo(x2,y+.5); ctx.stroke();
-  ctx.restore();
-}
-function drawAnnotatedScanV(ctx,x,y1,y2,color='#ff3b30',width=2,alpha=.75){
-  if(!Number.isFinite(x)) return;
-  ctx.save();
-  ctx.strokeStyle=color; ctx.lineWidth=width; ctx.globalAlpha=alpha;
-  ctx.setLineDash([8,7]);
-  ctx.beginPath(); ctx.moveTo(x+.5,y1); ctx.lineTo(x+.5,y2); ctx.stroke();
-  ctx.restore();
-}
-function drawAnnotatedBoundaryH(ctx,x1,x2,y,color='#e60000',width=4,alpha=.92){
-  if(!Number.isFinite(y)) return;
-  ctx.save();
-  ctx.strokeStyle=color; ctx.lineWidth=width; ctx.globalAlpha=alpha;
-  ctx.setLineDash([]);
-  ctx.beginPath(); ctx.moveTo(x1,y+.5); ctx.lineTo(x2,y+.5); ctx.stroke();
-  ctx.restore();
-}
-function drawAnnotatedBoundaryV(ctx,x,y1,y2,color='#1473e6',width=4,alpha=.92){
-  if(!Number.isFinite(x)) return;
-  ctx.save();
-  ctx.strokeStyle=color; ctx.lineWidth=width; ctx.globalAlpha=alpha;
-  ctx.setLineDash([]);
-  ctx.beginPath(); ctx.moveTo(x+.5,y1); ctx.lineTo(x+.5,y2); ctx.stroke();
-  ctx.restore();
-}
-
-function drawAnnotated(){
-  const a=state.analysis;
-  const img=state.image;
-  const c=el.annotatedCanvas;
-  c.width=a.w;c.height=a.h;
-  const ctx=c.getContext('2d');
-  ctx.clearRect(0,0,a.w,a.h);
-  ctx.drawImage(img,0,0);
-
-  // 共通ルール：スキャン線＝点線、境界線＝実線、領域＝薄い塗りつぶし。
-  // すべての説明文字は処理後画像へ描画しない。
-
-  // ① 縦スキャン：赤の点線 / 白枠下端：赤の実線
-  for(const r of a.rows||[]) drawAnnotatedScanV(ctx,r.x,0,a.h,'#ff3b30',2,.42);
-  drawAnnotatedScanV(ctx,a.xCenter,0,a.h,'#ff1f1f',2.5,.8);
-  drawAnnotatedBoundaryH(ctx,0,a.w,a.finalY,'#e60000',5,.95);
-
-  // ② 最上部横スキャン：青の点線 / 白枠左右端：青の実線
-  const h=a.horizontal;
-  for(const r of h?.records||[]) drawAnnotatedScanH(ctx,0,a.w,r.y,'#1473e6',2,.42);
-  if(Number.isFinite(h?.frameLeft)) drawAnnotatedBoundaryV(ctx,h.frameLeft,0,Math.min(a.h,a.finalY),'#1473e6',5,.95);
-  if(Number.isFinite(h?.frameRight)) drawAnnotatedBoundaryV(ctx,h.frameRight,0,Math.min(a.h,a.finalY),'#1473e6',5,.95);
-
-  // ③ 横スキャン：緑の点線 / ジャケット左右枠・ゲージ左端：緑の実線
-  const s3=a.step3;
-  if(s3){
-    if(Number.isFinite(s3.nominalY)) drawAnnotatedScanH(ctx,0,a.w,s3.nominalY,'#16a05d',2,.38);
-    if(Number.isFinite(s3.scanY)) drawAnnotatedScanH(ctx,0,a.w,s3.scanY,'#16a05d',2.5,.78);
-    if(Number.isFinite(s3.representative?.y) && s3.representative.y!==s3.scanY) drawAnnotatedScanH(ctx,0,a.w,s3.representative.y,'#16a05d',2,.38);
-    for(const x of [s3.jacketLeft,s3.jacketRight,s3.gaugeLeft]) drawAnnotatedBoundaryV(ctx,x,0,Math.min(a.h,Math.max(0,a.finalY)),'#16a05d',5,.95);
-  }
-
-  // ④ 縦スキャン：桃の点線 / ジャケット上下端：桃の実線
-  const s4=a.step4;
-  if(s4){
-    if(Number.isFinite(s4.scanX)) drawAnnotatedScanV(ctx,s4.scanX,Math.min(a.h,Math.max(0,a.finalY)),Math.min(a.h,Math.max(0,s4.jacketBottom??a.finalY)),'#d94bd7',2.5,.78);
-    for(const y of [s4.jacketTop,s4.jacketBottom]) drawAnnotatedBoundaryH(ctx,0,a.w,y,'#d94bd7',5,.95);
-  }
-
-  // ⑤ 横スキャン：紫の点線 / 難易度・レベル左右端：紫の実線
-  const s5=a.step5;
-  if(s5?.scan){
-    for(const y of [s5.scan.upperY,s5.scan.lowerY]){
-      if(Number.isFinite(y)) drawAnnotatedScanH(ctx,s5.scan.startX??0,s5.scan.endX??a.w,y,'#8e44ad',2,.78);
-    }
-    for(const x of [s5.difficultyLeft,s5.difficultyRight,s5.levelLeft,s5.levelRight]) drawAnnotatedBoundaryV(ctx,x,s5.scan.upperY,s5.scan.lowerY,'#8e44ad',5,.95);
-  }
-
-  // ⑨ 縦スキャン：緑の点線 / 6境界：桃の実線
-  const s9=a.step9;
-  if(s9){
-    if(Number.isFinite(s9.scanX)) drawAnnotatedScanV(ctx,s9.scanX,Math.max(0,a.finalY),a.h,'#16a085',2.5,.82);
-    for(const y of (s9.boundaries||[])) drawAnnotatedBoundaryH(ctx,0,a.w,y,'#e91e63',5,.95);
-  }
-
-  // ⑩ 横スキャン：水色の点線 / GOOD・LATE/FAST左右端：水色の実線
-  const s10=a.step10;
-  if(s10){
-    if(Number.isFinite(s10.scanY)) drawAnnotatedScanH(ctx,Number.isFinite(s10.startX)?s10.startX:0,Number.isFinite(s10.endX)?s10.endX:a.w,s10.scanY,'#29b6f6',2.5,.82);
-    const y1=Number.isFinite(s10.scanY)?s10.scanY-50:0;
-    const y2=Number.isFinite(s10.scanY)?Math.min(a.h,s10.scanY+50):a.h;
-    for(const x of [s10.goodLeft,s10.goodRight,s10.lateLeft,s10.lateRight]) drawAnnotatedBoundaryV(ctx,x,y1,y2,'#29b6f6',5,.95);
-  }
-
-  // ⑥〜⑯：A〜I領域は薄く塗り、境界は実線。ラベル文字は描画しない。
-  drawRegionOverlay(ctx,a);
-}
-
 function analyze(){
   if(!state.imageData) return;
   const t0=performance.now();
@@ -3299,6 +3179,171 @@ function drawImageToCanvas(canvas,img){
   const ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(img,0,0);
+}
+
+function drawAnnotated(){
+  const a=state.analysis;
+  const img=state.image;
+  const c=el.annotatedCanvas;
+  c.width=a.w;c.height=a.h;
+  const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.drawImage(img,0,0);
+
+  // 処理後画像の表示ルールを統一する。
+  //   ・スキャン線 = 点線
+  //   ・確定した境界線 = 実線
+  //   ・領域A〜I = 薄い塗り＋太い実線枠
+  //   ・座標や「白枠下端」などの説明文字 = 画像上には表示しない
+  const SCAN_DASH=[10,8];
+  const SCAN_W=3;
+  const BOUNDARY_W=5;
+  const drawScanLine=(x1,y1,x2,y2,color,alpha=.78)=>{
+    if(![x1,y1,x2,y2].every(Number.isFinite)) return;
+    ctx.save();
+    ctx.globalAlpha=alpha;
+    ctx.strokeStyle=color;
+    ctx.lineWidth=SCAN_W;
+    ctx.setLineDash(SCAN_DASH);
+    ctx.beginPath();ctx.moveTo(x1+.5,y1+.5);ctx.lineTo(x2+.5,y2+.5);ctx.stroke();
+    ctx.restore();
+  };
+  const drawBoundaryV=(x,y1,y2,color)=>{
+    if(![x,y1,y2].every(Number.isFinite)) return;
+    ctx.save();
+    ctx.globalAlpha=.96;
+    ctx.strokeStyle=color;
+    ctx.lineWidth=BOUNDARY_W;
+    ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(x+.5,y1);ctx.lineTo(x+.5,y2);ctx.stroke();
+    ctx.restore();
+  };
+  const drawBoundaryH=(y,x1,x2,color)=>{
+    if(![y,x1,x2].every(Number.isFinite)) return;
+    ctx.save();
+    ctx.globalAlpha=.96;
+    ctx.strokeStyle=color;
+    ctx.lineWidth=BOUNDARY_W;
+    ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(x1,y+.5);ctx.lineTo(x2,y+.5);ctx.stroke();
+    ctx.restore();
+  };
+
+  // 領域は先に薄く塗り、スキャン線・境界線をその上に描く。
+  drawRegionFills(ctx,a);
+
+  // ① 中央縦スキャン＋補助列
+  if(Number.isFinite(a.xCenter)) drawScanLine(a.xCenter,0,a.xCenter,a.h,'#ff3b30',.72);
+  for(const r of (a.rows||[])){
+    if(!Number.isFinite(r.x) || r.x===a.xCenter) continue;
+    drawScanLine(r.x,0,r.x,a.h,'#ff3b30',.38);
+  }
+
+  // ② 最上端横スキャンの補助行
+  const h=a.horizontal;
+  for(const r of (h?.records||[])){
+    if(!Number.isFinite(r.y)) continue;
+    drawScanLine(0,r.y,a.w,r.y,'#1473e6',.35);
+  }
+  if(Number.isFinite(h?.frameLeft)) drawBoundaryV(h.frameLeft,0,Math.min(a.h,a.finalY),'#1473e6');
+  if(Number.isFinite(h?.frameRight)) drawBoundaryV(h.frameRight,0,Math.min(a.h,a.finalY),'#1473e6');
+
+  // ③ 白枠中央の横スキャン＋ジャケット左右枠・ゲージ左端
+  const s3=a.step3;
+  if(s3){
+    if(Number.isFinite(s3.nominalY)) drawScanLine(0,s3.nominalY,a.w,s3.nominalY,'#16a05d',.35);
+    if(Number.isFinite(s3.scanY)) drawScanLine(0,s3.scanY,a.w,s3.scanY,'#16a05d',.78);
+    if(Number.isFinite(s3.representative?.y) && s3.representative.y!==s3.scanY) drawScanLine(0,s3.representative.y,a.w,s3.representative.y,'#16a05d',.32);
+    for(const x of [s3.jacketLeft,s3.jacketRight,s3.gaugeLeft]){
+      if(Number.isFinite(x)) drawBoundaryV(x,0,Math.min(a.h,Math.max(0,a.finalY)),'#16a05d');
+    }
+  }
+
+  // ④ ジャケット中央の縦スキャン＋上下境界
+  const s4=a.step4;
+  if(s4){
+    if(Number.isFinite(s4.scanX)) drawScanLine(s4.scanX,Math.min(a.h,Math.max(0,a.finalY)),s4.scanX,Math.min(a.h,Math.max(0,s4.jacketBottom??a.finalY)),'#d94bd7',.78);
+    for(const y of [s4.jacketTop,s4.jacketBottom]){
+      if(Number.isFinite(y)) drawBoundaryH(y,0,a.w,'#d94bd7');
+    }
+  }
+
+  // ⑤ 2本の横スキャン＋難易度・レベルの4境界
+  const s5=a.step5;
+  if(s5?.scan){
+    for(const y of [s5.scan.upperY,s5.scan.lowerY]){
+      if(Number.isFinite(y)) drawScanLine(s5.scan.startX??0,y,s5.scan.endX??a.w,y,'#8e44ad',.78);
+    }
+    for(const x of [s5.difficultyLeft,s5.difficultyRight,s5.levelLeft,s5.levelRight]){
+      if(Number.isFinite(x)) drawBoundaryV(x,s5.scan.upperY,s5.scan.lowerY,'#8e44ad');
+    }
+  }
+
+  // ⑨ ジャケット右枠を延長した縦スキャン＋6境界
+  const s9=a.step9;
+  if(s9){
+    if(Number.isFinite(s9.scanX)) drawScanLine(s9.scanX,Math.max(0,a.finalY),s9.scanX,a.h,'#16a085',.78);
+    for(const y of (s9.boundaries||[])){
+      if(Number.isFinite(y)) drawBoundaryH(y,0,a.w,'#e91e63');
+    }
+  }
+
+  // ⑩ GOOD縦中央の横スキャン＋左右境界
+  const s10=a.step10;
+  if(s10){
+    if(Number.isFinite(s10.scanY)) drawScanLine(Number.isFinite(s10.startX)?s10.startX:0,s10.scanY,Number.isFinite(s10.endX)?s10.endX:a.w,s10.scanY,'#29b6f6',.8);
+    for(const x of [s10.goodLeft,s10.goodRight,s10.lateLeft,s10.lateRight]){
+      if(Number.isFinite(x)) drawBoundaryV(x,s10.scanY-50,Math.min(a.h,s10.scanY+50),'#29b6f6');
+    }
+  }
+
+  // 領域の境界・ラベルを最後に描き、常に目立つようにする。
+  drawRegionBorders(ctx,a);
+
+  // ①で確定した白枠下端そのものは境界線だけ表示し、文字ラベルは表示しない。
+  if(Number.isFinite(a.finalY)) drawBoundaryH(a.finalY,0,a.w,'#e60000');
+}
+
+function drawRegionFills(ctx,a){
+  const regs=a?.regions16?.regions||{};
+  const palette={A:'#7e57c2',B:'#fb8c00',C:'#1e88e5',D:'#e53935',E:'#8e24aa',F:'#00897b',G:'#6d4c41',H:'#c62828',I:'#00acc1'};
+  ctx.save();
+  for(const [key,r] of Object.entries(regs)){
+    if(!r || ![r.x,r.y,r.width,r.height].every(Number.isFinite) || r.width<=0 || r.height<=0) continue;
+    const col=palette[key]||'#546e7a';
+    ctx.fillStyle=col;
+    ctx.globalAlpha=.14;
+    ctx.fillRect(r.x,r.y,r.width,r.height);
+  }
+  ctx.restore();
+}
+
+function drawRegionBorders(ctx,a){
+  const regs=a?.regions16?.regions||{};
+  const palette={A:'#7e57c2',B:'#fb8c00',C:'#1e88e5',D:'#e53935',E:'#8e24aa',F:'#00897b',G:'#6d4c41',H:'#c62828',I:'#00acc1'};
+  ctx.save();
+  ctx.lineWidth=5;
+  ctx.setLineDash([]);
+  ctx.font='bold 18px sans-serif';
+  ctx.textBaseline='top';
+  for(const [key,r] of Object.entries(regs)){
+    if(!r || ![r.x,r.y,r.width,r.height].every(Number.isFinite) || r.width<=0 || r.height<=0) continue;
+    const col=palette[key]||'#546e7a';
+    ctx.globalAlpha=.96;
+    ctx.strokeStyle=col;
+    ctx.strokeRect(r.x+.5,r.y+.5,r.width,r.height);
+
+    // ラベルは領域名だけを統一形式で表示する（座標・説明文は画像上に表示しない）。
+    const label=String(key);
+    const chipW=28, chipH=24;
+    const chipX=clamp(r.x,0,Math.max(0,a.w-chipW));
+    const chipY=clamp(r.y,0,Math.max(0,a.h-chipH));
+    ctx.fillStyle=col;
+    ctx.fillRect(chipX,chipY,chipW,chipH);
+    ctx.fillStyle='#fff';
+    ctx.fillText(label,chipX+8,chipY+3);
+  }
+  ctx.restore();
 }
 
 function drawSignal(){
