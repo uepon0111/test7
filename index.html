@@ -112,13 +112,188 @@
   @media (max-width:900px){.region-grid{grid-template-columns:1fr}.mini-grid{grid-template-columns:1fr 1fr}}
   @media (max-width:560px){.region-images{grid-template-columns:1fr}.mini-grid{grid-template-columns:1fr}}
 
+
+/* ===== Rebuilt UI ===== */
+:root{
+  --bg:#f3f6fa;
+  --panel:#ffffff;
+  --panel-2:#f8fafc;
+  --line:#dfe5ec;
+  --line-strong:#cbd5e1;
+  --text:#172033;
+  --muted:#667085;
+  --accent:#2563eb;
+  --accent-soft:#eaf1ff;
+  --good:#0f9f62;
+  --warn:#b7791f;
+  --danger:#d64545;
+  --shadow:0 8px 24px rgba(15,23,42,.06);
+  --radius:16px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text)}
+.wrap{width:min(1480px,calc(100% - 32px));margin:18px auto 48px}
+header{position:relative;margin-bottom:12px;padding:4px 2px 2px}
+header h1{font-size:clamp(24px,3vw,34px);letter-spacing:-.02em;margin:0 0 6px}
+header .lead{font-size:14px;max-width:1100px}
+.notice{display:none}
+
+.ui-hero{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:end;
+  background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);border:1px solid var(--line);
+  border-radius:20px;padding:18px 20px;margin:14px 0;box-shadow:var(--shadow)
+}
+.ui-hero-copy h2{margin:0 0 6px;font-size:20px}.ui-hero-copy p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
+.ui-hero-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.ui-kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-soft);border:1px solid #d7e3ff;padding:5px 9px;border-radius:999px;margin-bottom:8px}
+.ui-status-pill{display:inline-flex;align-items:center;min-height:38px;padding:0 12px;border-radius:999px;background:#f2f4f7;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+
+.toolbar{position:sticky;top:10px;z-index:30;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:stretch;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:10px;box-shadow:0 10px 28px rgba(15,23,42,.10)}
+.drop{min-height:62px;border:1.5px dashed #b7c2d1;border-radius:12px;padding:10px 14px;background:#fbfcfe;justify-content:flex-start;text-align:left}
+.drop:hover{border-color:#8aa8e8;background:#f7faff}
+.drop strong{font-size:14px}
+.drop span span{font-size:12px;color:var(--muted)}
+.btn{min-height:42px;border:1px solid var(--line-strong);background:#fff;border-radius:10px;padding:9px 14px;font-weight:700;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.progress{margin:8px 0 14px;height:5px;background:#e8edf3}
+.progress>i{background:var(--accent)}
+
+.ui-nav{position:sticky;top:94px;z-index:20;display:flex;gap:7px;overflow:auto;padding:4px 2px 10px;margin-bottom:2px;scrollbar-width:none}
+.ui-nav::-webkit-scrollbar{display:none}
+.ui-nav a{flex:0 0 auto;text-decoration:none;color:#475467;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:12px;font-weight:700}
+.ui-nav a:hover,.ui-nav a.active{color:var(--accent);border-color:#b8ccff;background:var(--accent-soft)}
+
+#resultArea{display:block}
+#resultArea>.grid:first-of-type{grid-template-columns:minmax(0,1.3fr) minmax(320px,.7fr);align-items:start}
+.grid{gap:14px;margin-top:14px}
+.card{border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);background:var(--panel);overflow:hidden}
+.card h2{font-size:16px;letter-spacing:-.01em;padding:13px 15px;background:#fbfcfe;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card h2::before{content:"";width:6px;height:18px;border-radius:6px;background:var(--accent);flex:0 0 auto}
+.card .body{padding:14px 15px}
+
+/* Summary card */
+.metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:10px}
+.metric{padding:10px 11px;border-radius:12px;background:var(--panel-2);border:1px solid #e6eaf0}
+.metric .label{font-size:11px;line-height:1.35}.metric .value{font-size:20px;line-height:1.15;margin-top:5px}.metric .sub{font-size:10px;line-height:1.4}
+#status{margin:10px 0 0;padding:11px 12px;border-radius:11px;background:#f8fafc;border:1px solid #e6eaf0;font-size:12px}
+.legend{display:none}
+.scan-note{padding:9px 10px;border-radius:10px;background:#f8fafc;border:1px solid #e5eaf0;font-size:11px;line-height:1.55}
+
+/* Main image area */
+#resultArea .card:has(#originalCanvas){grid-column:1/-1}
+.preview-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.18fr);gap:12px}
+.canvas-box{border:1px solid #d7dde6;border-radius:12px;background:#0e1520;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);max-height:68vh}
+.preview-grid .canvas-box{max-height:none}
+figure figcaption{font-size:12px;margin:0 0 6px}
+#originalCanvas,#annotatedCanvas{background:#0e1520}
+
+/* Debug cards */
+#resultArea>.grid:not(:first-of-type)>section{scroll-margin-top:125px}
+#resultArea>.grid:not(:first-of-type)>section .body{padding-top:12px}
+#resultArea>.grid:nth-of-type(n+2){grid-template-columns:repeat(2,minmax(0,1fr))}
+.debug-table{font-size:11px;display:block;overflow:auto;white-space:nowrap;border:1px solid #e7ebf0;border-radius:10px}
+.debug-table thead,.debug-table tbody,.debug-table tr{width:100%}
+.debug-table th,.debug-table td{padding:6px 7px;background:#fff}
+.debug-table th{position:sticky;top:0;background:#f8fafc}
+.settings{border:1px solid #e1e6ed;border-radius:11px;background:#fbfcfe}
+.settings summary{font-size:12px;padding:9px 10px}
+.settings-grid{gap:8px;padding:0 10px 10px}
+.field label{font-size:11px}.field input,.field select{padding:7px 8px;border-radius:8px;font-size:12px}
+
+/* Step 9/10 result metrics */
+.boundary-list{grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+.boundary-item{padding:8px 8px;border-radius:10px;background:#fbfcfe}
+.boundary-item .k{font-size:10px}.boundary-item .v{font-size:16px}
+
+/* OCR section */
+#step6to17Card{scroll-margin-top:125px;margin-top:14px}
+#step6to17Card .ocr-actions{position:sticky;top:140px;z-index:8;padding:9px 0;margin-top:0;background:linear-gradient(#fff 78%,rgba(255,255,255,0));backdrop-filter:blur(4px)}
+#step6to17Card .ocr-actions button{min-height:40px}
+.mini-grid{grid-template-columns:repeat(9,minmax(72px,1fr));gap:7px}
+.mini-metric{padding:8px 9px;border-radius:10px}
+.mini-metric .k{font-size:10px}.mini-metric .v{font-size:13px}
+.region-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.region-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:11px}
+.region-card h3{font-size:15px;margin:0 0 6px}.region-meta{font-size:10px}
+.region-images{grid-template-columns:1fr 1fr;gap:8px}
+.region-images canvas{border-radius:9px;background:#f8fafc}
+.ocr-row{margin-top:8px}.ocr-value{font-size:20px}.ocr-status{font-size:11px}
+#regionsJsonOutput{border:1px solid var(--line);border-radius:10px}
+
+#emptyState{margin-top:14px}
+.empty{padding:50px 18px}
+.footer-note{margin-top:14px;padding:10px 2px;font-size:11px}
+
+/* step labels for cards */
+.ui-step-tag{display:inline-flex;align-items:center;padding:4px 7px;border-radius:7px;background:#eef2f7;color:#5c6778;font-size:10px;font-weight:800;margin-left:auto}
+.card.ui-collapsed .body{display:none}
+.card.ui-collapsed h2{border-bottom:0}
+.ui-collapse-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#667085}
+
+@media(max-width:1100px){
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #resultArea>.grid:first-of-type{grid-template-columns:1fr}
+  #resultArea>.grid:not(:first-of-type){grid-template-columns:1fr}
+  .mini-grid{grid-template-columns:repeat(5,minmax(72px,1fr))}
+  .ui-nav{top:92px}
+}
+@media(max-width:720px){
+  .wrap{width:min(100% - 18px,680px);margin-top:10px}
+  header{padding-top:0}.ui-hero{grid-template-columns:1fr;padding:14px}.ui-hero-actions{justify-content:flex-start}
+  .toolbar{position:sticky;top:6px;grid-template-columns:1fr 1fr;gap:8px}.drop{grid-column:1/-1;min-height:56px}.toolbar .btn{width:100%}
+  .ui-nav{top:82px}
+  .metrics{grid-template-columns:1fr 1fr;gap:7px}.metric .value{font-size:18px}
+  .preview-grid{grid-template-columns:1fr}
+  .boundary-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .mini-grid{grid-template-columns:repeat(3,minmax(72px,1fr))}
+  .region-grid{grid-template-columns:1fr}
+  #step6to17Card .ocr-actions{top:130px}
+}
+@media(max-width:460px){
+  .wrap{width:calc(100% - 12px)}
+  header h1{font-size:22px}.lead{font-size:12px!important}
+  .metrics{grid-template-columns:1fr 1fr}.metric{padding:9px}.metric .label{font-size:10px}.metric .value{font-size:17px}
+  .boundary-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mini-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ui-hero-copy h2{font-size:17px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toolbar,.ui-nav{backdrop-filter:none}}
+
+
+  .db-check-card{margin-top:18px;border:1px solid #d8e0ec;border-radius:14px;background:#fbfcff;overflow:hidden}
+  .db-check-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid #e6ebf2}
+  .db-check-head h3{margin:0;font-size:18px}
+  .db-status{font-size:12px;font-weight:700;padding:6px 9px;border-radius:999px;background:#eef2f7;color:#5c6675}
+  .db-status.ok{background:#eaf8ef;color:#13733b}.db-status.warn{background:#fff5e8;color:#9a5b00}.db-status.error{background:#fff0f0;color:#b3261e}
+  .db-check-body{padding:14px 16px}
+  .db-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .db-item{background:#fff;border:1px solid #e1e6ee;border-radius:10px;padding:10px 11px;min-width:0}
+  .db-item .k{font-size:11px;color:#6a7484;margin-bottom:4px}.db-item .v{font-size:14px;font-weight:700;overflow-wrap:anywhere}.db-item .s{font-size:11px;color:#758095;margin-top:4px}
+  .warning-list{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:8px}.warning-list li{padding:10px 11px;border-radius:10px;border:1px solid #f0d9a8;background:#fffaf1;color:#7d4e00;font-size:13px;line-height:1.5}.warning-list li.error{border-color:#f0b6b2;background:#fff6f5;color:#9b1c15}
+  .db-detail{margin-top:12px;color:#596579;font-size:12px;line-height:1.6}
+  @media(max-width:900px){.db-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:520px){.db-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>プロセカ リザルト画像解析</h1>
-    <p class="lead">今回の実装対象は <strong>①〜⑤、⑨、⑩</strong> に加えて、<strong>⑥〜⑧・⑪〜⑰</strong> を実装しています。⑥〜⑯では指定された座標から領域A〜Iを生成し、⑰では各領域をグレースケール化・二値化・拡大してOCRします。⑱〜⑳のノイズ対策・処理前後表示・デバッグ情報も維持しています。</p>
+    <p class="lead">プロジェクトセカイのリザルト画像から、境界検出・領域切り出し・OCRまでをブラウザ内で確認できます。通常操作は「画像を選択 → 解析 → 必要ならOCR」だけで完結します。</p>
+    <div class="ui-hero">
+      <div class="ui-hero-copy">
+        <div class="ui-kicker">解析ワークスペース</div>
+        <h2>リザルト画像を読み取る</h2>
+        <p>解析後は、確定した境界・領域A〜I・OCR結果を上から順に確認できます。細かな検出情報は各ステップ内のデバッグ欄にまとめています。</p>
+      </div>
+      <div class="ui-hero-actions">
+        <span class="ui-status-pill" id="uiFileStatus">画像未選択</span>
+      </div>
+    </div>
+    <nav class="ui-nav" id="uiNav" aria-label="ページ内ナビゲーション">
+      <a href="#summaryCard">概要</a><a href="#imageCard">画像</a><a href="#step3Card">検出①〜⑤</a><a href="#step9Card">検出⑨</a><a href="#step10Card">検出⑩</a><a href="#step6to17Card">領域・OCR</a>
+    </nav>
     <div class="notice">①では画像上端中央付近の複数列を同時に縦スキャンし、各列で「白枠 → 背景」の下向きエッジ候補を取得します。②では<strong>y=0の最上端を主スキャン</strong>として左→右・右→左の両方向から「背景 → 白枠」のエッジ候補を取得し、近傍の補助行でも再確認します。③では①で得た白枠下端から<strong>白枠の縦幅中央</strong>を主スキャン位置として、ジャケット左右枠とゲージ左端を探索します。ジャケット画像内部の強いノイズは、色の持続性・枠らしい太さ・左右枠の組合せ・近傍行の一致度を使って除外します。いずれも候補を中央値＋MADで統合し、外れ値の影響を抑えます。</div>
   </header>
 
@@ -136,8 +311,8 @@
 
   <div id="resultArea" hidden>
     <div class="grid">
-      <section class="card">
-        <h2>解析結果</h2>
+      <section class="card" id="summaryCard">
+        <h2>解析結果 <span class="ui-step-tag">概要</span></h2>
         <div class="body">
           <div class="metrics">
             <div class="metric"><div class="label">① 白枠の下端（背景開始位置）</div><div class="value" id="edgeY">-</div><div class="sub">px / 画像上端から</div></div>
@@ -237,8 +412,8 @@
     </div>
 
     <div class="grid">
-      <section class="card">
-        <h2>処理前 / 処理後</h2>
+      <section class="card" id="imageCard">
+        <h2>処理前 / 処理後 <span class="ui-step-tag">確認</span></h2>
         <div class="body">
           <div class="preview-grid">
             <figure>
@@ -277,8 +452,8 @@
         </div>
       </section>
 
-      <section class="card">
-        <h2>③ ジャケット・ゲージ検出デバッグ</h2>
+      <section class="card" id="step3Card">
+        <h2>③ ジャケット・ゲージ検出デバッグ <span class="ui-step-tag">Step 3</span></h2>
         <div class="body">
           <div class="debug-two">
             <figure><figcaption>③ 主スキャン：白枠の縦幅中央</figcaption><div class="canvas-box"><canvas id="step3SignalCanvas" width="900" height="360"></canvas></div></figure>
@@ -376,8 +551,8 @@
         </div>
       </section>
 
-      <section class="card">
-        <h2>⑨ PERFECT・GOOD・MISSの上下境界スキャン デバッグ</h2>
+      <section class="card" id="step9Card">
+        <h2>⑨ PERFECT・GOOD・MISSの上下境界スキャン デバッグ <span class="ui-step-tag">Step 9</span></h2>
         <div class="body">
           <div class="scan-note">⑨では①で求めた<strong>白枠下端より下</strong>だけを検索し、③で求めた<strong>ジャケット右枠をそのまま縦スキャン位置</strong>として使用します。主線は③のジャケット右枠そのものを使用します。文字が主線に重なる問題を避けるため、境界の評価では主線±複数pxの確認に加え、判定パネル側の横帯を<strong>25パーセンタイル</strong>で集約します。さらに「横長の矩形として上下2辺が成立すること」を必須にし、スコアなどの文字による細い変化を除外します。候補は下から上の順序になる<strong>3つの判定帯（PERFECT→GOOD→MISS）</strong>として選択し、帯幅と帯間隔の整合性も同時に評価します。今回は指定どおり、判定文字列のOCRやA〜I領域の生成は行いません。</div>
           <div class="step9-grid section-space">
@@ -410,8 +585,8 @@
         </div>
       </section>
 
-      <section class="card">
-        <h2>⑩ GOOD・LATE/FASTの左右境界スキャン デバッグ</h2>
+      <section class="card" id="step10Card">
+        <h2>⑩ GOOD・LATE/FASTの左右境界スキャン デバッグ <span class="ui-step-tag">Step 10</span></h2>
         <div class="body">
           <div class="scan-note">⑩では⑨で取得した<strong>GOODの上端・下端の中央</strong>を横スキャン位置として使用し、①～⑤で取得した<strong>白枠左端～③のゲージ左端</strong>の範囲だけを解析します。指定された順序「背景→GOOD左端→GOOD右端→背景→LATE/FAST左端→LATE/FAST右端→背景」を、横方向のパネル形状として評価します。文字による一時的な明暗変化を避けるため、主線1本だけでなく縦方向の複数行を中央値で集約し、パネル内外の明るさ差・境界強度・幅・間隔・複数行一致度を同時に評価します。</div>
           <div class="metric-grid section-space">
@@ -468,7 +643,7 @@
 
   
       <section class="card" id="step6to17Card">
-        <h2>⑥〜⑰ 領域生成・画像前処理・OCR</h2>
+        <h2>⑥〜⑰ 領域生成・画像前処理・OCR <span class="ui-step-tag">領域 / OCR</span></h2>
         <div class="body">
           <div class="scan-note">
             ⑥〜⑧、⑪〜⑯は既に確定した座標だけを使ってA〜Iを厳密に切り出します。⑰では領域ごとに読み取り対象をさらに絞り込みます。Aはタイトル行、Cは右側のレベル数字、D〜Hは右側の4桁判定数、Iはコンボ候補側を優先して内部切り出しし、その上でグレースケール・白文字強調・コントラスト強調・Otsu・反転・適応二値化を複数比較します。数字領域では表示形式（4桁固定、レベル1〜50）も利用してOCR候補を選別します。処理前画像と採用した処理後画像、OCR候補を確認できます。
@@ -477,6 +652,22 @@
             <button id="runOcrBtn" type="button">⑰ OCRを実行</button>
             <button id="clearOcrBtn" type="button" class="secondary">OCR結果を消去</button>
             <span id="ocrGlobalStatus" class="ocr-status">⑥〜⑯の領域座標は解析後に生成されます。OCRは必要なときだけ実行します。</span>
+          </div>
+          <div class="db-check-card" id="dbCheckCard" aria-live="polite">
+            <div class="db-check-head">
+              <h3>楽曲DB照合・矛盾検知</h3>
+              <span id="dbCheckStatus" class="db-status">未実行</span>
+            </div>
+            <div class="db-check-body">
+              <div class="db-grid">
+                <div class="db-item"><div class="k">DBから確定した楽曲</div><div class="v" id="dbMusicTitle">—</div><div class="s" id="dbMusicTitleSub">musics.json</div></div>
+                <div class="db-item"><div class="k">DBから確定した難易度</div><div class="v" id="dbDifficulty">—</div><div class="s" id="dbDifficultySub">musicDifficulties.json</div></div>
+                <div class="db-item"><div class="k">期待レベル</div><div class="v" id="dbExpectedLevel">—</div><div class="s" id="dbObservedLevel">OCR: —</div></div>
+                <div class="db-item"><div class="k">期待総ノーツ数</div><div class="v" id="dbExpectedNotes">—</div><div class="s" id="dbObservedNotes">OCR合計: —</div></div>
+              </div>
+              <ul class="warning-list" id="dbWarningList"></ul>
+              <div class="db-detail" id="dbCheckDetail">OCR完了後に、タイトル・難易度・レベル・総ノーツ数をDBと照合します。</div>
+            </div>
           </div>
           <div class="mini-grid section-space">
             <div class="mini-metric"><div class="k">領域A</div><div class="v" id="regionABox">—</div></div>
@@ -507,6 +698,58 @@
 
   <div class="footer-note">※画像処理と領域生成はブラウザ内だけで完結します。⑰のOCRを実行する際だけ、Tesseract.js本体と言語データをCDNから読み込みます。画像そのものを外部へ送信する処理はありません。</div>
 </div>
+
+
+<script>
+(function initRebuiltUI(){
+  function setup(){
+    const resultArea=document.getElementById('resultArea');
+    const ocrCard=document.getElementById('step6to17Card');
+    const fileInput=document.getElementById('fileInput');
+    const fileStatus=document.getElementById('uiFileStatus');
+    if(!resultArea || !ocrCard)return;
+
+    // Move OCR/region card into the same results flow while keeping all IDs intact.
+    if(ocrCard.parentElement !== resultArea) resultArea.appendChild(ocrCard);
+
+    // Add compact collapse controls to verbose debug cards, leaving summary/image/OCR open.
+    const alwaysOpen=new Set(['summaryCard','imageCard','step6to17Card']);
+    resultArea.querySelectorAll(':scope > section.card, :scope > .grid > section.card').forEach(card=>{
+      const h2=card.querySelector(':scope > h2');
+      if(!h2 || alwaysOpen.has(card.id) || h2.dataset.uiReady==='1') return;
+      h2.dataset.uiReady='1';
+      const btn=document.createElement('button');
+      btn.type='button';btn.className='ui-collapse-btn';btn.textContent='折りたたむ';
+      btn.addEventListener('click',()=>{
+        const collapsed=card.classList.toggle('ui-collapsed');
+        btn.textContent=collapsed?'展開する':'折りたたむ';
+      });
+      h2.appendChild(btn);
+    });
+
+    if(fileInput && fileStatus){
+      fileInput.addEventListener('change',()=>{
+        const f=fileInput.files && fileInput.files[0];
+        fileStatus.textContent=f?f.name:'画像未選択';
+      });
+    }
+
+    const nav=document.getElementById('uiNav');
+    if(nav){
+      const links=[...nav.querySelectorAll('a')];
+      const targets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+      const setActive=()=>{
+        let best=0,dist=Infinity;
+        targets.forEach((t,i)=>{const d=Math.abs(t.getBoundingClientRect().top-140);if(d<dist){dist=d;best=i;}});
+        links.forEach((a,i)=>a.classList.toggle('active',i===best));
+      };
+      window.addEventListener('scroll',setActive,{passive:true});
+      setActive();
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
+})();
+</script>
 
 <script>
 'use strict';
@@ -587,7 +830,7 @@ const el = {
   step10ScanY: $('step10ScanY'), step10ScanYSub: $('step10ScanYSub'), step10Quality: $('step10Quality'), step10QualitySub: $('step10QualitySub'),
   step10GoodLeft2: $('step10GoodLeft2'), step10GoodRight2: $('step10GoodRight2'), step10LateLeft2: $('step10LateLeft2'), step10LateRight2: $('step10LateRight2'),
   step10SignalCanvas: $('step10SignalCanvas'), step10ZoomCanvas: $('step10ZoomCanvas'), step10CandidateTableBody: $('step10CandidateTableBody'), step10CandidatesOutput: $('step10CandidatesOutput'),
-  runOcrBtn: $('runOcrBtn'), clearOcrBtn: $('clearOcrBtn'), ocrGlobalStatus: $('ocrGlobalStatus'), regionGrid: $('regionGrid'), regionsJsonOutput: $('regionsJsonOutput'),
+  runOcrBtn: $('runOcrBtn'), clearOcrBtn: $('clearOcrBtn'), ocrGlobalStatus: $('ocrGlobalStatus'), dbCheckStatus: $('dbCheckStatus'), dbMusicTitle: $('dbMusicTitle'), dbMusicTitleSub: $('dbMusicTitleSub'), dbDifficulty: $('dbDifficulty'), dbDifficultySub: $('dbDifficultySub'), dbExpectedLevel: $('dbExpectedLevel'), dbObservedLevel: $('dbObservedLevel'), dbExpectedNotes: $('dbExpectedNotes'), dbObservedNotes: $('dbObservedNotes'), dbWarningList: $('dbWarningList'), dbCheckDetail: $('dbCheckDetail'), regionGrid: $('regionGrid'), regionsJsonOutput: $('regionsJsonOutput'),
   regionBoxes: Object.fromEntries('ABCDEFGHI'.split('').map(k=>[k,$('region'+k+'Box')]))
 };
 
@@ -3044,10 +3287,118 @@ async function runRegionOcr(region,key,workerCache,onProgress){
   return region.ocr;
 }
 
+
+const MASTER_DB_URLS={
+  musics:'https://sekai-world.github.io/sekai-master-db-diff/musics.json',
+  difficulties:'https://sekai-world.github.io/sekai-master-db-diff/musicDifficulties.json'
+};
+let masterDbPromise=null;
+function normalizeDbTitle(value){
+  return String(value??'').normalize('NFKC').toLowerCase().replace(/[\s\u3000]+/g,'').replace(/[・･·.,、。！？!?「」『』（）()［］\[\]{}【】〈〉《》:：;；'"`~～_\-—―]/g,'');
+}
+function normalizeDifficulty(value){
+  const s=String(value??'').normalize('NFKC').toLowerCase().replace(/[^a-z]/g,'');
+  const map={append:'APPEND',master:'MASTER',expert:'EXPERT',hard:'HARD',normal:'NORMAL',easy:'EASY'};
+  return map[s]||'';
+}
+function levenshteinDistance(a,b){
+  a=String(a);b=String(b);if(a===b)return 0;if(!a.length)return b.length;if(!b.length)return a.length;
+  let prev=new Uint32Array(b.length+1),cur=new Uint32Array(b.length+1);
+  for(let j=0;j<=b.length;j++)prev[j]=j;
+  for(let i=1;i<=a.length;i++){cur[0]=i;const ca=a.charCodeAt(i-1);for(let j=1;j<=b.length;j++){const cost=ca===b.charCodeAt(j-1)?0:1;cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+cost);}const t=prev;prev=cur;cur=t;}
+  return prev[b.length];
+}
+function stringSimilarity(a,b){
+  const x=String(a??''),y=String(b??'');if(!x||!y)return 0;if(x===y)return 1;
+  const d=levenshteinDistance(x,y),maxLen=Math.max(x.length,y.length);return Math.max(0,1-d/maxLen);
+}
+function lcsLength(a,b){
+  const x=Array.from(String(a)),y=Array.from(String(b));if(!x.length||!y.length)return 0;
+  let prev=new Uint16Array(y.length+1),cur=new Uint16Array(y.length+1);
+  for(let i=1;i<=x.length;i++){for(let j=1;j<=y.length;j++)cur[j]=x[i-1]===y[j-1]?prev[j-1]+1:Math.max(prev[j],cur[j-1]);const t=prev;prev=cur;cur=t;cur.fill(0);}
+  return prev[y.length];
+}
+function titleSimilarity(a,b){
+  const x=normalizeDbTitle(a),y=normalizeDbTitle(b);if(!x||!y)return 0;if(x===y)return 1;
+  const lev=stringSimilarity(x,y),lcs=2*lcsLength(x,y)/(x.length+y.length);
+  const qset=new Set();for(let i=0;i<x.length-1;i++)qset.add(x.slice(i,i+2));let qhit=0;for(let i=0;i<y.length-1;i++)if(qset.has(y.slice(i,i+2)))qhit++;const qden=Math.max(1,(x.length-1)+(y.length-1));const dice=2*qhit/qden;
+  return Math.max(0,Math.min(1,0.55*lev+0.30*lcs+0.15*dice));
+}
+async function loadMasterDb(){
+  if(masterDbPromise)return masterDbPromise;
+  masterDbPromise=(async()=>{
+    const responses=await Promise.all([fetch(MASTER_DB_URLS.musics,{cache:'no-store'}),fetch(MASTER_DB_URLS.difficulties,{cache:'no-store'})]);
+    if(!responses[0].ok)throw new Error(`musics.json の取得に失敗しました（HTTP ${responses[0].status}）。`);
+    if(!responses[1].ok)throw new Error(`musicDifficulties.json の取得に失敗しました（HTTP ${responses[1].status}）。`);
+    const [musics,difficulties]=await Promise.all([responses[0].json(),responses[1].json()]);
+    if(!Array.isArray(musics)||!Array.isArray(difficulties))throw new Error('DB JSONの形式が想定と異なります。');
+    const diffByMusic=new Map();
+    for(const d of difficulties){const id=Number(d.musicId);if(!Number.isFinite(id))continue;if(!diffByMusic.has(id))diffByMusic.set(id,[]);diffByMusic.get(id).push(d);}
+    return {musics,difficulties,diffByMusic,loadedAt:Date.now()};
+  })().catch(err=>{masterDbPromise=null;throw err;});
+  return masterDbPromise;
+}
+function getRegionText(a,key){return String(a?.regions16?.regions?.[key]?.ocr?.text||'').trim();}
+function getRegionAttempts(a,key){const at=a?.regions16?.regions?.[key]?.ocr?.attempts;return Array.isArray(at)?at.map(x=>String(x?.text||'').trim()).filter(Boolean):[];}
+function pickClosestMusic(rawTitle,attempts,musics){
+  const candidates=[];const inputs=[rawTitle,...attempts].map(normalizeDbTitle).filter(Boolean);if(!inputs.length)return null;
+  for(const m of musics){const title=String(m?.title??'');if(!title)continue;let best=0;for(const q of inputs)best=Math.max(best,titleSimilarity(q,title));candidates.push({music:m,similarity:best});}
+  candidates.sort((a,b)=>b.similarity-a.similarity||String(a.music.title).length-String(b.music.title).length);return candidates[0]||null;
+}
+function pickClosestDifficulty(rawDifficulty,attempts,diffs){
+  const inputs=[rawDifficulty,...attempts].map(normalizeDifficulty).filter(Boolean);if(!inputs.length)return null;
+  let best=null;
+  for(const d of diffs||[]){const canonical=normalizeDifficulty(d.musicDifficulty);if(!canonical)continue;let sim=0;for(const q of inputs)sim=Math.max(sim,stringSimilarity(q,canonical));const row={difficulty:d,canonical,similarity:sim};if(!best||row.similarity>best.similarity)best=row;}
+  return best;
+}
+function parseNumericRegion(a,key){const t=getRegionText(a,key);const digits=String(t).replace(/[^0-9]/g,'');if(!digits)return null;if(key==='C'){const groups=String(t).match(/\d{1,3}/g)||[];for(const g of groups.slice().reverse()){const n=Number(g);if(n>=1&&n<=50)return n;}const n=Number(digits.slice(-2));return Number.isFinite(n)&&n>=1&&n<=50?n:null;}const n=Number(digits.slice(-4));return Number.isFinite(n)?n:null;}
+function updateOcrCorrections(a,musicMatch,diffMatch,observed){
+  const titleR=a.regions16?.regions?.A, diffR=a.regions16?.regions?.B;
+  if(titleR){titleR.ocr=titleR.ocr||{};titleR.ocr.rawText=titleR.ocr.rawText??titleR.ocr.text;titleR.ocr.corrected=!!musicMatch?.music?.title;titleR.ocr.matchedTitle=musicMatch?.music?.title||null; if(musicMatch?.music?.title)titleR.ocr.text=musicMatch.music.title;}
+  if(diffR){diffR.ocr=diffR.ocr||{};diffR.ocr.rawText=diffR.ocr.rawText??diffR.ocr.text;diffR.ocr.corrected=!!diffMatch?.canonical;diffR.ocr.matchedDifficulty=diffMatch?.canonical||null;if(diffMatch?.canonical)diffR.ocr.text=diffMatch.canonical;}
+  a.dbValidation={matchedMusic:musicMatch?.music||null,musicSimilarity:musicMatch?.similarity??null,matchedDifficulty:diffMatch?.difficulty||null,difficultyCanonical:diffMatch?.canonical||null,difficultySimilarity:diffMatch?.similarity??null,observed,loadedAt:Date.now()};
+}
+function renderDbValidation(a){
+  const v=a?.dbValidation;if(!v){el.dbCheckStatus.textContent='未実行';el.dbCheckStatus.className='db-status';el.dbMusicTitle.textContent='—';el.dbDifficulty.textContent='—';el.dbExpectedLevel.textContent='—';el.dbObservedLevel.textContent='OCR: —';el.dbExpectedNotes.textContent='—';el.dbObservedNotes.textContent='OCR合計: —';el.dbWarningList.innerHTML='';el.dbCheckDetail.textContent='OCR完了後に、タイトル・難易度・レベル・総ノーツ数をDBと照合します。';return;}
+  const m=v.matchedMusic,d=v.matchedDifficulty,obs=v.observed||{};el.dbMusicTitle.textContent=m?.title||'一致候補なし';el.dbMusicTitleSub.textContent=`id=${m?.id??'—'} / 類似度 ${Number(v.musicSimilarity*100||0).toFixed(1)}%`;
+  el.dbDifficulty.textContent=v.difficultyCanonical||'一致候補なし';el.dbDifficultySub.textContent=`類似度 ${Number(v.difficultySimilarity*100||0).toFixed(1)}% / musicId=${d?.musicId??'—'}`;
+  el.dbExpectedLevel.textContent=Number.isFinite(Number(d?.playLevel))?String(d.playLevel):'—';el.dbObservedLevel.textContent=`OCR: ${Number.isFinite(obs.level)?obs.level:'—'}`;
+  el.dbExpectedNotes.textContent=Number.isFinite(Number(d?.totalNoteCount))?String(d.totalNoteCount):'—';el.dbObservedNotes.textContent=`OCR合計: ${Number.isFinite(obs.totalNotes)?obs.totalNotes:'—'}`;
+  const warnings=[];
+  if(Number.isFinite(obs.totalNotes)&&Number.isFinite(obs.combo)&&obs.totalNotes<obs.combo)warnings.push({type:'error',text:`不可能なノーツ数：判定数の合計 ${obs.totalNotes} < COMBO ${obs.combo} です。`});
+  const rawTitle=String(obs.rawTitle||'').trim();if(rawTitle&&m){const exact=normalizeDbTitle(rawTitle)===normalizeDbTitle(m.title);if(!exact)warnings.push({type:'warn',text:`楽曲タイトルがDBと不一致です。OCR「${rawTitle}」 → DB補正「${m.title}」`});}
+  const rawDiff=String(obs.rawDifficulty||'').trim();if(rawDiff&&v.difficultyCanonical){const exact=normalizeDifficulty(rawDiff)===v.difficultyCanonical;if(!exact)warnings.push({type:'warn',text:`楽曲難易度がDBと不一致です。OCR「${rawDiff}」 → DB補正「${v.difficultyCanonical}」`});}
+  if(m&&d&&d.musicId!==m.id)warnings.push({type:'error',text:`楽曲と難易度のDB対応が矛盾しています（musicId ${m.id} と ${d.musicId}）。`});
+  if(Number.isFinite(obs.level)&&Number.isFinite(Number(d?.playLevel))&&obs.level!==Number(d.playLevel))warnings.push({type:'warn',text:`楽曲レベルがDBと不一致です。OCR ${obs.level} / DB ${d.playLevel}`});
+  if(Number.isFinite(obs.totalNotes)&&Number.isFinite(Number(d?.totalNoteCount))&&obs.totalNotes!==Number(d.totalNoteCount))warnings.push({type:'warn',text:`総ノーツ数がDBと不一致です。判定数合計 ${obs.totalNotes} / DB ${d.totalNoteCount}`});
+  if(!m)warnings.push({type:'error',text:'OCR楽曲タイトルからDBの曲を特定できませんでした。'});
+  if(m&&!d)warnings.push({type:'error',text:'楽曲に対応する難易度をDBから特定できませんでした。'});
+  el.dbWarningList.innerHTML='';for(const w of warnings){const li=document.createElement('li');li.className=w.type==='error'?'error':'';li.textContent=(w.type==='error'?'重要: ':'警告: ')+w.text;el.dbWarningList.appendChild(li);}
+  const status=warnings.some(w=>w.type==='error')?'error':warnings.length?'warn':'ok';el.dbCheckStatus.textContent=status==='ok'?'矛盾なし':status==='warn'?`${warnings.length}件の警告`:`${warnings.length}件の矛盾`;el.dbCheckStatus.className='db-status '+status;
+  el.dbCheckDetail.textContent=`musics.json / musicDifficulties.json を取得して、タイトルは最近傍一致、難易度は6種類への最近傍一致、レベルと総ノーツ数は数値比較しました。タイトル類似度=${Number(v.musicSimilarity*100||0).toFixed(1)}%、難易度類似度=${Number(v.difficultySimilarity*100||0).toFixed(1)}%。`;
+}
+async function validateAgainstMasterDb(a){
+  if(!a?.regions16?.regions){return null;}
+  try{
+    el.dbCheckStatus.textContent='DB取得中…';el.dbCheckStatus.className='db-status';
+    const db=await loadMasterDb();
+    const rawTitle=getRegionText(a,'A'),rawDiff=getRegionText(a,'B'),titleAttempts=getRegionAttempts(a,'A'),diffAttempts=getRegionAttempts(a,'B');
+    const musicMatch=pickClosestMusic(rawTitle,titleAttempts,db.musics);
+    const diffPool=musicMatch?.music?.id!=null?(db.diffByMusic.get(Number(musicMatch.music.id))||[]):[];
+    const diffMatch=pickClosestDifficulty(rawDiff,diffAttempts,diffPool);
+    const obs={rawTitle,rawDifficulty:rawDiff,level:parseNumericRegion(a,'C'),perfect:parseNumericRegion(a,'D'),great:parseNumericRegion(a,'E'),good:parseNumericRegion(a,'F'),bad:parseNumericRegion(a,'G'),miss:parseNumericRegion(a,'H'),combo:parseNumericRegion(a,'I')};
+    const judgementKeys=['perfect','great','good','bad','miss'];const nums=judgementKeys.map(k=>obs[k]);obs.totalNotes=nums.every(n=>Number.isFinite(n))?nums.reduce((x,n)=>x+n,0):null;
+    updateOcrCorrections(a,musicMatch,diffMatch,obs);renderDbValidation(a);renderRegions(a);return a.dbValidation;
+  }catch(err){
+    a.dbValidation={error:err?.message||String(err),loadedAt:Date.now()};el.dbCheckStatus.textContent='DB取得エラー';el.dbCheckStatus.className='db-status error';el.dbWarningList.innerHTML='';const li=document.createElement('li');li.className='error';li.textContent='重要: '+(err?.message||String(err));el.dbWarningList.appendChild(li);el.dbCheckDetail.textContent='外部DBを取得できなかったため、補正・矛盾検知を完了できませんでした。';return a.dbValidation;
+  }
+}
+
 function clearOcrResults(){
   const a=state.analysis;if(!a?.regions16)return;
   for(const r of Object.values(a.regions16.regions))delete r.ocr;
-  el.ocrGlobalStatus.textContent='OCR結果を消去しました。';renderRegions(a);
+  delete a.dbValidation;
+  el.ocrGlobalStatus.textContent='OCR結果を消去しました。';renderDbValidation(a);renderRegions(a);
 }
 function renderRegionCard(region){
   const key=region.id,prep=region.prepared, cfg=regionConfig(key),card=document.createElement('article');card.className='region-card';
@@ -3065,7 +3416,7 @@ function renderRegions(a){
     const r=regs[key];if(!r){el.regionBoxes[key].textContent='未確定';continue;}
     el.regionBoxes[key].textContent=`${r.x},${r.y}～${r.right},${r.bottom}`;grid.appendChild(renderRegionCard(r));
   }
-  el.regionsJsonOutput.textContent=JSON.stringify({inputs:a?.regions16?.inputs||null,regions:Object.fromEntries(Object.entries(regs).map(([k,r])=>[k,{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,source:r.source,ocr:r.ocr||null,preprocess:r.prepared?{plan:r.prepared.planLabel||null,subOrigin:r.prepared.subOrigin||null,chosen:r.prepared.chosen.name,scale:r.prepared.scale,variants:r.prepared.variants.map(v=>v.name)}:null}]))},null,2);
+  el.regionsJsonOutput.textContent=JSON.stringify({inputs:a?.regions16?.inputs||null,dbValidation:a?.dbValidation||null,regions:Object.fromEntries(Object.entries(regs).map(([k,r])=>[k,{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,source:r.source,ocr:r.ocr||null,preprocess:r.prepared?{plan:r.prepared.planLabel||null,subOrigin:r.prepared.subOrigin||null,chosen:r.prepared.chosen?.name||null,scale:r.prepared.scale||null,variants:Array.isArray(r.prepared.variants)?r.prepared.variants.map(v=>v.name):[]}:null}]))},null,2);
 }
 async function runAllOcr(){
   const a=state.analysis;if(!a?.regions16?.regions){el.ocrGlobalStatus.textContent='先に画像を解析して⑥〜⑯の領域を生成してください。';return;}
@@ -3074,7 +3425,9 @@ async function runAllOcr(){
   try{
     for(const [key,region] of entries){el.ocrGlobalStatus.textContent=`領域${key}をOCR中… ${done}/${entries.length}`;await runRegionOcr(region,key,workerCache,(k,status,progress)=>{el.ocrGlobalStatus.textContent=`領域${k}: ${status} ${Math.round(progress*100)}%`;});done++;}
     for(const w of Object.values(workerCache))await w.terminate();
-    el.ocrGlobalStatus.textContent=`⑰ OCR完了：${done}/${entries.length}領域`;
+    el.ocrGlobalStatus.textContent=`⑰ OCR完了：${done}/${entries.length}領域。DB照合中…`;
+    await validateAgainstMasterDb(a);
+    el.ocrGlobalStatus.textContent=`⑰ OCR完了：${done}/${entries.length}領域。DB照合も完了しました。`;
   }catch(err){for(const w of Object.values(workerCache)){try{await w.terminate();}catch{}};el.ocrGlobalStatus.textContent='OCR中にエラーが発生しました: '+(err?.message||String(err));throw err;}
   finally{el.runOcrBtn.disabled=false;el.clearOcrBtn.disabled=false;renderRegions(a);}
 }
@@ -3452,7 +3805,7 @@ function renderAll(){
   el.emptyState.hidden=true;
   el.resultArea.hidden=false;
   drawImageToCanvas(el.originalCanvas,state.image);
-  drawAnnotated();drawSignal();drawZoom();drawHorizontal();drawStep3Signal();drawStep3Zoom();drawStep4Signal();drawStep4Zoom();drawStep5Signal(el.step5UpperSignalCanvas,a.step5?.upper,a.step5,"⑤ 中央");drawStep5Signal(el.step5LowerSignalCanvas,a.step5?.lower,a.step5,"⑤ 3/4");drawStep5Zoom();drawStep9Signal();drawStep9Zoom();drawStep10Signal();drawStep10Zoom();renderTable();renderHorizontalTable();renderStep3Table();renderStep4Table();renderStep5Table();renderStep9Table();renderStep10Table();renderRegions(a);
+  drawAnnotated();drawSignal();drawZoom();drawHorizontal();drawStep3Signal();drawStep3Zoom();drawStep4Signal();drawStep4Zoom();drawStep5Signal(el.step5UpperSignalCanvas,a.step5?.upper,a.step5,"⑤ 中央");drawStep5Signal(el.step5LowerSignalCanvas,a.step5?.lower,a.step5,"⑤ 3/4");drawStep5Zoom();drawStep9Signal();drawStep9Zoom();drawStep10Signal();drawStep10Zoom();renderTable();renderHorizontalTable();renderStep3Table();renderStep4Table();renderStep5Table();renderStep9Table();renderStep10Table();renderDbValidation(a);renderRegions(a);
   el.edgeY.textContent=String(a.finalY);
   el.frameHeight.textContent=String(a.finalY);
   el.frameLeft.textContent=Number.isFinite(a.horizontal.frameLeft)?String(a.horizontal.frameLeft):'—';
@@ -3529,6 +3882,7 @@ function renderAll(){
           selected:a.step9.boundaries.includes(c.top)||a.step9.boundaries.includes(c.bottom)
         }))},
     step10:{settings:a.step10.cfg,scanY:a.step10.scanY,startX:a.step10.startX,endX:a.step10.endX,valid:a.step10.valid,reason:a.step10.reason,result:{goodLeft:a.step10.goodLeft,goodRight:a.step10.goodRight,lateLeft:a.step10.lateLeft,lateRight:a.step10.lateRight},qualityPercent:Number((a.step10.quality||0).toFixed(2)),selection:a.step10.selection?{score:Number((a.step10.selection.score||0).toFixed(3)),gap:a.step10.selection.gap,widthSym:Number((a.step10.selection.widthSym||0).toFixed(3)),gapScore:Number((a.step10.selection.gapScore||0).toFixed(3)),relaxed:!!a.step10.selection.relaxed}:null,candidates:(a.step10.candidates||[]).map(c=>({left:c.left,right:c.right,width:c.width,contrast:Number((c.contrast||0).toFixed(3)),leftEdge:Number((c.leftEdge||0).toFixed(3)),rightEdge:Number((c.rightEdge||0).toFixed(3)),consistency:Number((c.consistency||0).toFixed(3)),score:Number((c.score||0).toFixed(3))}))},
+    dbValidation:a.dbValidation||null,
     regions16:{inputs:a.regions16?.inputs||null,regions:Object.fromEntries(Object.entries(a.regions16?.regions||{}).map(([k,r])=>[k,{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,source:r.source,ocr:r.ocr||null,preprocess:r.prepared?{chosen:r.prepared.chosen.name,scale:r.prepared.scale}:null}]))},
     diagnostics:{centerEdgeScore:Number(a.centerEdgeScore.toFixed(4)),postLuma:Number(a.postLuma.toFixed(2)),separation:Number(a.separation.toFixed(2)),signalNoise:Number(a.signalNoise.toFixed(2)),confidencePercent:Number(a.confidence.toFixed(2)),elapsedMs:Number(a.elapsed.toFixed(2))}
   },null,2);
