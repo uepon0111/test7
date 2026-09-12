@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#ffffff" />
-<title>プロセカ リザルト画像解析 - Step 1〜17</title>
+<title>プロセカ リザルト画像解析 - Step 1・2・3・4・5・9 スキャン</title>
 <style>
   :root{
     --bg:#f5f7fb;
@@ -112,188 +112,13 @@
   @media (max-width:900px){.region-grid{grid-template-columns:1fr}.mini-grid{grid-template-columns:1fr 1fr}}
   @media (max-width:560px){.region-images{grid-template-columns:1fr}.mini-grid{grid-template-columns:1fr}}
 
-
-/* ===== Rebuilt UI ===== */
-:root{
-  --bg:#f3f6fa;
-  --panel:#ffffff;
-  --panel-2:#f8fafc;
-  --line:#dfe5ec;
-  --line-strong:#cbd5e1;
-  --text:#172033;
-  --muted:#667085;
-  --accent:#2563eb;
-  --accent-soft:#eaf1ff;
-  --good:#0f9f62;
-  --warn:#b7791f;
-  --danger:#d64545;
-  --shadow:0 8px 24px rgba(15,23,42,.06);
-  --radius:16px;
-}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text)}
-.wrap{width:min(1480px,calc(100% - 32px));margin:18px auto 48px}
-header{position:relative;margin-bottom:12px;padding:4px 2px 2px}
-header h1{font-size:clamp(24px,3vw,34px);letter-spacing:-.02em;margin:0 0 6px}
-header .lead{font-size:14px;max-width:1100px}
-.notice{display:none}
-
-.ui-hero{
-  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:end;
-  background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);border:1px solid var(--line);
-  border-radius:20px;padding:18px 20px;margin:14px 0;box-shadow:var(--shadow)
-}
-.ui-hero-copy h2{margin:0 0 6px;font-size:20px}.ui-hero-copy p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
-.ui-hero-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.ui-kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-soft);border:1px solid #d7e3ff;padding:5px 9px;border-radius:999px;margin-bottom:8px}
-.ui-status-pill{display:inline-flex;align-items:center;min-height:38px;padding:0 12px;border-radius:999px;background:#f2f4f7;border:1px solid var(--line);font-size:12px;color:var(--muted)}
-
-.toolbar{position:sticky;top:10px;z-index:30;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:stretch;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:10px;box-shadow:0 10px 28px rgba(15,23,42,.10)}
-.drop{min-height:62px;border:1.5px dashed #b7c2d1;border-radius:12px;padding:10px 14px;background:#fbfcfe;justify-content:flex-start;text-align:left}
-.drop:hover{border-color:#8aa8e8;background:#f7faff}
-.drop strong{font-size:14px}
-.drop span span{font-size:12px;color:var(--muted)}
-.btn{min-height:42px;border:1px solid var(--line-strong);background:#fff;border-radius:10px;padding:9px 14px;font-weight:700;white-space:nowrap}
-.btn.primary{background:var(--accent);border-color:var(--accent)}
-.progress{margin:8px 0 14px;height:5px;background:#e8edf3}
-.progress>i{background:var(--accent)}
-
-.ui-nav{position:sticky;top:94px;z-index:20;display:flex;gap:7px;overflow:auto;padding:4px 2px 10px;margin-bottom:2px;scrollbar-width:none}
-.ui-nav::-webkit-scrollbar{display:none}
-.ui-nav a{flex:0 0 auto;text-decoration:none;color:#475467;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:12px;font-weight:700}
-.ui-nav a:hover,.ui-nav a.active{color:var(--accent);border-color:#b8ccff;background:var(--accent-soft)}
-
-#resultArea{display:block}
-#resultArea>.grid:first-of-type{grid-template-columns:minmax(0,1.3fr) minmax(320px,.7fr);align-items:start}
-.grid{gap:14px;margin-top:14px}
-.card{border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);background:var(--panel);overflow:hidden}
-.card h2{font-size:16px;letter-spacing:-.01em;padding:13px 15px;background:#fbfcfe;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}
-.card h2::before{content:"";width:6px;height:18px;border-radius:6px;background:var(--accent);flex:0 0 auto}
-.card .body{padding:14px 15px}
-
-/* Summary card */
-.metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:10px}
-.metric{padding:10px 11px;border-radius:12px;background:var(--panel-2);border:1px solid #e6eaf0}
-.metric .label{font-size:11px;line-height:1.35}.metric .value{font-size:20px;line-height:1.15;margin-top:5px}.metric .sub{font-size:10px;line-height:1.4}
-#status{margin:10px 0 0;padding:11px 12px;border-radius:11px;background:#f8fafc;border:1px solid #e6eaf0;font-size:12px}
-.legend{display:none}
-.scan-note{padding:9px 10px;border-radius:10px;background:#f8fafc;border:1px solid #e5eaf0;font-size:11px;line-height:1.55}
-
-/* Main image area */
-#resultArea .card:has(#originalCanvas){grid-column:1/-1}
-.preview-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.18fr);gap:12px}
-.canvas-box{border:1px solid #d7dde6;border-radius:12px;background:#0e1520;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);max-height:68vh}
-.preview-grid .canvas-box{max-height:none}
-figure figcaption{font-size:12px;margin:0 0 6px}
-#originalCanvas,#annotatedCanvas{background:#0e1520}
-
-/* Debug cards */
-#resultArea>.grid:not(:first-of-type)>section{scroll-margin-top:125px}
-#resultArea>.grid:not(:first-of-type)>section .body{padding-top:12px}
-#resultArea>.grid:nth-of-type(n+2){grid-template-columns:repeat(2,minmax(0,1fr))}
-.debug-table{font-size:11px;display:block;overflow:auto;white-space:nowrap;border:1px solid #e7ebf0;border-radius:10px}
-.debug-table thead,.debug-table tbody,.debug-table tr{width:100%}
-.debug-table th,.debug-table td{padding:6px 7px;background:#fff}
-.debug-table th{position:sticky;top:0;background:#f8fafc}
-.settings{border:1px solid #e1e6ed;border-radius:11px;background:#fbfcfe}
-.settings summary{font-size:12px;padding:9px 10px}
-.settings-grid{gap:8px;padding:0 10px 10px}
-.field label{font-size:11px}.field input,.field select{padding:7px 8px;border-radius:8px;font-size:12px}
-
-/* Step 9/10 result metrics */
-.boundary-list{grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
-.boundary-item{padding:8px 8px;border-radius:10px;background:#fbfcfe}
-.boundary-item .k{font-size:10px}.boundary-item .v{font-size:16px}
-
-/* OCR section */
-#step6to17Card{scroll-margin-top:125px;margin-top:14px}
-#step6to17Card .ocr-actions{position:sticky;top:140px;z-index:8;padding:9px 0;margin-top:0;background:linear-gradient(#fff 78%,rgba(255,255,255,0));backdrop-filter:blur(4px)}
-#step6to17Card .ocr-actions button{min-height:40px}
-.mini-grid{grid-template-columns:repeat(9,minmax(72px,1fr));gap:7px}
-.mini-metric{padding:8px 9px;border-radius:10px}
-.mini-metric .k{font-size:10px}.mini-metric .v{font-size:13px}
-.region-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.region-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:11px}
-.region-card h3{font-size:15px;margin:0 0 6px}.region-meta{font-size:10px}
-.region-images{grid-template-columns:1fr 1fr;gap:8px}
-.region-images canvas{border-radius:9px;background:#f8fafc}
-.ocr-row{margin-top:8px}.ocr-value{font-size:20px}.ocr-status{font-size:11px}
-#regionsJsonOutput{border:1px solid var(--line);border-radius:10px}
-
-#emptyState{margin-top:14px}
-.empty{padding:50px 18px}
-.footer-note{margin-top:14px;padding:10px 2px;font-size:11px}
-
-/* step labels for cards */
-.ui-step-tag{display:inline-flex;align-items:center;padding:4px 7px;border-radius:7px;background:#eef2f7;color:#5c6778;font-size:10px;font-weight:800;margin-left:auto}
-.card.ui-collapsed .body{display:none}
-.card.ui-collapsed h2{border-bottom:0}
-.ui-collapse-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#667085}
-
-@media(max-width:1100px){
-  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-  #resultArea>.grid:first-of-type{grid-template-columns:1fr}
-  #resultArea>.grid:not(:first-of-type){grid-template-columns:1fr}
-  .mini-grid{grid-template-columns:repeat(5,minmax(72px,1fr))}
-  .ui-nav{top:92px}
-}
-@media(max-width:720px){
-  .wrap{width:min(100% - 18px,680px);margin-top:10px}
-  header{padding-top:0}.ui-hero{grid-template-columns:1fr;padding:14px}.ui-hero-actions{justify-content:flex-start}
-  .toolbar{position:sticky;top:6px;grid-template-columns:1fr 1fr;gap:8px}.drop{grid-column:1/-1;min-height:56px}.toolbar .btn{width:100%}
-  .ui-nav{top:82px}
-  .metrics{grid-template-columns:1fr 1fr;gap:7px}.metric .value{font-size:18px}
-  .preview-grid{grid-template-columns:1fr}
-  .boundary-list{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .mini-grid{grid-template-columns:repeat(3,minmax(72px,1fr))}
-  .region-grid{grid-template-columns:1fr}
-  #step6to17Card .ocr-actions{top:130px}
-}
-@media(max-width:460px){
-  .wrap{width:calc(100% - 12px)}
-  header h1{font-size:22px}.lead{font-size:12px!important}
-  .metrics{grid-template-columns:1fr 1fr}.metric{padding:9px}.metric .label{font-size:10px}.metric .value{font-size:17px}
-  .boundary-list{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .mini-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .ui-hero-copy h2{font-size:17px}
-}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toolbar,.ui-nav{backdrop-filter:none}}
-
-
-  .db-check-card{margin-top:18px;border:1px solid #d8e0ec;border-radius:14px;background:#fbfcff;overflow:hidden}
-  .db-check-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid #e6ebf2}
-  .db-check-head h3{margin:0;font-size:18px}
-  .db-status{font-size:12px;font-weight:700;padding:6px 9px;border-radius:999px;background:#eef2f7;color:#5c6675}
-  .db-status.ok{background:#eaf8ef;color:#13733b}.db-status.warn{background:#fff5e8;color:#9a5b00}.db-status.error{background:#fff0f0;color:#b3261e}
-  .db-check-body{padding:14px 16px}
-  .db-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-  .db-item{background:#fff;border:1px solid #e1e6ee;border-radius:10px;padding:10px 11px;min-width:0}
-  .db-item .k{font-size:11px;color:#6a7484;margin-bottom:4px}.db-item .v{font-size:14px;font-weight:700;overflow-wrap:anywhere}.db-item .s{font-size:11px;color:#758095;margin-top:4px}
-  .warning-list{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:8px}.warning-list li{padding:10px 11px;border-radius:10px;border:1px solid #f0d9a8;background:#fffaf1;color:#7d4e00;font-size:13px;line-height:1.5}.warning-list li.error{border-color:#f0b6b2;background:#fff6f5;color:#9b1c15}
-  .db-detail{margin-top:12px;color:#596579;font-size:12px;line-height:1.6}
-  @media(max-width:900px){.db-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media(max-width:520px){.db-grid{grid-template-columns:1fr}}
-
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>プロセカ リザルト画像解析</h1>
-    <p class="lead">プロジェクトセカイのリザルト画像から、境界検出・領域切り出し・OCRまでをブラウザ内で確認できます。通常操作は「画像を選択 → 解析 → 必要ならOCR」だけで完結します。</p>
-    <div class="ui-hero">
-      <div class="ui-hero-copy">
-        <div class="ui-kicker">解析ワークスペース</div>
-        <h2>リザルト画像を読み取る</h2>
-        <p>解析後は、確定した境界・領域A〜I・OCR結果を上から順に確認できます。細かな検出情報は各ステップ内のデバッグ欄にまとめています。</p>
-      </div>
-      <div class="ui-hero-actions">
-        <span class="ui-status-pill" id="uiFileStatus">画像未選択</span>
-      </div>
-    </div>
-    <nav class="ui-nav" id="uiNav" aria-label="ページ内ナビゲーション">
-      <a href="#summaryCard">概要</a><a href="#imageCard">画像</a><a href="#step3Card">検出①〜⑤</a><a href="#step9Card">検出⑨</a><a href="#step10Card">検出⑩</a><a href="#step6to17Card">領域・OCR</a>
-    </nav>
+    <p class="lead">今回の実装対象は <strong>①〜⑤、⑨、⑩</strong> に加えて、<strong>⑥〜⑧・⑪〜⑰</strong> を実装しています。⑥〜⑯では指定された座標から領域A〜Iを生成し、⑰では各領域をグレースケール化・二値化・拡大してOCRします。⑱〜⑳のノイズ対策・処理前後表示・デバッグ情報も維持しています。</p>
     <div class="notice">①では画像上端中央付近の複数列を同時に縦スキャンし、各列で「白枠 → 背景」の下向きエッジ候補を取得します。②では<strong>y=0の最上端を主スキャン</strong>として左→右・右→左の両方向から「背景 → 白枠」のエッジ候補を取得し、近傍の補助行でも再確認します。③では①で得た白枠下端から<strong>白枠の縦幅中央</strong>を主スキャン位置として、ジャケット左右枠とゲージ左端を探索します。ジャケット画像内部の強いノイズは、色の持続性・枠らしい太さ・左右枠の組合せ・近傍行の一致度を使って除外します。いずれも候補を中央値＋MADで統合し、外れ値の影響を抑えます。</div>
   </header>
 
@@ -311,8 +136,8 @@ figure figcaption{font-size:12px;margin:0 0 6px}
 
   <div id="resultArea" hidden>
     <div class="grid">
-      <section class="card" id="summaryCard">
-        <h2>解析結果 <span class="ui-step-tag">概要</span></h2>
+      <section class="card">
+        <h2>解析結果</h2>
         <div class="body">
           <div class="metrics">
             <div class="metric"><div class="label">① 白枠の下端（背景開始位置）</div><div class="value" id="edgeY">-</div><div class="sub">px / 画像上端から</div></div>
@@ -344,7 +169,7 @@ figure figcaption{font-size:12px;margin:0 0 6px}
             <span class="blue">青細線：②横スキャン行</span>
             <span class="blue">青太線：②白枠左右端</span>
             <span style="color:#149447">緑細線：③横スキャン行</span>
-            <span style="color:#149447">緑太線：③ジャケット左右枠・ゲージ左端</span>
+            <span style="color:#149447">緑太線：③ジャケット左右枠・ゲージ左端（白枠→ジャケット→白枠で検出）</span>
             <span style="color:#d94bd7">桃細線：④ジャケット中央縦スキャン</span>
             <span style="color:#d94bd7">桃太線：④ジャケット上下端</span>
             <span style="color:#8e44ad">紫細線：⑤ 2本の横スキャン</span>
@@ -412,8 +237,8 @@ figure figcaption{font-size:12px;margin:0 0 6px}
     </div>
 
     <div class="grid">
-      <section class="card" id="imageCard">
-        <h2>処理前 / 処理後 <span class="ui-step-tag">確認</span></h2>
+      <section class="card">
+        <h2>処理前 / 処理後</h2>
         <div class="body">
           <div class="preview-grid">
             <figure>
@@ -421,7 +246,7 @@ figure figcaption{font-size:12px;margin:0 0 6px}
               <div class="canvas-box"><canvas id="originalCanvas"></canvas></div>
             </figure>
             <figure>
-              <figcaption>処理後：①で確定した境界を重ねた画像</figcaption>
+              <figcaption>処理後：統一表示（スキャン＝点線／境界＝実線／領域＝薄塗り）</figcaption>
               <div class="canvas-box"><canvas id="annotatedCanvas"></canvas></div>
             </figure>
           </div>
@@ -452,8 +277,8 @@ figure figcaption{font-size:12px;margin:0 0 6px}
         </div>
       </section>
 
-      <section class="card" id="step3Card">
-        <h2>③ ジャケット・ゲージ検出デバッグ <span class="ui-step-tag">Step 3</span></h2>
+      <section class="card">
+        <h2>③ ジャケット・ゲージ検出デバッグ</h2>
         <div class="body">
           <div class="debug-two">
             <figure><figcaption>③ 主スキャン：白枠の縦幅中央</figcaption><div class="canvas-box"><canvas id="step3SignalCanvas" width="900" height="360"></canvas></div></figure>
@@ -551,8 +376,8 @@ figure figcaption{font-size:12px;margin:0 0 6px}
         </div>
       </section>
 
-      <section class="card" id="step9Card">
-        <h2>⑨ PERFECT・GOOD・MISSの上下境界スキャン デバッグ <span class="ui-step-tag">Step 9</span></h2>
+      <section class="card">
+        <h2>⑨ PERFECT・GOOD・MISSの上下境界スキャン デバッグ</h2>
         <div class="body">
           <div class="scan-note">⑨では①で求めた<strong>白枠下端より下</strong>だけを検索し、③で求めた<strong>ジャケット右枠をそのまま縦スキャン位置</strong>として使用します。主線は③のジャケット右枠そのものを使用します。文字が主線に重なる問題を避けるため、境界の評価では主線±複数pxの確認に加え、判定パネル側の横帯を<strong>25パーセンタイル</strong>で集約します。さらに「横長の矩形として上下2辺が成立すること」を必須にし、スコアなどの文字による細い変化を除外します。候補は下から上の順序になる<strong>3つの判定帯（PERFECT→GOOD→MISS）</strong>として選択し、帯幅と帯間隔の整合性も同時に評価します。今回は指定どおり、判定文字列のOCRやA〜I領域の生成は行いません。</div>
           <div class="step9-grid section-space">
@@ -585,8 +410,8 @@ figure figcaption{font-size:12px;margin:0 0 6px}
         </div>
       </section>
 
-      <section class="card" id="step10Card">
-        <h2>⑩ GOOD・LATE/FASTの左右境界スキャン デバッグ <span class="ui-step-tag">Step 10</span></h2>
+      <section class="card">
+        <h2>⑩ GOOD・LATE/FASTの左右境界スキャン デバッグ</h2>
         <div class="body">
           <div class="scan-note">⑩では⑨で取得した<strong>GOODの上端・下端の中央</strong>を横スキャン位置として使用し、①～⑤で取得した<strong>白枠左端～③のゲージ左端</strong>の範囲だけを解析します。指定された順序「背景→GOOD左端→GOOD右端→背景→LATE/FAST左端→LATE/FAST右端→背景」を、横方向のパネル形状として評価します。文字による一時的な明暗変化を避けるため、主線1本だけでなく縦方向の複数行を中央値で集約し、パネル内外の明るさ差・境界強度・幅・間隔・複数行一致度を同時に評価します。</div>
           <div class="metric-grid section-space">
@@ -643,7 +468,7 @@ figure figcaption{font-size:12px;margin:0 0 6px}
 
   
       <section class="card" id="step6to17Card">
-        <h2>⑥〜⑰ 領域生成・画像前処理・OCR <span class="ui-step-tag">領域 / OCR</span></h2>
+        <h2>⑥〜⑰ 領域生成・画像前処理・OCR</h2>
         <div class="body">
           <div class="scan-note">
             ⑥〜⑧、⑪〜⑯は既に確定した座標だけを使ってA〜Iを厳密に切り出します。⑰では領域ごとに読み取り対象をさらに絞り込みます。Aはタイトル行、Cは右側のレベル数字、D〜Hは右側の4桁判定数、Iはコンボ候補側を優先して内部切り出しし、その上でグレースケール・白文字強調・コントラスト強調・Otsu・反転・適応二値化を複数比較します。数字領域では表示形式（4桁固定、レベル1〜50）も利用してOCR候補を選別します。処理前画像と採用した処理後画像、OCR候補を確認できます。
@@ -652,22 +477,6 @@ figure figcaption{font-size:12px;margin:0 0 6px}
             <button id="runOcrBtn" type="button">⑰ OCRを実行</button>
             <button id="clearOcrBtn" type="button" class="secondary">OCR結果を消去</button>
             <span id="ocrGlobalStatus" class="ocr-status">⑥〜⑯の領域座標は解析後に生成されます。OCRは必要なときだけ実行します。</span>
-          </div>
-          <div class="db-check-card" id="dbCheckCard" aria-live="polite">
-            <div class="db-check-head">
-              <h3>楽曲DB照合・矛盾検知</h3>
-              <span id="dbCheckStatus" class="db-status">未実行</span>
-            </div>
-            <div class="db-check-body">
-              <div class="db-grid">
-                <div class="db-item"><div class="k">DBから確定した楽曲</div><div class="v" id="dbMusicTitle">—</div><div class="s" id="dbMusicTitleSub">musics.json</div></div>
-                <div class="db-item"><div class="k">DBから確定した難易度</div><div class="v" id="dbDifficulty">—</div><div class="s" id="dbDifficultySub">musicDifficulties.json</div></div>
-                <div class="db-item"><div class="k">期待レベル</div><div class="v" id="dbExpectedLevel">—</div><div class="s" id="dbObservedLevel">OCR: —</div></div>
-                <div class="db-item"><div class="k">期待総ノーツ数</div><div class="v" id="dbExpectedNotes">—</div><div class="s" id="dbObservedNotes">OCR合計: —</div></div>
-              </div>
-              <ul class="warning-list" id="dbWarningList"></ul>
-              <div class="db-detail" id="dbCheckDetail">OCR完了後に、タイトル・難易度・レベル・総ノーツ数をDBと照合します。</div>
-            </div>
           </div>
           <div class="mini-grid section-space">
             <div class="mini-metric"><div class="k">領域A</div><div class="v" id="regionABox">—</div></div>
@@ -698,58 +507,6 @@ figure figcaption{font-size:12px;margin:0 0 6px}
 
   <div class="footer-note">※画像処理と領域生成はブラウザ内だけで完結します。⑰のOCRを実行する際だけ、Tesseract.js本体と言語データをCDNから読み込みます。画像そのものを外部へ送信する処理はありません。</div>
 </div>
-
-
-<script>
-(function initRebuiltUI(){
-  function setup(){
-    const resultArea=document.getElementById('resultArea');
-    const ocrCard=document.getElementById('step6to17Card');
-    const fileInput=document.getElementById('fileInput');
-    const fileStatus=document.getElementById('uiFileStatus');
-    if(!resultArea || !ocrCard)return;
-
-    // Move OCR/region card into the same results flow while keeping all IDs intact.
-    if(ocrCard.parentElement !== resultArea) resultArea.appendChild(ocrCard);
-
-    // Add compact collapse controls to verbose debug cards, leaving summary/image/OCR open.
-    const alwaysOpen=new Set(['summaryCard','imageCard','step6to17Card']);
-    resultArea.querySelectorAll(':scope > section.card, :scope > .grid > section.card').forEach(card=>{
-      const h2=card.querySelector(':scope > h2');
-      if(!h2 || alwaysOpen.has(card.id) || h2.dataset.uiReady==='1') return;
-      h2.dataset.uiReady='1';
-      const btn=document.createElement('button');
-      btn.type='button';btn.className='ui-collapse-btn';btn.textContent='折りたたむ';
-      btn.addEventListener('click',()=>{
-        const collapsed=card.classList.toggle('ui-collapsed');
-        btn.textContent=collapsed?'展開する':'折りたたむ';
-      });
-      h2.appendChild(btn);
-    });
-
-    if(fileInput && fileStatus){
-      fileInput.addEventListener('change',()=>{
-        const f=fileInput.files && fileInput.files[0];
-        fileStatus.textContent=f?f.name:'画像未選択';
-      });
-    }
-
-    const nav=document.getElementById('uiNav');
-    if(nav){
-      const links=[...nav.querySelectorAll('a')];
-      const targets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
-      const setActive=()=>{
-        let best=0,dist=Infinity;
-        targets.forEach((t,i)=>{const d=Math.abs(t.getBoundingClientRect().top-140);if(d<dist){dist=d;best=i;}});
-        links.forEach((a,i)=>a.classList.toggle('active',i===best));
-      };
-      window.addEventListener('scroll',setActive,{passive:true});
-      setActive();
-    }
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
-})();
-</script>
 
 <script>
 'use strict';
@@ -830,7 +587,7 @@ const el = {
   step10ScanY: $('step10ScanY'), step10ScanYSub: $('step10ScanYSub'), step10Quality: $('step10Quality'), step10QualitySub: $('step10QualitySub'),
   step10GoodLeft2: $('step10GoodLeft2'), step10GoodRight2: $('step10GoodRight2'), step10LateLeft2: $('step10LateLeft2'), step10LateRight2: $('step10LateRight2'),
   step10SignalCanvas: $('step10SignalCanvas'), step10ZoomCanvas: $('step10ZoomCanvas'), step10CandidateTableBody: $('step10CandidateTableBody'), step10CandidatesOutput: $('step10CandidatesOutput'),
-  runOcrBtn: $('runOcrBtn'), clearOcrBtn: $('clearOcrBtn'), ocrGlobalStatus: $('ocrGlobalStatus'), dbCheckStatus: $('dbCheckStatus'), dbMusicTitle: $('dbMusicTitle'), dbMusicTitleSub: $('dbMusicTitleSub'), dbDifficulty: $('dbDifficulty'), dbDifficultySub: $('dbDifficultySub'), dbExpectedLevel: $('dbExpectedLevel'), dbObservedLevel: $('dbObservedLevel'), dbExpectedNotes: $('dbExpectedNotes'), dbObservedNotes: $('dbObservedNotes'), dbWarningList: $('dbWarningList'), dbCheckDetail: $('dbCheckDetail'), regionGrid: $('regionGrid'), regionsJsonOutput: $('regionsJsonOutput'),
+  runOcrBtn: $('runOcrBtn'), clearOcrBtn: $('clearOcrBtn'), ocrGlobalStatus: $('ocrGlobalStatus'), regionGrid: $('regionGrid'), regionsJsonOutput: $('regionsJsonOutput'),
   regionBoxes: Object.fromEntries('ABCDEFGHI'.split('').map(k=>[k,$('region'+k+'Box')]))
 };
 
@@ -1249,21 +1006,35 @@ function detectJacketPairVertical(data,w,h,y,lo,hi,frameLeft,frameRight,frameHei
   // Therefore its horizontal width is much better predicted by the header
   // height than by an absolute pixel threshold.  This prevents image noise
   // from producing a plausible-but-too-narrow pair.
-  const fh=Math.max(20,Number.isFinite(frameHeight)?frameHeight:Math.round(frameWidth*.07));
-  const expectedCenter=.82*fh;
-  const expectedMin=Math.max(cfg.minJacketWidth*.45,expectedCenter*.52);
-  const expectedMax=Math.min(cfg.maxJacketWidth,expectedCenter*1.38);
+  const fh=Math.max(20,Number.isFinite(frameHeight)?frameHeight:Math.round(frameWidth*.08));
+  // The jacket is the first square-like object immediately inside the left
+  // edge of the white header.  Earlier revisions searched almost half of the
+  // header width, which allowed title letters and the difficulty/level panels
+  // to become a stronger false pair than the real jacket border.
+  // Use the header height as the scale reference because the jacket width is
+  // roughly comparable to that height on the supplied result screens.
+  const expectedWidth=clamp(.80*fh, cfg.minJacketWidth, cfg.maxJacketWidth);
+  const expectedOffset=clamp(.22*fh, 18, Math.max(28, .40*fh));
+  const expectedMin=Math.max(cfg.minJacketWidth, expectedWidth*.52);
+  const expectedMax=Math.min(cfg.maxJacketWidth, expectedWidth*1.42);
+  const searchRight=Math.min(hi, Math.round(frameLeft + 1.60*fh));
   for(let i=0;i<peaks.length;i++){
     for(let j=i+1;j<peaks.length;j++){
       let left=peaks[i],right=peaks[j];
       if(left.center>right.center){const t=left;left=right;right=t;}
       const width=right.center-left.center;
+      if(right.center>searchRight)continue;
       if(width<expectedMin || width>expectedMax)continue;
-      const relLeft=(left.center-frameLeft)/frameWidth;
-      if(relLeft<-.03 || relLeft>.30)continue;
-      const sideLeft=frameLikeScore(sig,left.center-18,left.center-5);
-      const sideRight=frameLikeScore(sig,right.center+5,right.center+18);
-      const widthShape=clamp(1-Math.abs(width-expectedCenter)/Math.max(12,expectedCenter*.50),0,1);
+      const offset=left.center-frameLeft;
+      const relLeft=offset/frameWidth;
+      // The jacket begins close to the frame's left edge.  Keeping this
+      // search band tight is the main protection against the title text.
+      if(offset<Math.max(6, .06*fh) || offset>Math.max(32, .72*fh))continue;
+      if(relLeft<-.005 || relLeft>.12)continue;
+      const sideLeft=frameLikeScore(sig,left.center-Math.max(14, .10*fh),left.center-3);
+      const sideRight=frameLikeScore(sig,right.center+3,right.center+Math.max(14, .10*fh));
+      const widthShape=clamp(1-Math.abs(width-expectedWidth)/Math.max(12,expectedWidth*.48),0,1);
+      const offsetShape=clamp(1-Math.abs(offset-expectedOffset)/Math.max(10, .26*fh),0,1);
       const pairScore=
         clamp(left.score,0,1)*.18 +
         clamp(right.score,0,1)*.18 +
@@ -1271,13 +1042,14 @@ function detectJacketPairVertical(data,w,h,y,lo,hi,frameLeft,frameRight,frameHei
         clamp(right.isolation,0,1)*.10 +
         sideLeft*.14 +
         sideRight*.14 +
-        widthShape*.11 +
-        clamp(1-Math.abs(width/frameWidth-.075)/.085,0,1)*.03 +
-        clamp(1-Math.abs(relLeft-.025)/.20,0,1)*.02;
+        widthShape*.14 +
+        offsetShape*.09 +
+        clamp(1-Math.abs(width/frameWidth-.075)/.085,0,1)*.02 +
+        clamp(1-Math.abs(relLeft-.025)/.10,0,1)*.01;
       if(!best || pairScore>best.pairScore){
-        best={left:{start:Math.round(left.center),end:Math.round(left.center+1),width:Math.max(1,left.width),meanScore:left.score},
-              right:{start:Math.round(right.center),end:Math.round(right.center+1),width:Math.max(1,right.width),meanScore:right.score},
-              score:pairScore,width:width,gap:Math.max(0,right.start-left.end)};
+        best={left:{start:Math.round(left.start),end:Math.round(left.end),center:Math.round(left.center),width:Math.max(1,left.width),meanScore:left.score},
+              right:{start:Math.round(right.start),end:Math.round(right.end),center:Math.round(right.center),width:Math.max(1,right.width),meanScore:right.score},
+              score:pairScore,width:Math.max(1,right.end-left.start),gap:Math.max(0,right.start-left.end)};
       }
     }
   }
@@ -1292,7 +1064,10 @@ function candidatePairScore(sig,left,right,frameLeft,frameRight,cfg){
   // The expected jacket is near the left side of the white frame.
   const relLeft=(left.start-frameLeft)/frameWidth;
   const relWidth=width/frameWidth;
-  if(relLeft < -.02 || relLeft > .28 || relWidth < .025 || relWidth > .25)return -Infinity;
+  if(relLeft < -.005 || relLeft > .12 || relWidth < .045 || relWidth > .16)return -Infinity;
+  const fh=Math.max(20, Number.isFinite(frameRight-frameLeft)?(frameRight-frameLeft)*0.08:20);
+  const offset=left.start-frameLeft;
+  if(offset < Math.max(6, .06*fh) || offset > Math.max(32, .75*fh))return -Infinity;
 
   const before=frameLikeScore(sig,left.start-18,left.start-3);
   const after=frameLikeScore(sig,right.end+3,right.end+28);
@@ -1441,9 +1216,12 @@ function detectStep3Row(data,w,h,y,cfg,frameLeft,frameRight,frameHeight){
   // First use the original 1-D candidate detector.  It is useful as a cheap
   // fallback, but it is deliberately NOT trusted on its own because jacket
   // artwork can contain stronger single-row edges than the true border.
+  // Restrict the jacket search to the first ~1.6 header-heights from the
+  // left frame edge.  This covers the complete jacket in the supplied result
+  // formats but excludes the song title, difficulty, and level panels.
   const jacketSearchEnd=Math.min(
     searchEnd,
-    searchStart+Math.round((searchEnd-searchStart)*.48)
+    Math.round(searchStart + Math.max(1, frameHeight*1.60))
   );
   const jacket1d=detectJacketPair(sig,searchStart,jacketSearchEnd,frameLeft,frameRight,cfg);
   const fh=Math.max(20,Number.isFinite(frameHeight)?frameHeight:Math.max(20,Math.round(y*2)));
@@ -1461,19 +1239,39 @@ function detectStep3Row(data,w,h,y,cfg,frameLeft,frameRight,frameHeight){
   const bestPair=jacket.best;
   // The gauge is expected after the jacket-right -> white-frame segment.
   // Search far enough to include the complete multicolor score gauge.
-  const gauge=detectGaugeRun(
-    sig,
-    bestPair.right.end+Math.max(8,Math.round((bestPair.width)*.15)),
-    searchEnd,
-    cfg
-  );
+  // The score gauge is thicker than the jacket border and is centered a
+  // little differently on some result layouts.  Keep the specified main
+  // scan row for the geometry, but use a small vertical neighbourhood only
+  // for gauge colour continuity.  This prevents the gauge from disappearing
+  // when its centre is a few pixels away from the nominal frame midpoint.
+  const gaugeStart=bestPair.right.end+Math.max(8,Math.round((bestPair.width)*.15));
+  const gaugeRadius=Math.max(4,Math.min(18,Math.round(frameHeight*.12)));
+  const gaugeProbeRadius=Math.max(3,Math.min(8,Math.round(frameHeight*.04)));
+  let gauge=null;
+  let gaugeProbeY=y;
+  // The nominal frame midpoint can fall a few pixels above/below the visual
+  // centre of the thick score gauge on different result layouts.  Keep y as
+  // the required primary scan, then use a small neighbourhood only as an
+  // auxiliary verification. This is much safer than changing the main scan
+  // position and prevents a valid jacket from being discarded just because
+  // the gauge was vertically offset by anti-aliasing/layout differences.
+  const probeMax=Math.max(3,Math.round(frameHeight*.14));
+  for(let dy=-probeMax;dy<=probeMax;dy+=3){
+    const gy=clamp(y+dy,0,h-1);
+    const gs=getRowRgbMedianSignal(data,w,h,gy,gaugeRadius);
+    const g=detectGaugeRun(gs,gaugeStart,searchEnd,cfg);
+    if(g && (!gauge || g.meanScore>gauge.meanScore)){gauge=g;gaugeProbeY=gy;}
+  }
+  // Keep the actual midpoint signal in the debug object; probeY is only the
+  // row that happened to give the clearest gauge evidence.
+  const gaugeSig=getRowRgbMedianSignal(data,w,h,y,gaugeProbeRadius);
 
   if(!gauge){
     return {
       y,leftX:bestPair.left.start,rightX:bestPair.right.end,
       gaugeX:null,jacketWidth:bestPair.width,
       quality:bestPair.score*.68,valid:false,
-      reason:'gauge-not-found',sig,
+      reason:'gauge-not-found',gaugeProbeY, sig,
       jacketRuns:jacket1d.runs||[],jacketPair:bestPair,verticalProfile:jacketV.profile||null,verticalPeaks:jacketV.peaks||[]
     };
   }
@@ -1504,7 +1302,7 @@ function detectStep3Row(data,w,h,y,cfg,frameLeft,frameRight,frameHeight){
     jacketPair:bestPair,
     verticalProfile:jacketV.profile||null,
     verticalPeaks:jacketV.peaks||[],
-    gaugeRun:gauge
+    gaugeRun:gauge,gaugeProbeY
   };
 }
 
@@ -1539,23 +1337,27 @@ function drawStep3Signal(){
   ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
   const p={l:45,r:18,t:35,b:35},pw=W-p.l-p.r,ph=H-p.t-p.b;
   const minX=a.frameLeft,maxX=a.frameRight;
-  const vals=a.primary && a.primary.sig ? a.primary.sig : null; if(!vals){ ctx.fillStyle='#596579';ctx.font='14px sans-serif';ctx.fillText('③の有効な主スキャン行を検出できませんでした。デバッグ表を確認してください。',45,70); return; } const n=vals.r.length;
+  const vals=a.primary && a.primary.sig ? a.primary.sig : null;
+  const jp=a.jacketTransitionProfile&&a.jacketTransitionProfile.profile?a.jacketTransitionProfile:null;
+  if(!vals && !jp){ ctx.fillStyle='#596579';ctx.font='14px sans-serif';ctx.fillText('③の有効な主スキャン行を検出できませんでした。デバッグ表を確認してください。',45,70); return; }
+  const n=vals?vals.r.length:(jp.x1-jp.x0+1);
   const xFor=x=>p.l+(x-minX)/Math.max(1,maxX-minX)*pw;
   const yFor=v=>p.t+ph-v*ph;
-  function scoreAt(x){
-    const r=vals.r[x],g=vals.g[x],b=vals.b[x],mx=Math.max(r,g,b),mn=Math.min(r,g,b);
-    return clamp((mx-mn)/180,0,1);
-  }
   ctx.strokeStyle='#e8edf3';ctx.lineWidth=1;for(let i=0;i<=4;i++){const yy=p.t+ph*i/4;ctx.beginPath();ctx.moveTo(p.l,yy);ctx.lineTo(p.l+pw,yy);ctx.stroke();}
-  ctx.strokeStyle='#7a8797';ctx.lineWidth=2;ctx.beginPath();
-  for(let x=minX;x<=maxX;x++){const l=rgbLuma(vals.r[x],vals.g[x],vals.b[x])/255,X=xFor(x),Y=yFor(l);if(x===minX)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);}ctx.stroke();
-  ctx.strokeStyle='#d34ad1';ctx.lineWidth=1.5;ctx.beginPath();
-  for(let x=minX;x<=maxX;x++){const X=xFor(x),Y=yFor(scoreAt(x));if(x===minX)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);}ctx.stroke();
+  if(jp){
+    const pp=jp.profile;
+    ctx.strokeStyle='#149447';ctx.lineWidth=2;ctx.beginPath();
+    for(let i=0;i<pp.length;i++){const X=xFor(jp.x0+i),Y=yFor(pp[i]);if(i===0)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);}ctx.stroke();
+  }
+  if(vals){
+    ctx.strokeStyle='#7a8797';ctx.lineWidth=1.5;ctx.beginPath();
+    for(let x=minX;x<=maxX;x++){const l=rgbLuma(vals.r[x],vals.g[x],vals.b[x])/255,X=xFor(x),Y=yFor(l);if(x===minX)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);}ctx.stroke();
+  }
   if(Number.isFinite(a.jacketLeft)){ctx.strokeStyle='#149447';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(xFor(a.jacketLeft),p.t);ctx.lineTo(xFor(a.jacketLeft),p.t+ph);ctx.stroke();}
   if(Number.isFinite(a.jacketRight)){ctx.strokeStyle='#149447';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(xFor(a.jacketRight),p.t);ctx.lineTo(xFor(a.jacketRight),p.t+ph);ctx.stroke();}
   if(Number.isFinite(a.gaugeLeft)){ctx.strokeStyle='#149447';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(xFor(a.gaugeLeft),p.t);ctx.lineTo(xFor(a.gaugeLeft),p.t+ph);ctx.stroke();}
   if(Number.isFinite(a.representative?.y) && a.representative.y!==a.nominalY){ctx.fillStyle='#596579';ctx.font='12px sans-serif';ctx.fillText('補助行の代表: y='+a.representative.y+' px',W-185,16);}
-  ctx.fillStyle='#596579';ctx.font='12px sans-serif';ctx.fillText('灰: 明るさ / 紫: 彩度(枠・ゲージ候補)',p.l,16);ctx.fillText('緑: 確定位置',p.l,29);
+  ctx.fillStyle='#596579';ctx.font='12px sans-serif';ctx.fillText(jp?'緑: 白枠→ジャケット→白枠の構造プロファイル / 灰: 元スキャン輝度':'灰: 明るさ',p.l,16);ctx.fillText('緑太線: 確定位置',p.l,29);
   for(const x of [minX,Math.round((minX+maxX)/2),maxX]){const X=xFor(x);ctx.fillText(String(x),X-12,p.t+ph+22);}
 }
 
@@ -1918,33 +1720,604 @@ function renderStep5Table(){
   for(const r of a.records){const kept=a.robust.difficultyLeft.kept.includes(r)&&a.robust.difficultyRight.kept.includes(r)&&a.robust.levelLeft.kept.includes(r)&&a.robust.levelRight.kept.includes(r),values=[r.name,r.y,Number.isFinite(r.left)?r.left:'—',Number.isFinite(r.diffRight)?r.diffRight:'—',Number.isFinite(r.levelLeft)?r.levelLeft:'—',Number.isFinite(r.right)?r.right:'—',Number.isFinite(r.quality)?r.quality.toFixed(3):'—',r.reason||'—',kept?'採用':'除外'];const tr=document.createElement('tr');values.forEach((v,i)=>{const td=document.createElement('td');td.textContent=String(v);if(i===8)td.style.color=kept?'#149447':'#9a4a4a';tr.appendChild(td);});el.step5ScanTableBody.appendChild(tr);}
 }
 
+
+function buildBinaryIntegral(data,w,h,x0,x1,y0,y1){
+  const iw=(x1-x0)+1, ih=(y1-y0)+1;
+  const integ=new Uint32Array(iw*ih);
+  for(let yy=0;yy<ih-1;yy++){
+    let rowSum=0;
+    const sy=y0+yy, off=(sy*w+x0)*4;
+    const base=yy*iw, next=(yy+1)*iw;
+    for(let xx=0;xx<iw-1;xx++){
+      const i=off+xx*4;
+      const r=data[i],g=data[i+1],b=data[i+2];
+      const mx=Math.max(r,g,b), mn=Math.min(r,g,b), chroma=mx-mn;
+      const lum=rgbLuma(r,g,b);
+      // Jacket borders are highly saturated in the supplied result screens.
+      // Keep the mask hue-independent so MASTER/EXPERT/APPEND/NORMAL variants
+      // are handled, but suppress dark artwork pixels.
+      const magentaLike=(r>105 && b>95 && g<190 && (r+b-2*g)>55);
+      const vivid=(chroma>=42 && lum>=62);
+      const hit=(magentaLike||vivid)?1:0;
+      rowSum+=hit;
+      integ[next+xx+1]=integ[base+xx+1]+rowSum;
+    }
+  }
+  return {x0,y0,iw,ih,integ};
+}
+function integralRectSum(ii,x0,y0,x1,y1){
+  const ax=clamp(Math.floor(x0)-ii.x0,0,ii.iw-1);
+  const ay=clamp(Math.floor(y0)-ii.y0,0,ii.ih-1);
+  const bx=clamp(Math.ceil(x1)-ii.x0,ax,ii.iw-1);
+  const by=clamp(Math.ceil(y1)-ii.y0,ay,ii.ih-1);
+  const I=ii.integ,w=ii.iw;
+  return I[by*w+bx]-I[ay*w+bx]-I[by*w+ax]+I[ay*w+ax];
+}
+function borderBandCoverage(ii,x,y,wid,hei,th){
+  const t=Math.max(1,Math.min(th,Math.floor(Math.min(wid,hei)/3)));
+  const top=integralRectSum(ii,x,y,x+wid,y+t)/Math.max(1,wid*t);
+  const bottom=integralRectSum(ii,x,y+hei-t,x+wid,y+hei)/Math.max(1,wid*t);
+  const left=integralRectSum(ii,x,y,x+t,y+hei)/Math.max(1,t*hei);
+  const right=integralRectSum(ii,x+wid-t,y,x+wid,y+hei)/Math.max(1,t*hei);
+  return {top,bottom,left,right,mean:(top+bottom+left+right)/4,min:Math.min(top,bottom,left,right)};
+}
+function hsvLikeMagentaScore(r,g,b){
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), c=mx-mn;
+  if(c<22 || mx<90) return 0;
+  // Hue-independent enough for pink/purple jacket frames, but specifically
+  // suppresses cyan/green/blue. The actual Project SEKAI jacket frame is a
+  // highly saturated pink/purple accent in the supplied layouts.
+  let hue=0;
+  if(c>0){
+    if(mx===r) hue=60*(((g-b)/c)%6);
+    else if(mx===g) hue=60*((b-r)/c+2);
+    else hue=60*((r-g)/c+4);
+    if(hue<0) hue+=360;
+  }
+  const sat=c/Math.max(1,mx);
+  const v=mx/255;
+  const hueDist=Math.min(Math.abs(hue-290),Math.abs(hue-310),Math.abs(hue-275),Math.abs(hue-325));
+  const hueScore=clamp(1-hueDist/48,0,1);
+  return clamp(hueScore*.70 + clamp((sat-.38)/.55,0,1)*.20 + clamp((v-.40)/.60,0,1)*.10,0,1);
+}
+
+function detectPersistentMagentaVerticalEdges(data,w,h,frameLeft,frameRight,frameHeight){
+  const fh=Math.max(40,Math.round(frameHeight));
+  const frameW=Math.max(1,frameRight-frameLeft);
+  const y0=clamp(Math.round(fh*.015),0,h-2);
+  const y1=clamp(Math.round(Math.min(fh*.98,h-2)),y0+1,h-1);
+  const x0=clamp(Math.round(frameLeft+4),0,w-2);
+  const x1=clamp(Math.round(Math.min(frameRight-4,frameLeft+fh*1.40)),x0+1,w-1);
+  const scores=new Float64Array(Math.max(0,x1-x0));
+  const support=new Float64Array(Math.max(0,x1-x0));
+  const longest=new Int16Array(Math.max(0,x1-x0));
+
+  for(let x=x0;x<x1;x++){
+    let good=0,run=0,maxRun=0,softRun=0,maxSoft=0;
+    for(let y=y0;y<=y1;y++){
+      const i=(y*w+x)*4;
+      const s=hsvLikeMagentaScore(data[i],data[i+1],data[i+2]);
+      if(s>=.55){good++;run++;if(run>maxRun)maxRun=run;}
+      else if(s>=.34){softRun++;if(softRun>maxSoft)maxSoft=softRun;run=Math.max(0,run-1);}
+      else {run=0;softRun=0;}
+    }
+    const height=Math.max(1,y1-y0+1);
+    const sup=good/height;
+    const longScore=clamp(maxRun/Math.max(20,fh*.62),0,1);
+    const supScore=clamp(sup/.12,0,1);
+    const softScore=clamp(maxSoft/Math.max(12,fh*.12),0,1);
+    support[x-x0]=sup;
+    longest[x-x0]=Math.min(32767,maxRun);
+    scores[x-x0]=longScore*.64 + supScore*.26 + softScore*.10;
+  }
+
+  const smooth=smoothHorizontal(scores,5);
+  const peaks=[];
+  const minSep=Math.max(3,Math.round(fh*.018));
+  for(let i=3;i<smooth.length-3;i++){
+    const v=smooth[i];
+    if(v<.28)continue;
+    if(v<smooth[i-1] || v<smooth[i+1])continue;
+    const x=x0+i;
+    let a=x,b=x;
+    while(a>x0 && smooth[a-1-x0]>=Math.max(.22,v*.70))a--;
+    while(b<x1-1 && smooth[b+1-x0]>=Math.max(.22,v*.70))b++;
+    const width=b-a+1;
+    if(width<minSep || width>Math.max(14,Math.round(fh*.12)))continue;
+    const local=[];
+    for(let xx=a;xx<=b;xx++)local.push(smooth[xx-x0]);
+    const mean=local.reduce((q,z)=>q+z,0)/Math.max(1,local.length);
+    const runMax=Math.max(...Array.from(longest.slice(a-x0,b-x0+1)));
+    peaks.push({start:a,end:b,center:(a+b)/2,width,score:mean,longestRun:runMax});
+    i=Math.max(i,b-x0);
+  }
+  peaks.sort((a,b)=>(b.score+b.longestRun/Math.max(40,fh))-(a.score+a.longestRun/Math.max(40,fh)));
+
+  let best=null;
+  const expectedMin=fh*.54, expectedMax=fh*.92;
+  for(let i=0;i<peaks.length;i++){
+    for(let j=i+1;j<peaks.length;j++){
+      let l=peaks[i],r=peaks[j];
+      if(l.center>r.center){const t=l;l=r;r=t;}
+      const width=r.center-l.center;
+      const leftOffset=l.center-frameLeft;
+      if(leftOffset<fh*.035 || leftOffset>fh*.34)continue;
+      if(width<expectedMin || width>expectedMax)continue;
+      if(r.center>frameLeft+fh*1.15)continue;
+      const widthScore=clamp(1-Math.abs(width-fh*.72)/Math.max(18,fh*.30),0,1);
+      const leftScore=clamp(1-Math.abs(leftOffset-fh*.13)/Math.max(14,fh*.20),0,1);
+      const persistence=clamp((l.longestRun+r.longestRun)/(2*Math.max(30,fh*.62)),0,1);
+      const pairScore=l.score*.27+r.score*.27+persistence*.24+widthScore*.14+leftScore*.08;
+      if(!best || pairScore>best.score){
+        best={left:Math.round(l.start),right:Math.round(r.end),top:null,bottom:null,width:Math.round(r.end-l.start),height:null,
+          score:pairScore,method:'persistent-magenta-vertical',leftPeak:l,rightPeak:r,
+          coverage:{left:l.score,right:r.score,min:Math.min(l.score,r.score),mean:(l.score+r.score)/2}};
+      }
+    }
+  }
+  return {best,peaks,profile:{scores,support,longest,x0,x1,y0,y1},frameW,fh};
+}
+
+function jacketBorderColorScore(r,g,b){
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),ch=mx-mn;
+  if(mx<105||ch<22)return 0;
+  let hue=0;
+  if(ch===0) return 0;
+  if(mx===r) hue=60*(((g-b)/ch)%6);
+  else if(mx===g) hue=60*((b-r)/ch+2);
+  else hue=60*((r-g)/ch+4);
+  if(hue<0)hue+=360;
+  const centers=[265,280,295,310,325,340,352,4];
+  let d=180;
+  for(const c of centers){ const q=Math.abs(hue-c); d=Math.min(d,q,360-q); }
+  const hueScore=clamp(1-d/58,0,1);
+  const sat=ch/Math.max(1,mx);
+  const satScore=clamp((sat-.26)/.42,0,1);
+  const brightScore=clamp((mx-105)/120,0,1);
+  return hueScore*.56+satScore*.34+brightScore*.10;
+}
+
+function sampleJacketRectBorder(data,w,h,x,y,rw,rh,band){
+  const b=Math.max(2,Math.round(band));
+  const sideSamples=Math.max(8,Math.min(44,Math.round(Math.max(rw,rh)/5)));
+  const vals={top:[],bottom:[],left:[],right:[]};
+  const sample=(xx,yy)=>{
+    xx=clamp(Math.round(xx),0,w-1); yy=clamp(Math.round(yy),0,h-1);
+    const i=(yy*w+xx)*4;
+    return jacketBorderColorScore(data[i],data[i+1],data[i+2]);
+  };
+  for(let k=1;k<=sideSamples;k++){
+    const t=k/(sideSamples+1);
+    const xx=x+t*(rw-1), yy=y+t*(rh-1);
+    let top=0,bottom=0,left=0,right=0;
+    for(let q=-b;q<=b;q++){
+      top=Math.max(top,sample(xx,y+q));
+      bottom=Math.max(bottom,sample(xx,y+rh-1+q));
+      left=Math.max(left,sample(x+q,yy));
+      right=Math.max(right,sample(x+rw-1+q,yy));
+    }
+    vals.top.push(top);vals.bottom.push(bottom);vals.left.push(left);vals.right.push(right);
+  }
+  const avg=a=>a.length?median(a):0;
+  const support=a=>a.length?a.filter(v=>v>=.42).length/a.length:0;
+  return {
+    top:avg(vals.top),bottom:avg(vals.bottom),left:avg(vals.left),right:avg(vals.right),
+    topSupport:support(vals.top),bottomSupport:support(vals.bottom),
+    leftSupport:support(vals.left),rightSupport:support(vals.right)
+  };
+}
+
+function sampleJacketInterior(data,w,h,x,y,rw,rh){
+  const px=Math.max(4,Math.round(rw*.16)),py=Math.max(4,Math.round(rh*.16));
+  const xa=clamp(Math.round(x+px),0,w-1), xb=clamp(Math.round(x+rw-px),xa+1,w);
+  const ya=clamp(Math.round(y+py),0,h-1), yb=clamp(Math.round(y+rh-py),ya+1,h);
+  const vals=[]; const chrom=[];
+  const xs=Math.max(8,Math.min(18,Math.round((xb-xa)/10)));
+  const ys=Math.max(8,Math.min(18,Math.round((yb-ya)/10)));
+  for(let yy=ya;yy<yb;yy+=ys){
+    for(let xx=xa;xx<xb;xx+=xs){
+      const i=(yy*w+xx)*4,r=data[i],g=data[i+1],b=data[i+2];
+      vals.push(rgbLuma(r,g,b));chrom.push(Math.max(r,g,b)-Math.min(r,g,b));
+    }
+  }
+  const lum=vals.length?median(vals):128, ch=chrom.length?median(chrom):0;
+  const p90=vals.length?percentileSmall(vals,.90):lum, p10=vals.length?percentileSmall(vals,.10):lum;
+  return {luma:lum,chroma:ch,variation:p90-p10,
+    score:clamp((150-lum)/115,0,1)*.45+clamp((ch-12)/75,0,1)*.25+clamp((p90-p10)/95,0,1)*.30};
+}
+
+function buildJacketColorMask(data,w,h,x0,x1,y0,y1,threshold){
+  const ww=x1-x0+1,hh=y1-y0+1,mask=new Uint8Array(ww*hh);
+  for(let yy=0;yy<hh;yy++){
+    let off=((y0+yy)*w+x0)*4;
+    for(let xx=0;xx<ww;xx++,off+=4){
+      const r=data[off],g=data[off+1],b=data[off+2];
+      mask[yy*ww+xx]=jacketBorderColorScore(r,g,b)>=threshold?1:0;
+    }
+  }
+  // Prefix sums make the repeated border-support tests fast enough for Safari.
+  const rowPrefix=new Int32Array(hh*(ww+1));
+  for(let y=0;y<hh;y++){
+    const base=y*(ww+1),mb=y*ww;
+    let run=0; rowPrefix[base]=0;
+    for(let x=0;x<ww;x++){run+=mask[mb+x];rowPrefix[base+x+1]=run;}
+  }
+  const colPrefix=new Int32Array(ww*(hh+1));
+  for(let x=0;x<ww;x++){
+    const base=x*(hh+1); let run=0; colPrefix[base]=0;
+    for(let y=0;y<hh;y++){run+=mask[y*ww+x];colPrefix[base+y+1]=run;}
+  }
+  return {mask,ww,hh,x0,y0,rowPrefix,colPrefix};
+}
+
+function projectVerticalSupport(maskObj){
+  const {ww,hh,colPrefix}=maskObj;
+  const out=new Float64Array(ww);
+  for(let x=0;x<ww;x++){
+    const base=x*(hh+1);
+    const sum=colPrefix[base+hh];
+    out[x]=sum/Math.max(1,hh);
+  }
+  return out;
+}
+
+function projectHorizontalSupport(maskObj,xa,xb){
+  const {ww,hh,rowPrefix}=maskObj;
+  const out=new Float64Array(hh);
+  xa=clamp(Math.round(xa),0,ww-1); xb=clamp(Math.round(xb),xa+1,ww-1);
+  const span=Math.max(1,xb-xa+1),rb=2;
+  for(let y=0;y<hh;y++){
+    let best=0;
+    const ya=Math.max(0,y-rb),yb=Math.min(hh-1,y+rb);
+    for(let yy=ya;yy<=yb;yy++){
+      const base=yy*(ww+1);
+      const sum=rowPrefix[base+xb+1]-rowPrefix[base+xa];
+      best=Math.max(best,sum/span);
+    }
+    out[y]=best;
+  }
+  return out;
+}
+
+function localPeakIndices(arr,minValue,minDistance){
+  const peaks=[];
+  for(let i=1;i<arr.length-1;i++){
+    if(arr[i]<minValue)continue;
+    if(arr[i]<arr[i-1]||arr[i]<arr[i+1])continue;
+    peaks.push(i);
+  }
+  peaks.sort((a,b)=>arr[b]-arr[a]);
+  const kept=[];
+  for(const i of peaks){
+    if(kept.every(k=>Math.abs(k-i)>=minDistance))kept.push(i);
+    if(kept.length>=40)break;
+  }
+  return kept.sort((a,b)=>a-b);
+}
+
+function buildJacketFrameTransitionProfile(data,w,h,frameLeft,frameRight,frameHeight){
+  // ③の最重要情報は「白枠 → ジャケット → 白枠」の色・明るさの変化。
+  // ジャケット枠の色やジャケット画像の色そのものは一切判定材料にしない。
+  const fh=Math.max(32,Math.round(frameHeight));
+  const fl=clamp(Math.round(frameLeft),0,w-2);
+  const fr=clamp(Math.round(frameRight),fl+2,w-1);
+  const y0=clamp(Math.round(fh*.06),0,h-1);
+  const y1=clamp(Math.round(fh*.94),y0+8,h-1);
+  const ys=[];
+  for(let y=y0;y<=y1;y++)ys.push(y);
+  const n=fr-fl+1;
+  const medianLuma=new Float64Array(n);
+  const q25Luma=new Float64Array(n);
+  const q75Luma=new Float64Array(n);
+  const variation=new Float64Array(n);
+
+  // 各xについて縦方向の代表輝度を求める。文字・細線は一部の行にしか
+  // 現れないため、中央値とIQRを使うとジャケットの面積的な変化を残せる。
+  for(let xi=0;xi<n;xi++){
+    const vals=new Array(ys.length);
+    for(let k=0;k<ys.length;k++){
+      const y=ys[k],i=(y*w+(fl+xi))*4;
+      vals[k]=rgbLuma(data[i],data[i+1],data[i+2]);
+    }
+    vals.sort((a,b)=>a-b);
+    medianLuma[xi]=percentileSmall(vals,.50);
+    q25Luma[xi]=percentileSmall(vals,.25);
+    q75Luma[xi]=percentileSmall(vals,.75);
+    variation[xi]=q75Luma[xi]-q25Luma[xi];
+  }
+
+  const medSmooth=medianFilter1D(medianLuma,7);
+  const varSmooth=medianFilter1D(variation,7);
+  // 長いスケールの背景を除去し、「白枠→非白枠」の相対変化を見る。
+  const longBase=medianFilter1D(medSmooth,Math.max(31,Math.round(fh*.28)|1));
+  const contrast=new Float64Array(n);
+  for(let i=0;i<n;i++){
+    const local=medSmooth[i],base=longBase[i];
+    const diff=Math.abs(local-base);
+    const spread=varSmooth[i];
+    contrast[i]=clamp(diff/48,0,1)*.72 + clamp((spread-5)/38,0,1)*.28;
+  }
+
+  // 補助的に「その行で白枠背景から外れた画素の割合」も利用する。
+  // 行ごとの背景輝度を白枠全体の中央値から推定するため、色相には依存しない。
+  const occupancy=new Float64Array(n);
+  for(let k=0;k<ys.length;k++){
+    const y=ys[k];
+    const rowVals=new Array(Math.max(1,fr-fl+1));
+    let idx=0;
+    for(let x=fl;x<=fr;x++){
+      const i=(y*w+x)*4;
+      rowVals[idx++]=rgbLuma(data[i],data[i+1],data[i+2]);
+    }
+    const rowBase=percentileSmall(rowVals,.65);
+    const thr=Math.max(16, Math.min(46, rowBase*.16));
+    for(let xi=0;xi<n;xi++){
+      const i=(y*w+(fl+xi))*4;
+      const lum=rgbLuma(data[i],data[i+1],data[i+2]);
+      if(Math.abs(lum-rowBase)>=thr)occupancy[xi]+=1;
+    }
+  }
+  for(let i=0;i<n;i++)occupancy[i]/=Math.max(1,ys.length);
+  const occSmooth=medianFilter1D(occupancy,7);
+
+  // 「白枠と異なる」ことを2種類の独立した特徴から評価する。
+  const profile=new Float64Array(n);
+  for(let i=0;i<n;i++){
+    profile[i]=clamp(contrast[i]*.52 + occSmooth[i]*.48,0,1);
+  }
+
+  return {profile,medianLuma:medSmooth,q25:q25Luma,q75:q75Luma,variation:varSmooth,
+    longBase,occupancy:occSmooth,x0:fl,x1:fr,y0,y1,frameHeight:fh};
+}
+
+function closeBinaryRunMask(mask,radius){
+  const n=mask.length,r=Math.max(1,Math.round(radius));
+  const dil=new Uint8Array(n),out=new Uint8Array(n);
+  for(let i=0;i<n;i++){
+    let on=0;
+    const a=Math.max(0,i-r),b=Math.min(n-1,i+r);
+    for(let j=a;j<=b;j++){if(mask[j]){on=1;break;}}
+    dil[i]=on;
+  }
+  for(let i=0;i<n;i++){
+    let on=1;
+    const a=Math.max(0,i-r),b=Math.min(n-1,i+r);
+    for(let j=a;j<=b;j++){if(!dil[j]){on=0;break;}}
+    out[i]=on;
+  }
+  return out;
+}
+
+function detectFirstJacketRunByFrameContrast(profile,frameLeft,frameRight,frameHeight){
+  const p=profile.profile;
+  const n=p.length;
+  if(n<12)return null;
+  // ジャケットは白枠の左端から近い位置にあり、ほぼ正方形なので、
+  // 白枠高に対しておおむね0.50～1.15倍の横幅を想定する。
+  const fh=Math.max(32,frameHeight);
+  const searchEnd=clamp(Math.round(Math.min(n-3,fh*1.55)),8,n-3);
+  const preEnd=clamp(Math.round(fh*.18),6,Math.max(6,searchEnd-2));
+  const base=median(Array.from(p.slice(0,preEnd)));
+  const early=Array.from(p.slice(0,Math.max(preEnd+1,Math.min(searchEnd,n))));
+  const q50=median(early),q90=quantile(early,.90);
+  const peakDelta=Math.max(.04,q90-base);
+  const highThr=clamp(base+peakDelta*.42,0.16,.62);
+  const lowThr=clamp(base+peakDelta*.20,0.10,.48);
+  const mask=new Uint8Array(searchEnd+1);
+  for(let i=0;i<=searchEnd;i++)mask[i]=(p[i]>=highThr)?1:0;
+  const closed=closeBinaryRunMask(mask,Math.max(2,Math.round(fh*.025)));
+  const minW=Math.max(24,Math.round(fh*.48));
+  const maxW=Math.max(minW+4,Math.round(fh*1.20));
+  const runs=[];
+  let s=-1;
+  for(let i=0;i<=searchEnd+1;i++){
+    const on=(i<=searchEnd)?!!closed[i]:false;
+    if(on&&s<0)s=i;
+    if(!on&&s>=0){
+      const e=i,len=e-s;
+      if(len>=minW&&len<=maxW)runs.push({s,e});
+      s=-1;
+    }
+  }
+  if(!runs.length){
+    // 閾値が高すぎた場合だけ低いヒステリシス閾値で再探索する。
+    const mask2=new Uint8Array(searchEnd+1);
+    for(let i=0;i<=searchEnd;i++)mask2[i]=(p[i]>=lowThr)?1:0;
+    const closed2=closeBinaryRunMask(mask2,Math.max(2,Math.round(fh*.025)));
+    let ss=-1;
+    for(let i=0;i<=searchEnd+1;i++){
+      const on=(i<=searchEnd)?!!closed2[i]:false;
+      if(on&&ss<0)ss=i;
+      if(!on&&ss>=0){
+        const e=i,len=e-ss;
+        if(len>=minW&&len<=maxW)runs.push({s:ss,e});
+        ss=-1;
+      }
+    }
+  }
+  if(!runs.length)return null;
+
+  const candidates=[];
+  for(const run of runs){
+    const inside=Array.from(p.slice(run.s,run.e));
+    const plateau=median(inside);
+    const before=run.s>0?median(Array.from(p.slice(Math.max(0,run.s-Math.max(6,Math.round(fh*.15))),run.s))):base;
+    const after=run.e<searchEnd?median(Array.from(p.slice(run.e,Math.min(searchEnd,run.e+Math.max(6,Math.round(fh*.15)))))):base;
+    const width=run.e-run.s;
+    const widthScore=clamp(1-Math.abs(width/fh-.78)/.35,0,1);
+    const contrastScore=clamp((plateau-Math.max(before,after))/.24,0,1);
+    const leftTransition=clamp((plateau-before)/.30,0,1);
+    const rightTransition=clamp((plateau-after)/.30,0,1);
+    const quietScore=(1-clamp(before/.45,0,1))*.5+(1-clamp(after/.45,0,1))*.5;
+    // 最初に現れる十分な幅の「白枠と異なる帯」を強く優先する。
+    const firstScore=1-clamp(run.s/Math.max(1,fh*1.15),0,1);
+    const score=contrastScore*.35+widthScore*.22+
+      ((leftTransition+rightTransition)/2)*.20+quietScore*.15+firstScore*.08;
+    candidates.push({s:run.s,e:run.e,width,score,plateau,before,after,
+      leftTransition,rightTransition,quietScore,firstScore});
+  }
+  candidates.sort((a,b)=>b.score-a.score);
+  const best=candidates[0];
+  if(!best)return null;
+
+  // エッジは「背景」と「ジャケット帯」の中間値を通る位置に戻す。
+  const leftT=(best.before+best.plateau)*.5;
+  const rightT=(best.after+best.plateau)*.5;
+  let left=best.s,right=best.e;
+  const l0=Math.max(0,best.s-Math.round(fh*.12)),l1=Math.min(best.e,best.s+Math.round(fh*.12));
+  for(let i=l0;i<=l1;i++){if(p[i]>=leftT){left=i;break;}}
+  const r0=Math.max(best.s,best.e-Math.round(fh*.12)),r1=Math.min(searchEnd,best.e+Math.round(fh*.05));
+  for(let i=r0;i<=r1;i++){if(p[i]<=rightT){right=i;break;}}
+  if(right-left<Math.round(fh*.45)){left=best.s;right=best.e;}
+
+  // ③での必須値は左右枠だが、デバッグ用におおよその上下も推定して返す。
+  // 上下は後段④が独立して再検出するため、ここでは厳密な採用値にしない。
+  const width=Math.max(1,right-left);
+  const approxTop=clamp(Math.round(profile.y1*.08),0,profile.y1-2);
+  const approxBottom=clamp(approxTop+width,approxTop+2,profile.y1);
+  const xAbsLeft=clamp(profile.x0+left,frameLeft,frameRight-1);
+  const xAbsRight=clamp(profile.x0+right,frameLeft+1,frameRight);
+  return {
+    left:xAbsLeft,right:xAbsRight,top:approxTop,bottom:approxBottom,
+    width:xAbsRight-xAbsLeft,height:approxBottom-approxTop,
+    score:best.score,coverage:{top:best.leftTransition,bottom:best.rightTransition,left:best.leftTransition,right:best.rightTransition,mean:best.score},
+    edgeColor:{top:best.leftTransition,bottom:best.rightTransition,left:best.leftTransition,right:best.rightTransition},
+    innerLuma:best.plateau,innerChroma:null,innerVariation:null,artworkScore:0.0,
+    method:'white-frame-to-jacket-to-white-frame',
+    transition:{baseline:base,highThreshold:highThr,lowThreshold:lowThr,runStart:best.s,runEnd:best.e,
+      plateau:best.plateau,before:best.before,after:best.after,leftTransition:best.leftTransition,
+      rightTransition:best.rightTransition,quietScore:best.quietScore,firstScore:best.firstScore,
+      candidates:candidates.slice(0,24)},
+    profile:{x0:profile.x0,x1:profile.x1,y0:profile.y0,y1:profile.y1}
+  };
+}
+
+function detectJacketRectangle(data,w,h,frameLeft,frameRight,frameHeight){
+  if(!Number.isFinite(frameLeft)||!Number.isFinite(frameRight)||frameRight<=frameLeft||!Number.isFinite(frameHeight))return null;
+  const transitionProfile=buildJacketFrameTransitionProfile(data,w,h,frameLeft,frameRight,frameHeight);
+  return detectFirstJacketRunByFrameContrast(transitionProfile,frameLeft,frameRight,Math.max(32,Math.round(frameHeight)))||null;
+}
+
 function analyzeStep3(data,w,h,a,hcfg){
   if(!Number.isFinite(a.finalY)||!Number.isFinite(hcfg.frameLeft)||!Number.isFinite(hcfg.frameRight)||hcfg.frameRight<=hcfg.frameLeft){
     const cfg0=evaluateStep3Settings();
     const empty={median:null,mad:0,tolerance:0,kept:[],valid:[]};
-    return {cfg:cfg0,nominalY:null,rowYs:[],records:[],primary:null,scanY:null,frameLeft:hcfg.frameLeft??null,frameRight:hcfg.frameRight??null,jacketLeft:null,jacketRight:null,gaugeLeft:null,jacketWidth:null,leftSel:empty,rightSel:empty,gaugeSel:empty,keptRows:[],quality:0,validCount:0};
+    return {cfg:cfg0,nominalY:null,rowYs:[],records:[],primary:null,scanY:null,frameLeft:hcfg.frameLeft??null,frameRight:hcfg.frameRight??null,jacketLeft:null,jacketRight:null,gaugeLeft:null,jacketWidth:null,leftSel:empty,rightSel:empty,gaugeSel:empty,keptRows:[],quality:0,validCount:0,jacketRect:null,jacketTransitionProfile:null};
   }
   const cfg=evaluateStep3Settings();
   const nominalY=clamp(Math.round(a.finalY/2),0,h-1);
   const rowYs=makeStep3Rows(nominalY,cfg.rowRadius,cfg.rowStep,h);
   const records=[];
   const frameHeight=Math.max(20,Math.round(a.finalY));
-  for(const y of rowYs)records.push(detectStep3Row(data,w,h,y,cfg,hcfg.frameLeft,hcfg.frameRight,frameHeight));
-  const complete=records.filter(r=>r.valid && Number.isFinite(r.leftX)&&Number.isFinite(r.rightX)&&Number.isFinite(r.gaugeX));
-  const scoreSorted=complete.slice().sort((p,q)=>(q.quality-Math.abs(q.y-nominalY)*.0005)-(p.quality-Math.abs(p.y-nominalY)*.0005));
+  // Perform a rectangle-level search once for the whole header.  This is
+  // intentionally independent of the noisy center scan row. A jacket is a
+  // bordered, approximately square object; title text and difficulty labels
+  // generally cannot satisfy all four perimeter sides at once.
+  const jacketRect=detectJacketRectangle(data,w,h,hcfg.frameLeft,hcfg.frameRight,frameHeight);
+  if(jacketRect){
+    try{jacketRect._transitionProfile=buildJacketFrameTransitionProfile(data,w,h,hcfg.frameLeft,hcfg.frameRight,frameHeight);}catch(_e){jacketRect._transitionProfile=null;}
+  }
+  for(const y of rowYs){
+    const rec=detectStep3Row(data,w,h,y,cfg,hcfg.frameLeft,hcfg.frameRight,frameHeight);
+    if(jacketRect){
+      // Keep the row-by-row gauge detection, but replace the unstable jacket
+      // pair with the robust rectangle-level result.
+      rec.leftX=jacketRect.left;
+      rec.rightX=jacketRect.right;
+      rec.jacketWidth=jacketRect.width;
+      rec.jacketRectScore=jacketRect.score;
+      rec.jacketRectCoverage=jacketRect.coverage;
+      rec.jacketRectTop=jacketRect.top;
+      rec.jacketRectBottom=jacketRect.bottom;
+      // A gauge may legitimately fail on one auxiliary row; the jacket itself
+      // is still valid and can participate in robust aggregation.
+      if(Number.isFinite(rec.gaugeX)){
+        rec.valid=true;
+        rec.reason='rectangular-jacket+gauge';
+        rec.quality=Math.max(rec.quality||0,Math.min(1,jacketRect.score*.82+(rec.quality||0)*.18));
+      }else{
+        rec.valid=Number.isFinite(rec.leftX)&&Number.isFinite(rec.rightX);
+        rec.reason='rectangular-jacket';
+        rec.quality=Math.max(rec.quality||0,jacketRect.score*.82);
+      }
+    }
+    records.push(rec);
+  }
+  // ジャケット左右枠とゲージ左端は独立して集約する。
+  // 以前は「3点すべて取得できた行」だけを使っていたため、ゲージが一時的に
+  // 失敗するとジャケットまで未検出扱いになることがあった。ジャケット認識を
+  // ゲージ認識から完全に切り離す。
+  const jacketRows=records.filter(r=>r.valid && Number.isFinite(r.leftX)&&Number.isFinite(r.rightX));
+
+  // 重要: 新しい③ではジャケットを「白枠→ジャケット→白枠」で独立検出している。
+  // そのジャケットと、古い1-D候補から求めた gaugeX を混在させると、
+  // 以前ジャケット認識に失敗した画像だけでゲージ探索開始点がずれてしまい、
+  // ⑤以降の範囲も連鎖的に壊れる。ここでは最終ジャケット右端を確定した後、
+  // ゲージ左端を「ジャケット右→白枠→ゲージ」の関係から再検出して完全に分離する。
+  // frameRight はこの後もステップ3全体で共通なので、ここで先に確定しておく。
+  const frameLeft=hcfg.frameLeft,frameRight=hcfg.frameRight;
+  const preliminaryLeft=robustSelectStep3(jacketRows,'leftX',cfg.robustMad).median;
+  const preliminaryRight=robustSelectStep3(jacketRows,'rightX',cfg.robustMad).median;
+  const preliminaryWidth=(Number.isFinite(preliminaryLeft)&&Number.isFinite(preliminaryRight))
+    ?Math.max(20,preliminaryRight-preliminaryLeft)
+    :Math.max(20,Math.round(frameHeight*.78));
+
+  function detectGaugeUsingFinalJacket(startJacketRight, preferredY){
+    if(!Number.isFinite(startJacketRight)) return null;
+    const endX=clamp(Math.round(frameRight-3),0,w-1);
+    const baseStart=clamp(Math.round(startJacketRight + Math.max(8,preliminaryWidth*.12)),0,endX-2);
+    const probeMax=Math.max(3,Math.round(frameHeight*.14));
+    let best=null;
+    for(let dy=-probeMax;dy<=probeMax;dy+=2){
+      const gy=clamp(preferredY+dy,0,h-1);
+      const gs=getRowRgbMedianSignal(data,w,h,gy,Math.max(4,Math.min(18,Math.round(frameHeight*.12))));
+      const g=detectGaugeRun(gs,baseStart,endX,cfg);
+      if(g){
+        const centerPrior=1-clamp(Math.abs(dy)/Math.max(1,probeMax),0,1);
+        const score=(g.meanScore||0)*.88+centerPrior*.12;
+        if(!best||score>best._score)best={...g,_score:score,probeY:gy};
+      }
+    }
+    if(!best) return null;
+    const minGap=Math.max(6,Math.round(preliminaryWidth*.08));
+    if(best.start<startJacketRight+minGap)return null;
+    return best;
+  }
+
+  // まずロバストに確定したジャケット右端を決定。
+  const jacketRightPre=preliminaryRight;
+  for(const r of records){
+    if(!Number.isFinite(jacketRightPre)) break;
+    const gg=detectGaugeUsingFinalJacket(jacketRightPre,r.y);
+    r._finalGaugeCandidate=gg;
+    if(gg){
+      r.gaugeX=gg.start;
+      r.gaugeRun=gg;
+      r.gaugeProbeY=gg.probeY;
+      if(Number.isFinite(r.leftX)&&Number.isFinite(r.rightX)){
+        r.valid=true;
+        r.reason=r.reason==='rectangular-jacket'?'rectangular-jacket+final-gauge':r.reason;
+      }
+    }
+  }
+
+  const gaugeRows=records.filter(r=>Number.isFinite(r.gaugeX));
+  const complete=gaugeRows.filter(r=>Number.isFinite(r.leftX)&&Number.isFinite(r.rightX));
+  const scoreSorted=jacketRows.slice().sort((p,q)=>(q.quality-Math.abs(q.y-nominalY)*.0005)-(p.quality-Math.abs(p.y-nominalY)*.0005));
   // 指定どおり、③の主スキャン位置は白枠の縦幅中央を固定する。
   // 近傍行は⑱のノイズ対策用の補助観測としてのみ使用する。
   const primary=records.find(r=>r.y===nominalY)||records[0]||null;
   const representative=scoreSorted[0]||records.reduce((p,q)=>(q.quality>(p?.quality??-1)?q:p),records[0]||null);
-  const leftSel=robustSelectStep3(complete,'leftX',cfg.robustMad);
-  const rightSel=robustSelectStep3(complete,'rightX',cfg.robustMad);
-  const gaugeSel=robustSelectStep3(complete,'gaugeX',cfg.robustMad);
-  const frameLeft=hcfg.frameLeft,frameRight=hcfg.frameRight;
+  const leftSel=robustSelectStep3(jacketRows,'leftX',cfg.robustMad);
+  const rightSel=robustSelectStep3(jacketRows,'rightX',cfg.robustMad);
+  const gaugeSel=robustSelectStep3(gaugeRows,'gaugeX',cfg.robustMad);
   const jacketLeft=leftSel.median,jacketRight=rightSel.median,gaugeLeft=gaugeSel.median;
   const jacketWidth=(Number.isFinite(jacketLeft)&&Number.isFinite(jacketRight)&&jacketRight>jacketLeft)?jacketRight-jacketLeft:null;
-  const keptRows=complete.filter(r=>leftSel.kept.includes(r)&&rightSel.kept.includes(r)&&gaugeSel.kept.includes(r));
-  const quality=complete.length?median(complete.map(r=>r.quality))*100:0;
-  return {cfg,nominalY,rowYs,records,primary,representative,scanY:nominalY,frameLeft,frameRight,jacketLeft,jacketRight,gaugeLeft,jacketWidth,leftSel,rightSel,gaugeSel,keptRows,quality,validCount:complete.length};
+  const keptRows=jacketRows.filter(r=>leftSel.kept.includes(r)&&rightSel.kept.includes(r));
+  const quality=jacketRows.length?median(jacketRows.map(r=>r.quality))*100:0;
+  return {cfg,nominalY,rowYs,records,primary,representative,scanY:nominalY,frameLeft,frameRight,jacketLeft,jacketRight,gaugeLeft,jacketWidth,leftSel,rightSel,gaugeSel,keptRows,quality,validCount:jacketRows.length,gaugeValidCount:gaugeRows.length,
+    gaugeDetectionMethod:'final-jacket-right-independent',
+    jacketRect,jacketTransitionProfile:jacketRect?jacketRect._transitionProfile:null};
 }
 
 function evaluateSettings(){
@@ -3287,118 +3660,10 @@ async function runRegionOcr(region,key,workerCache,onProgress){
   return region.ocr;
 }
 
-
-const MASTER_DB_URLS={
-  musics:'https://sekai-world.github.io/sekai-master-db-diff/musics.json',
-  difficulties:'https://sekai-world.github.io/sekai-master-db-diff/musicDifficulties.json'
-};
-let masterDbPromise=null;
-function normalizeDbTitle(value){
-  return String(value??'').normalize('NFKC').toLowerCase().replace(/[\s\u3000]+/g,'').replace(/[・･·.,、。！？!?「」『』（）()［］\[\]{}【】〈〉《》:：;；'"`~～_\-—―]/g,'');
-}
-function normalizeDifficulty(value){
-  const s=String(value??'').normalize('NFKC').toLowerCase().replace(/[^a-z]/g,'');
-  const map={append:'APPEND',master:'MASTER',expert:'EXPERT',hard:'HARD',normal:'NORMAL',easy:'EASY'};
-  return map[s]||'';
-}
-function levenshteinDistance(a,b){
-  a=String(a);b=String(b);if(a===b)return 0;if(!a.length)return b.length;if(!b.length)return a.length;
-  let prev=new Uint32Array(b.length+1),cur=new Uint32Array(b.length+1);
-  for(let j=0;j<=b.length;j++)prev[j]=j;
-  for(let i=1;i<=a.length;i++){cur[0]=i;const ca=a.charCodeAt(i-1);for(let j=1;j<=b.length;j++){const cost=ca===b.charCodeAt(j-1)?0:1;cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+cost);}const t=prev;prev=cur;cur=t;}
-  return prev[b.length];
-}
-function stringSimilarity(a,b){
-  const x=String(a??''),y=String(b??'');if(!x||!y)return 0;if(x===y)return 1;
-  const d=levenshteinDistance(x,y),maxLen=Math.max(x.length,y.length);return Math.max(0,1-d/maxLen);
-}
-function lcsLength(a,b){
-  const x=Array.from(String(a)),y=Array.from(String(b));if(!x.length||!y.length)return 0;
-  let prev=new Uint16Array(y.length+1),cur=new Uint16Array(y.length+1);
-  for(let i=1;i<=x.length;i++){for(let j=1;j<=y.length;j++)cur[j]=x[i-1]===y[j-1]?prev[j-1]+1:Math.max(prev[j],cur[j-1]);const t=prev;prev=cur;cur=t;cur.fill(0);}
-  return prev[y.length];
-}
-function titleSimilarity(a,b){
-  const x=normalizeDbTitle(a),y=normalizeDbTitle(b);if(!x||!y)return 0;if(x===y)return 1;
-  const lev=stringSimilarity(x,y),lcs=2*lcsLength(x,y)/(x.length+y.length);
-  const qset=new Set();for(let i=0;i<x.length-1;i++)qset.add(x.slice(i,i+2));let qhit=0;for(let i=0;i<y.length-1;i++)if(qset.has(y.slice(i,i+2)))qhit++;const qden=Math.max(1,(x.length-1)+(y.length-1));const dice=2*qhit/qden;
-  return Math.max(0,Math.min(1,0.55*lev+0.30*lcs+0.15*dice));
-}
-async function loadMasterDb(){
-  if(masterDbPromise)return masterDbPromise;
-  masterDbPromise=(async()=>{
-    const responses=await Promise.all([fetch(MASTER_DB_URLS.musics,{cache:'no-store'}),fetch(MASTER_DB_URLS.difficulties,{cache:'no-store'})]);
-    if(!responses[0].ok)throw new Error(`musics.json の取得に失敗しました（HTTP ${responses[0].status}）。`);
-    if(!responses[1].ok)throw new Error(`musicDifficulties.json の取得に失敗しました（HTTP ${responses[1].status}）。`);
-    const [musics,difficulties]=await Promise.all([responses[0].json(),responses[1].json()]);
-    if(!Array.isArray(musics)||!Array.isArray(difficulties))throw new Error('DB JSONの形式が想定と異なります。');
-    const diffByMusic=new Map();
-    for(const d of difficulties){const id=Number(d.musicId);if(!Number.isFinite(id))continue;if(!diffByMusic.has(id))diffByMusic.set(id,[]);diffByMusic.get(id).push(d);}
-    return {musics,difficulties,diffByMusic,loadedAt:Date.now()};
-  })().catch(err=>{masterDbPromise=null;throw err;});
-  return masterDbPromise;
-}
-function getRegionText(a,key){return String(a?.regions16?.regions?.[key]?.ocr?.text||'').trim();}
-function getRegionAttempts(a,key){const at=a?.regions16?.regions?.[key]?.ocr?.attempts;return Array.isArray(at)?at.map(x=>String(x?.text||'').trim()).filter(Boolean):[];}
-function pickClosestMusic(rawTitle,attempts,musics){
-  const candidates=[];const inputs=[rawTitle,...attempts].map(normalizeDbTitle).filter(Boolean);if(!inputs.length)return null;
-  for(const m of musics){const title=String(m?.title??'');if(!title)continue;let best=0;for(const q of inputs)best=Math.max(best,titleSimilarity(q,title));candidates.push({music:m,similarity:best});}
-  candidates.sort((a,b)=>b.similarity-a.similarity||String(a.music.title).length-String(b.music.title).length);return candidates[0]||null;
-}
-function pickClosestDifficulty(rawDifficulty,attempts,diffs){
-  const inputs=[rawDifficulty,...attempts].map(normalizeDifficulty).filter(Boolean);if(!inputs.length)return null;
-  let best=null;
-  for(const d of diffs||[]){const canonical=normalizeDifficulty(d.musicDifficulty);if(!canonical)continue;let sim=0;for(const q of inputs)sim=Math.max(sim,stringSimilarity(q,canonical));const row={difficulty:d,canonical,similarity:sim};if(!best||row.similarity>best.similarity)best=row;}
-  return best;
-}
-function parseNumericRegion(a,key){const t=getRegionText(a,key);const digits=String(t).replace(/[^0-9]/g,'');if(!digits)return null;if(key==='C'){const groups=String(t).match(/\d{1,3}/g)||[];for(const g of groups.slice().reverse()){const n=Number(g);if(n>=1&&n<=50)return n;}const n=Number(digits.slice(-2));return Number.isFinite(n)&&n>=1&&n<=50?n:null;}const n=Number(digits.slice(-4));return Number.isFinite(n)?n:null;}
-function updateOcrCorrections(a,musicMatch,diffMatch,observed){
-  const titleR=a.regions16?.regions?.A, diffR=a.regions16?.regions?.B;
-  if(titleR){titleR.ocr=titleR.ocr||{};titleR.ocr.rawText=titleR.ocr.rawText??titleR.ocr.text;titleR.ocr.corrected=!!musicMatch?.music?.title;titleR.ocr.matchedTitle=musicMatch?.music?.title||null; if(musicMatch?.music?.title)titleR.ocr.text=musicMatch.music.title;}
-  if(diffR){diffR.ocr=diffR.ocr||{};diffR.ocr.rawText=diffR.ocr.rawText??diffR.ocr.text;diffR.ocr.corrected=!!diffMatch?.canonical;diffR.ocr.matchedDifficulty=diffMatch?.canonical||null;if(diffMatch?.canonical)diffR.ocr.text=diffMatch.canonical;}
-  a.dbValidation={matchedMusic:musicMatch?.music||null,musicSimilarity:musicMatch?.similarity??null,matchedDifficulty:diffMatch?.difficulty||null,difficultyCanonical:diffMatch?.canonical||null,difficultySimilarity:diffMatch?.similarity??null,observed,loadedAt:Date.now()};
-}
-function renderDbValidation(a){
-  const v=a?.dbValidation;if(!v){el.dbCheckStatus.textContent='未実行';el.dbCheckStatus.className='db-status';el.dbMusicTitle.textContent='—';el.dbDifficulty.textContent='—';el.dbExpectedLevel.textContent='—';el.dbObservedLevel.textContent='OCR: —';el.dbExpectedNotes.textContent='—';el.dbObservedNotes.textContent='OCR合計: —';el.dbWarningList.innerHTML='';el.dbCheckDetail.textContent='OCR完了後に、タイトル・難易度・レベル・総ノーツ数をDBと照合します。';return;}
-  const m=v.matchedMusic,d=v.matchedDifficulty,obs=v.observed||{};el.dbMusicTitle.textContent=m?.title||'一致候補なし';el.dbMusicTitleSub.textContent=`id=${m?.id??'—'} / 類似度 ${Number(v.musicSimilarity*100||0).toFixed(1)}%`;
-  el.dbDifficulty.textContent=v.difficultyCanonical||'一致候補なし';el.dbDifficultySub.textContent=`類似度 ${Number(v.difficultySimilarity*100||0).toFixed(1)}% / musicId=${d?.musicId??'—'}`;
-  el.dbExpectedLevel.textContent=Number.isFinite(Number(d?.playLevel))?String(d.playLevel):'—';el.dbObservedLevel.textContent=`OCR: ${Number.isFinite(obs.level)?obs.level:'—'}`;
-  el.dbExpectedNotes.textContent=Number.isFinite(Number(d?.totalNoteCount))?String(d.totalNoteCount):'—';el.dbObservedNotes.textContent=`OCR合計: ${Number.isFinite(obs.totalNotes)?obs.totalNotes:'—'}`;
-  const warnings=[];
-  if(Number.isFinite(obs.totalNotes)&&Number.isFinite(obs.combo)&&obs.totalNotes<obs.combo)warnings.push({type:'error',text:`不可能なノーツ数：判定数の合計 ${obs.totalNotes} < COMBO ${obs.combo} です。`});
-  const rawTitle=String(obs.rawTitle||'').trim();if(rawTitle&&m){const exact=normalizeDbTitle(rawTitle)===normalizeDbTitle(m.title);if(!exact)warnings.push({type:'warn',text:`楽曲タイトルがDBと不一致です。OCR「${rawTitle}」 → DB補正「${m.title}」`});}
-  const rawDiff=String(obs.rawDifficulty||'').trim();if(rawDiff&&v.difficultyCanonical){const exact=normalizeDifficulty(rawDiff)===v.difficultyCanonical;if(!exact)warnings.push({type:'warn',text:`楽曲難易度がDBと不一致です。OCR「${rawDiff}」 → DB補正「${v.difficultyCanonical}」`});}
-  if(m&&d&&d.musicId!==m.id)warnings.push({type:'error',text:`楽曲と難易度のDB対応が矛盾しています（musicId ${m.id} と ${d.musicId}）。`});
-  if(Number.isFinite(obs.level)&&Number.isFinite(Number(d?.playLevel))&&obs.level!==Number(d.playLevel))warnings.push({type:'warn',text:`楽曲レベルがDBと不一致です。OCR ${obs.level} / DB ${d.playLevel}`});
-  if(Number.isFinite(obs.totalNotes)&&Number.isFinite(Number(d?.totalNoteCount))&&obs.totalNotes!==Number(d.totalNoteCount))warnings.push({type:'warn',text:`総ノーツ数がDBと不一致です。判定数合計 ${obs.totalNotes} / DB ${d.totalNoteCount}`});
-  if(!m)warnings.push({type:'error',text:'OCR楽曲タイトルからDBの曲を特定できませんでした。'});
-  if(m&&!d)warnings.push({type:'error',text:'楽曲に対応する難易度をDBから特定できませんでした。'});
-  el.dbWarningList.innerHTML='';for(const w of warnings){const li=document.createElement('li');li.className=w.type==='error'?'error':'';li.textContent=(w.type==='error'?'重要: ':'警告: ')+w.text;el.dbWarningList.appendChild(li);}
-  const status=warnings.some(w=>w.type==='error')?'error':warnings.length?'warn':'ok';el.dbCheckStatus.textContent=status==='ok'?'矛盾なし':status==='warn'?`${warnings.length}件の警告`:`${warnings.length}件の矛盾`;el.dbCheckStatus.className='db-status '+status;
-  el.dbCheckDetail.textContent=`musics.json / musicDifficulties.json を取得して、タイトルは最近傍一致、難易度は6種類への最近傍一致、レベルと総ノーツ数は数値比較しました。タイトル類似度=${Number(v.musicSimilarity*100||0).toFixed(1)}%、難易度類似度=${Number(v.difficultySimilarity*100||0).toFixed(1)}%。`;
-}
-async function validateAgainstMasterDb(a){
-  if(!a?.regions16?.regions){return null;}
-  try{
-    el.dbCheckStatus.textContent='DB取得中…';el.dbCheckStatus.className='db-status';
-    const db=await loadMasterDb();
-    const rawTitle=getRegionText(a,'A'),rawDiff=getRegionText(a,'B'),titleAttempts=getRegionAttempts(a,'A'),diffAttempts=getRegionAttempts(a,'B');
-    const musicMatch=pickClosestMusic(rawTitle,titleAttempts,db.musics);
-    const diffPool=musicMatch?.music?.id!=null?(db.diffByMusic.get(Number(musicMatch.music.id))||[]):[];
-    const diffMatch=pickClosestDifficulty(rawDiff,diffAttempts,diffPool);
-    const obs={rawTitle,rawDifficulty:rawDiff,level:parseNumericRegion(a,'C'),perfect:parseNumericRegion(a,'D'),great:parseNumericRegion(a,'E'),good:parseNumericRegion(a,'F'),bad:parseNumericRegion(a,'G'),miss:parseNumericRegion(a,'H'),combo:parseNumericRegion(a,'I')};
-    const judgementKeys=['perfect','great','good','bad','miss'];const nums=judgementKeys.map(k=>obs[k]);obs.totalNotes=nums.every(n=>Number.isFinite(n))?nums.reduce((x,n)=>x+n,0):null;
-    updateOcrCorrections(a,musicMatch,diffMatch,obs);renderDbValidation(a);renderRegions(a);return a.dbValidation;
-  }catch(err){
-    a.dbValidation={error:err?.message||String(err),loadedAt:Date.now()};el.dbCheckStatus.textContent='DB取得エラー';el.dbCheckStatus.className='db-status error';el.dbWarningList.innerHTML='';const li=document.createElement('li');li.className='error';li.textContent='重要: '+(err?.message||String(err));el.dbWarningList.appendChild(li);el.dbCheckDetail.textContent='外部DBを取得できなかったため、補正・矛盾検知を完了できませんでした。';return a.dbValidation;
-  }
-}
-
 function clearOcrResults(){
   const a=state.analysis;if(!a?.regions16)return;
   for(const r of Object.values(a.regions16.regions))delete r.ocr;
-  delete a.dbValidation;
-  el.ocrGlobalStatus.textContent='OCR結果を消去しました。';renderDbValidation(a);renderRegions(a);
+  el.ocrGlobalStatus.textContent='OCR結果を消去しました。';renderRegions(a);
 }
 function renderRegionCard(region){
   const key=region.id,prep=region.prepared, cfg=regionConfig(key),card=document.createElement('article');card.className='region-card';
@@ -3416,7 +3681,7 @@ function renderRegions(a){
     const r=regs[key];if(!r){el.regionBoxes[key].textContent='未確定';continue;}
     el.regionBoxes[key].textContent=`${r.x},${r.y}～${r.right},${r.bottom}`;grid.appendChild(renderRegionCard(r));
   }
-  el.regionsJsonOutput.textContent=JSON.stringify({inputs:a?.regions16?.inputs||null,dbValidation:a?.dbValidation||null,regions:Object.fromEntries(Object.entries(regs).map(([k,r])=>[k,{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,source:r.source,ocr:r.ocr||null,preprocess:r.prepared?{plan:r.prepared.planLabel||null,subOrigin:r.prepared.subOrigin||null,chosen:r.prepared.chosen?.name||null,scale:r.prepared.scale||null,variants:Array.isArray(r.prepared.variants)?r.prepared.variants.map(v=>v.name):[]}:null}]))},null,2);
+  el.regionsJsonOutput.textContent=JSON.stringify({inputs:a?.regions16?.inputs||null,regions:Object.fromEntries(Object.entries(regs).map(([k,r])=>[k,{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,source:r.source,ocr:r.ocr||null,preprocess:r.prepared?{plan:r.prepared.planLabel||null,subOrigin:r.prepared.subOrigin||null,chosen:r.prepared.chosen.name,scale:r.prepared.scale,variants:r.prepared.variants.map(v=>v.name)}:null}]))},null,2);
 }
 async function runAllOcr(){
   const a=state.analysis;if(!a?.regions16?.regions){el.ocrGlobalStatus.textContent='先に画像を解析して⑥〜⑯の領域を生成してください。';return;}
@@ -3425,12 +3690,355 @@ async function runAllOcr(){
   try{
     for(const [key,region] of entries){el.ocrGlobalStatus.textContent=`領域${key}をOCR中… ${done}/${entries.length}`;await runRegionOcr(region,key,workerCache,(k,status,progress)=>{el.ocrGlobalStatus.textContent=`領域${k}: ${status} ${Math.round(progress*100)}%`;});done++;}
     for(const w of Object.values(workerCache))await w.terminate();
-    el.ocrGlobalStatus.textContent=`⑰ OCR完了：${done}/${entries.length}領域。DB照合中…`;
-    await validateAgainstMasterDb(a);
-    el.ocrGlobalStatus.textContent=`⑰ OCR完了：${done}/${entries.length}領域。DB照合も完了しました。`;
+    el.ocrGlobalStatus.textContent=`⑰ OCR完了：${done}/${entries.length}領域`;
   }catch(err){for(const w of Object.values(workerCache)){try{await w.terminate();}catch{}};el.ocrGlobalStatus.textContent='OCR中にエラーが発生しました: '+(err?.message||String(err));throw err;}
   finally{el.runOcrBtn.disabled=false;el.clearOcrBtn.disabled=false;renderRegions(a);}
 }
+// Unified annotation style for the processed-image preview.
+// Scan lines = dashed; semantic boundaries = solid; regions = lightly filled + bold outline.
+const ANNOTATION_STYLE = Object.freeze({
+  scanDash:[12,9], scanWidth:3, boundaryWidth:6, regionBorderWidth:5,
+  regionFillAlpha:0.22, regionLabelAlpha:0.94,
+  red:'#ef233c', blue:'#1976d2', green:'#20a84b', yellow:'#f2b01e',
+  purple:'#8e44ad', pink:'#e91e63', cyan:'#18aee8'
+});
+const REGION_COLORS = Object.freeze({
+  A:'#8e44ad',B:'#ff8c00',C:'#2868d8',D:'#e91e63',E:'#9b59b6',F:'#16a085',G:'#d35400',H:'#c0392b',I:'#00a6c7'
+});
+function drawDashedLine(ctx,color,width,x1,y1,x2,y2){
+  ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(ANNOTATION_STYLE.scanDash);ctx.globalAlpha=.85;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();
+}
+function drawSolidLine(ctx,color,width,x1,y1,x2,y2){
+  ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash([]);ctx.globalAlpha=.95;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();
+}
+function drawRegionOverlay(ctx,a){
+  const regs=a?.regions16?.regions||{};
+  ctx.save();ctx.font='700 20px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';ctx.textBaseline='middle';
+  for(const key of 'ABCDEFGHI'){
+    const r=regs[key];
+    if(!r||![r.x,r.y,r.width,r.height].every(Number.isFinite)||r.width<=0||r.height<=0) continue;
+    const col=REGION_COLORS[key]||'#444';
+    ctx.globalAlpha=ANNOTATION_STYLE.regionFillAlpha;ctx.fillStyle=col;ctx.fillRect(r.x,r.y,r.width,r.height);
+    ctx.globalAlpha=.98;ctx.strokeStyle=col;ctx.lineWidth=ANNOTATION_STYLE.regionBorderWidth;ctx.setLineDash([]);ctx.strokeRect(r.x+.5,r.y+.5,r.width,r.height);
+    const labelW=34,labelH=30;
+    const lx=Math.min(Math.max(r.x+6,r.x+2),r.x+Math.max(2,r.width-labelW-2));
+    const ly=Math.min(Math.max(r.y+6,r.y+2),r.y+Math.max(2,r.height-labelH-2));
+    ctx.globalAlpha=ANNOTATION_STYLE.regionLabelAlpha;ctx.fillStyle=col;ctx.fillRect(lx,ly,labelW,labelH);
+    ctx.globalAlpha=1;ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(key,lx+labelW/2,ly+labelH/2+1);ctx.textAlign='start';
+  }
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
+// Downstream anchor repair
+// The jacket detector was intentionally changed to use the frame transition
+// "white frame -> jacket -> white frame". Older downstream detectors still
+// assumed that the old jacket/color detector had produced very similar
+// coordinates.  When the new detector succeeds on a previously difficult
+// image, a small coordinate shift could make Step 4/5/10 reject the result and
+// cause A-I to disappear.  These repair functions keep the original detectors
+// as the first choice and only provide geometry/edge-based fallbacks.
+// ---------------------------------------------------------------------------
+function step4FallbackFromJacketRect(data,w,h,finalY,step3){
+  const jr=step3?.jacketRect;
+  if(!jr||!Number.isFinite(jr.left)||!Number.isFinite(jr.right))return null;
+  const x=clamp(Math.round((jr.left+jr.right)/2),0,w-1);
+  const fw=clamp(Math.round(finalY),24,h);
+  // Direct vertical frame-transition profile at the jacket center.
+  const x0=clamp(x-8,0,w-1),x1=clamp(x+8,x0,w-1);
+  const ys=[];
+  for(let y=0;y<=fw;y++)ys.push(y);
+  const profile=new Float64Array(ys.length);
+  for(let k=0;k<ys.length;k++){
+    const y=ys[k],vals=[];
+    for(let xx=x0;xx<=x1;xx++){
+      const i=(y*w+xx)*4; vals.push(rgbLuma(data[i],data[i+1],data[i+2]));
+    }
+    profile[k]=median(vals);
+  }
+  const sm=medianFilter1D(profile,5);
+  const base=Math.max(1,median(Array.from(sm.slice(0,Math.max(4,Math.round(fw*.12))))));
+  const q10=quantile(Array.from(sm),.10),q90=quantile(Array.from(sm),.90);
+  const spread=Math.max(12,Math.abs(q90-q10));
+  const edge=new Float64Array(sm.length);
+  for(let i=2;i<sm.length-2;i++){
+    const left=median(Array.from(sm.slice(Math.max(0,i-3),i+1)));
+    const right=median(Array.from(sm.slice(i,Math.min(sm.length,i+4))));
+    edge[i]=Math.abs(right-left);
+  }
+  const minH=Math.max(24,Math.round((jr.width||40)*.48));
+  const maxH=Math.min(Math.round(fw*.92),Math.max(minH+20,Math.round((jr.width||40)*1.35)));
+  const cand=[];
+  for(let y=3;y<sm.length-3;y++)if(edge[y]>=Math.max(3,spread*.08)){
+    const insideEnd=Math.min(sm.length-1,y+Math.round(Math.max(minH,30)));
+    cand.push({y,score:edge[y]});
+  }
+  let best=null;
+  for(const t of cand){
+    for(const b of cand){
+      if(b.y<=t.y)continue;
+      const hh=b.y-t.y;
+      if(hh<minH||hh>maxH)continue;
+      const center=(t.y+b.y)/2;
+      const centerScore=1-clamp(Math.abs(center-fw*.5)/(fw*.45),0,1);
+      const aspectScore=1-clamp(Math.abs(hh-Math.max(1,jr.width))/Math.max(12,jr.width*.55),0,1);
+      const inner=median(Array.from(sm.slice(t.y,b.y+1)));
+      const outer=(median(Array.from(sm.slice(Math.max(0,t.y-8),t.y+1)))+median(Array.from(sm.slice(b.y,Math.min(sm.length,b.y+9)))))/2;
+      const separation=clamp(Math.abs(inner-outer)/Math.max(18,spread),0,1);
+      const score=clamp((t.score+b.score)/Math.max(2,spread),0,1)*.50+aspectScore*.25+centerScore*.10+separation*.15;
+      if(!best||score>best.score)best={top:t.y,bottom:b.y,height:hh,score};
+    }
+  }
+  if(!best)return null;
+  return {scanX:x,jacketTop:best.top,jacketBottom:best.bottom,jacketHeight:best.height,quality:best.score*100,valid:true,source:'step3-rect+vertical-transition-fallback',fallback:true,profile:Array.from(sm),edge:Array.from(edge),rect:{left:jr.left,right:jr.right,width:jr.width}};
+}
+
+function step5EdgeFallback(data,w,h,step3,step4){
+  if(!step3||!step4||!Number.isFinite(step3.jacketRight)||!Number.isFinite(step3.gaugeLeft)||!Number.isFinite(step4.jacketTop)||!Number.isFinite(step4.jacketBottom))return null;
+  const startX=clamp(Math.round(step3.jacketRight),0,w-3), endX=clamp(Math.round(step3.gaugeLeft),startX+60,w-1);
+  if(endX-startX<80)return null;
+  const top=step4.jacketTop,bottom=step4.jacketBottom,jh=Math.max(20,bottom-top),yc1=Math.round((top+bottom)/2),yc2=Math.round(top+jh*.75);
+  const half=Math.max(3,Math.round(jh*.12)), y0=clamp(Math.min(yc1,yc2)-half,0,h-1), y1=clamp(Math.max(yc1,yc2)+half,y0+2,h-1);
+  const n=endX-startX+1, edge=new Float64Array(n), support=new Float64Array(n), lum=new Float64Array(n), chroma=new Float64Array(n);
+  for(let x=startX+1;x<=endX;x++){
+    let es=0,ss=0,lm=0,cm=0,count=0;
+    for(let y=y0;y<=y1;y++){
+      const i=(y*w+x)*4,ip=(y*w+x-1)*4;
+      const l=rgbLuma(data[i],data[i+1],data[i+2]),lp=rgbLuma(data[ip],data[ip+1],data[ip+2]);
+      const ch=Math.max(data[i],data[i+1],data[i+2])-Math.min(data[i],data[i+1],data[i+2]);
+      const chp=Math.max(data[ip],data[ip+1],data[ip+2])-Math.min(data[ip],data[ip+1],data[ip+2]);
+      const e=Math.abs(l-lp)+0.35*Math.abs(ch-chp);
+      es+=e; lm+=l;cm+=ch;if(e>=9)ss++;count++;
+    }
+    edge[x-startX]=es/Math.max(1,count);support[x-startX]=ss/Math.max(1,count);lum[x-startX]=lm/Math.max(1,count);chroma[x-startX]=cm/Math.max(1,count);
+  }
+  const smooth=smoothHorizontal(edge,7);
+  const candidates=[];
+  for(let i=3;i<n-3;i++){
+    const v=smooth[i];
+    if(v<Math.max(2.5,quantile(Array.from(smooth),.75)*.82))continue;
+    if(v<smooth[i-1]||v<smooth[i+1])continue;
+    const x=startX+i; const sup=support[i]; candidates.push({x,score:v,support:sup});
+  }
+  const ded=[];
+  for(const c of candidates.sort((a,b)=>b.score-a.score)){
+    if(ded.every(d=>Math.abs(d.x-c.x)>Math.max(6,Math.round(jh*.10))))ded.push(c);
+    if(ded.length>=45)break;
+  }
+  ded.sort((a,b)=>a.x-b.x);
+  let best=null;
+  for(const a of ded){
+    for(const b of ded){if(b.x<=a.x)continue;const wa=b.x-a.x;if(wa<Math.max(35,Math.round(jh*.85))||wa>Math.round(jh*3.8))continue;
+      for(const c of ded){if(c.x<=b.x)continue;const wb=c.x-b.x;if(wb<Math.max(30,Math.round(jh*.55))||wb>Math.round(jh*3.0))continue;
+        const leftGap=a.x-startX, total=endX-startX;
+        if(leftGap>jh*.55)continue;
+        if(c.x>startX+total*.92)continue;
+        const score=clamp(a.score/(Math.max(1,quantile(Array.from(smooth),.9))),0,1)*.22+clamp(b.score/(Math.max(1,quantile(Array.from(smooth),.9))),0,1)*.28+clamp(c.score/(Math.max(1,quantile(Array.from(smooth),.9))),0,1)*.22+clamp(1-Math.abs(wa/jh-1.9)/2.2,0,1)*.14+clamp(1-Math.abs(wb/jh-1.15)/1.8,0,1)*.10+clamp((a.support+b.support+c.support)/3,0,1)*.04;
+        if(!best||score>best.score)best={a,b,c,score};
+      }
+    }
+  }
+  if(!best)return null;
+  return {difficultyLeft:best.a.x,difficultyRight:best.b.x,levelLeft:best.b.x,levelRight:best.c.x,scan:{upperY:yc1,lowerY:yc2,startX,endX,supportRadius:half},quality:best.score*100,valid:true,orderOk:true,records:[{name:'幾何フォールバック',y:yc1,left:best.a.x,diffRight:best.b.x,levelLeft:best.b.x,right:best.c.x,quality:best.score,valid:true,reason:'persistent vertical edge fallback',supportRadius:half}],fallback:true,source:'persistent-vertical-edges'};
+}
+
+function step10EdgeFallback(data,w,h,step3,step9,horizontal){
+  if(!step3||!step9||!Number.isFinite(step3.gaugeLeft)||!Number.isFinite(horizontal?.frameLeft)||!Number.isFinite(horizontal?.frameRight))return null;
+  const b=step9.boundaries||[]; if(!Number.isFinite(b[2])||!Number.isFinite(b[3]))return null;
+  const scanY=Math.round((b[2]+b[3])/2),startX=clamp(Math.round(horizontal.frameLeft),0,w-3),endX=clamp(Math.round(step3.gaugeLeft),startX+80,w-1);
+  const band=Math.max(4,Math.round((b[3]-b[2])*.35)), y0=clamp(scanY-band,0,h-1), y1=clamp(scanY+band,y0+2,h-1);
+  const n=endX-startX+1, edge=new Float64Array(n),support=new Float64Array(n);
+  for(let x=startX+1;x<=endX;x++){
+    let e=0,s=0,cnt=0;
+    for(let y=y0;y<=y1;y++){
+      const i=(y*w+x)*4,ip=(y*w+x-1)*4; const l=rgbLuma(data[i],data[i+1],data[i+2]),lp=rgbLuma(data[ip],data[ip+1],data[ip+2]);
+      const ch=Math.max(data[i],data[i+1],data[i+2])-Math.min(data[i],data[i+1],data[i+2]); const chp=Math.max(data[ip],data[ip+1],data[ip+2])-Math.min(data[ip],data[ip+1],data[ip+2]);
+      const d=Math.abs(l-lp)+.25*Math.abs(ch-chp); e+=d; if(d>=8)s++;cnt++;
+    }
+    edge[x-startX]=e/Math.max(1,cnt);support[x-startX]=s/Math.max(1,cnt);
+  }
+  const smooth=smoothHorizontal(edge,7), q85=quantile(Array.from(smooth),.85), q95=quantile(Array.from(smooth),.95);
+  const cand=[];
+  for(let i=3;i<n-3;i++){if(smooth[i]<Math.max(2.5,q85*.72)||smooth[i]<smooth[i-1]||smooth[i]<smooth[i+1])continue;cand.push({x:startX+i,score:smooth[i],support:support[i]});}
+  const ded=[];for(const c of cand.sort((a,b)=>b.score-a.score)){if(ded.every(d=>Math.abs(d.x-c.x)>8))ded.push(c);if(ded.length>=60)break;}ded.sort((a,b)=>a.x-b.x);
+  let best=null;
+  for(let i=0;i<ded.length;i++)for(let j=i+1;j<ded.length;j++)for(let k=j+1;k<ded.length;k++)for(let m=k+1;m<ded.length;m++){
+    const a=ded[i],b0=ded[j],c=ded[k],d=ded[m],w1=b0.x-a.x,w2=c.x-b0.x,w3=d.x-c.x;
+    if(w1<40||w1>Math.max(700,(endX-startX)*.55))continue;
+    if(w2<20||w2>Math.max(500,(endX-startX)*.40))continue;
+    if(w3<35||w3>Math.max(700,(endX-startX)*.55))continue;
+    const pos=(a.x-startX)/(endX-startX); if(pos>.18)continue;
+    const lateStart=(c.x-startX)/(endX-startX); if(lateStart<.35||lateStart>.72)continue;
+    const norm=Math.max(1,q95),score=[a,b0,c,d].reduce((s,z)=>s+clamp(z.score/norm,0,1),0)/4*.70+clamp((a.support+b0.support+c.support+d.support)/4,0,1)*.12+clamp(1-Math.abs(w1-w3)/Math.max(40,(w1+w3)*.75),0,1)*.10+clamp(1-Math.abs(w2/(Math.max(1,(w1+w3)/2))-.55),0,1)*.08;
+    if(!best||score>best.score)best={a,b:b0,c,d,score};
+  }
+  if(!best)return null;
+  return {valid:true,reason:'GOOD/LATE-FAST persistent vertical edge fallback',scanY,startX,endX,goodLeft:best.a.x,goodRight:best.b.x,lateLeft:best.c.x,lateRight:best.d.x,quality:best.score*100,fallback:true,profile:{raw:Array.from(edge),smooth:Array.from(smooth),support:Array.from(support),edgeBoth:Array.from(edge),startX,endX,goodTop:b[2],goodBottom:b[3],y0,y1}};
+}
+
+
+function measureHeaderGaugeCandidate(data,w,h,frameLeft,frameRight,jacketRight,frameHeight){
+  if(![w,h,frameLeft,frameRight,jacketRight,frameHeight].every(Number.isFinite)||frameRight<=jacketRight+40)return null;
+  const yCenter=clamp(Math.round(frameHeight*.50),0,h-1);
+  const yRadius=clamp(Math.round(frameHeight*.18),6,60);
+  const y0=clamp(yCenter-yRadius,0,h-1), y1=clamp(yCenter+yRadius,y0+2,h-1);
+  const start=clamp(Math.round(Math.max(jacketRight+18,frameLeft+(frameRight-frameLeft)*.42)),0,w-4);
+  const end=clamp(Math.round(Math.min(frameRight-12,frameLeft+(frameRight-frameLeft)*.90)),start+4,w-1);
+  const n=end-start+1;
+  const edge=new Float64Array(n), chroma=new Float64Array(n), luma=new Float64Array(n), continuity=new Float64Array(n);
+  for(let x=start;x<=end;x++){
+    const valsL=[],valsC=[]; let e=0,count=0;
+    for(let y=y0;y<=y1;y++){
+      const i=(y*w+x)*4, ip=(y*w+x-1)*4;
+      const l=rgbLuma(data[i],data[i+1],data[i+2]), lp=rgbLuma(data[ip],data[ip+1],data[ip+2]);
+      const mx=Math.max(data[i],data[i+1],data[i+2]), mn=Math.min(data[i],data[i+1],data[i+2]);
+      const mxp=Math.max(data[ip],data[ip+1],data[ip+2]), mnp=Math.min(data[ip],data[ip+1],data[ip+2]);
+      const c=mx-mn, cp=mxp-mnp;
+      e += Math.abs(l-lp)*0.70 + Math.abs(c-cp)*0.30;
+      valsL.push(l); valsC.push(c); count++;
+    }
+    edge[x-start]=e/Math.max(1,count); chroma[x-start]=median(valsC); luma[x-start]=median(valsL);
+    // Look ahead for a continuous multicolour bar. This is deliberately
+    // hue-independent: only sustained saturation/contrast is required.
+    let run=0, scoreSum=0, runN=0;
+    for(let k=0;k<Math.min(120,n-(x-start));k++){
+      const xx=x+k; const j=xx-start; if(j<0||j>=n)break;
+      const c=chroma[j], l=luma[j];
+      const ok=c>=20 && l>=45;
+      if(ok){run++;scoreSum+=Math.min(1,c/90);runN++;}
+      else if(run>=10)break; else {run=0;scoreSum=0;runN=0;}
+    }
+    continuity[x-start]=runN?scoreSum/runN:0;
+  }
+  const sm=smoothHorizontal(edge,9), csm=smoothHorizontal(chroma,9), lsm=smoothHorizontal(luma,9), cont=smoothHorizontal(continuity,9);
+  const q90=quantile(Array.from(sm),.90), q75=quantile(Array.from(sm),.75);
+  let best=null;
+  for(let i=8;i<n-8;i++){
+    const x=start+i;
+    const e=sm[i];
+    if(e<Math.max(4,q75*.82))continue;
+    const local=(e>=sm[i-1]&&e>=sm[i+1])?1:0;
+    const runScore=cont[i];
+    if(runScore<.32)continue;
+    const prior=1-clamp(Math.abs((x-frameLeft)/(frameRight-frameLeft)-.56)/.24,0,1);
+    const score=clamp(e/Math.max(1,q90),0,1)*.52+runScore*.28+local*.08+prior*.12;
+    if(!best||score>best.score)best={x,score,edge:e,runScore,luma:lsm[i],chroma:csm[i],prior};
+  }
+  return best?{start:best.x,score:best.score,edge:best.edge,runScore:best.runScore,luma:best.luma,chroma:best.chroma,y0,y1,startX:start,endX:end,profile:{edge:Array.from(sm),chroma:Array.from(csm),luma:Array.from(lsm),continuity:Array.from(cont),startX:start,endX:end,y0,y1}}:null;
+}
+
+function repairGaugeAnchor(data,w,h,horizontal,step3,finalY){
+  if(!step3||!horizontal||!Number.isFinite(step3.jacketRight))return step3;
+  const fr=Number(horizontal.frameRight), fl=Number(horizontal.frameLeft), fh=Number(finalY);
+  if(![fr,fl,fh].every(Number.isFinite))return step3;
+  const cand=measureHeaderGaugeCandidate(data,w,h,fl,fr,step3.jacketRight,fh);
+  if(!cand)return step3;
+  // Always replace the old gauge anchor when the independent geometry detector
+  // has a strong candidate. It is intentionally not coupled to jacket width.
+  if(cand.score>=.45){
+    step3.gaugeLeft=Math.round(cand.start);
+    step3.gaugeIndependent=cand;
+    step3.gaugeDetectionMethod='header-independent-hue-agnostic';
+    step3.gaugeSel={median:Math.round(cand.start),mad:0,tolerance:0,kept:[],valid:[]};
+  }
+  return step3;
+}
+
+function step5GeometryIndependent(data,w,h,step3,step4){
+  if(!step3||!step4||![step3.jacketRight,step3.gaugeLeft,step4.jacketTop,step4.jacketBottom].every(Number.isFinite))return null;
+  const start=clamp(Math.round(step3.jacketRight+2),0,w-4), end=clamp(Math.round(step3.gaugeLeft-2),start+80,w-1);
+  const top=step4.jacketTop,bottom=step4.jacketBottom,jh=Math.max(20,bottom-top);
+  const yA=clamp(Math.round(top+jh*.50),0,h-1), yB=clamp(Math.round(top+jh*.75),0,h-1);
+  const radius=clamp(Math.round(jh*.12),5,28), y0=clamp(Math.min(yA,yB)-radius,0,h-1), y1=clamp(Math.max(yA,yB)+radius,y0+2,h-1);
+  const n=end-start+1, edge=new Float64Array(n), support=new Float64Array(n);
+  for(let i=1;i<n;i++){
+    const x=start+i; let sum=0,hits=0,cnt=0;
+    for(let y=y0;y<=y1;y++){
+      const p=(y*w+x)*4,q=(y*w+x-1)*4;
+      const dl=Math.abs(rgbLuma(data[p],data[p+1],data[p+2])-rgbLuma(data[q],data[q+1],data[q+2]));
+      const cp=Math.max(data[p],data[p+1],data[p+2])-Math.min(data[p],data[p+1],data[p+2]);
+      const cq=Math.max(data[q],data[q+1],data[q+2])-Math.min(data[q],data[q+1],data[q+2]);
+      const d=dl+.32*Math.abs(cp-cq); sum+=d; if(d>=7)hits++;cnt++;
+    }
+    edge[i]=sum/Math.max(1,cnt);support[i]=hits/Math.max(1,cnt);
+  }
+  const sm=smoothHorizontal(edge,9), sp=smoothHorizontal(support,9), q85=quantile(Array.from(sm),.85), q95=quantile(Array.from(sm),.95);
+  const cand=[];
+  for(let i=5;i<n-5;i++){
+    if(sm[i]<Math.max(2.8,q85*.70)||sm[i]<sm[i-1]||sm[i]<sm[i+1])continue;
+    const x=start+i; cand.push({x,score:sm[i],support:sp[i]});
+  }
+  cand.sort((a,b)=>b.score-a.score);
+  const ded=[]; for(const c of cand){if(ded.every(d=>Math.abs(d.x-c.x)>Math.max(7,Math.round(jh*.10))))ded.push(c); if(ded.length>=35)break;}
+  ded.sort((a,b)=>a.x-b.x);
+  const span=end-start;
+  let best=null;
+  for(let i=0;i<ded.length;i++)for(let j=i+1;j<ded.length;j++)for(let k=j+1;k<ded.length;k++){
+    const a=ded[i],b=ded[j],c=ded[k],w1=b.x-a.x,w2=c.x-b.x;
+    if(w1<Math.max(45,jh*.55)||w1>Math.min(380,span*.55))continue;
+    if(w2<Math.max(40,jh*.45)||w2>Math.min(320,span*.50))continue;
+    const pos=(a.x-start)/Math.max(1,span), mid=(b.x-start)/Math.max(1,span);
+    if(pos>.28||mid<.16||mid>.82)continue;
+    const norm=Math.max(1,q95);
+    const edgeScore=(clamp(a.score/norm,0,1)+clamp(b.score/norm,0,1)+clamp(c.score/norm,0,1))/3;
+    const support=(a.support+b.support+c.support)/3;
+    const widthBalance=1-clamp(Math.abs((w2/Math.max(1,w1))-.82)/1.5,0,1);
+    const prior=1-clamp(Math.abs(mid-.46)/.38,0,1);
+    const score=edgeScore*.52+support*.14+widthBalance*.16+prior*.18;
+    if(!best||score>best.score)best={a,b,c,score};
+  }
+  if(!best)return null;
+  return {difficultyLeft:best.a.x,difficultyRight:best.b.x,levelLeft:best.b.x,levelRight:best.c.x,scan:{upperY:yA,lowerY:yB,startX:start,endX:end,supportRadius:radius},quality:best.score*100,valid:true,orderOk:true,fallback:true,source:'hue-independent-persistent-vertical-edges',records:[{name:'色非依存フォールバック',y:yA,left:best.a.x,diffRight:best.b.x,levelLeft:best.b.x,right:best.c.x,quality:best.score,valid:true,reason:'persistent vertical edges',supportRadius:radius}],profile:{raw:Array.from(edge),smooth:Array.from(sm),support:Array.from(sp),startX:start,endX:end,y0,y1}};
+}
+
+function repairDownstreamAnchors(data,w,h,horizontal,step3,step4,step5,step9,step10,finalY){
+  // The corrected Step 3 jacket detector changes the anchor geometry for some
+  // images. Every downstream step must be recalculated from the SAME final
+  // anchors; keeping a previously-valid Step 5/10 result can otherwise leave
+  // stale coordinates that were computed from the old jacket/gauge.
+  const originalGauge=Number.isFinite(step3?.gaugeLeft)?step3.gaugeLeft:null;
+  step3=repairGaugeAnchor(data,w,h,horizontal,step3,finalY)||step3;
+  const gaugeChanged=Number.isFinite(originalGauge)&&Number.isFinite(step3?.gaugeLeft)
+    ?Math.abs(step3.gaugeLeft-originalGauge)>=3
+    :Number.isFinite(step3?.gaugeLeft)!==Number.isFinite(originalGauge);
+
+  // Reconcile the jacket vertical extent with the color-agnostic rectangle.
+  // A valid-looking old result can still be stale after the jacket width changes.
+  const rect=step3?.jacketRect;
+  let verticalImplausible=!step4||![step4.jacketTop,step4.jacketBottom].every(Number.isFinite)||step4.jacketBottom<=step4.jacketTop;
+  if(!verticalImplausible&&rect&&Number.isFinite(rect.width)){
+    const dh=step4.jacketBottom-step4.jacketTop;
+    verticalImplausible=Math.abs(dh-rect.width)>Math.max(18,rect.width*.32);
+  }
+  if(verticalImplausible&&rect){
+    const fb=step4FallbackFromJacketRect(data,w,h,finalY,step3);
+    if(fb)step4={...step4,...fb};
+  }
+
+  // Step 5 is anchored by Step 3's jacketRight/gaugeLeft and Step 4's top/bottom.
+  // Always recompute after Step 3/4 reconciliation so no stale coordinates can
+  // survive merely because the old result happened to pass its validity test.
+  const freshStep5=analyzeStep5(data,w,h,step3,step4);
+  if(freshStep5&&freshStep5.orderOk)step5=freshStep5;
+  if(!step5||!step5.orderOk||![step5.difficultyLeft,step5.difficultyRight,step5.levelRight].every(Number.isFinite)){
+    const fb=step5GeometryIndependent(data,w,h,step3,step4);
+    if(fb)step5={...step5,...fb};
+  }
+
+  // Step 10 is likewise anchored by the FINAL gauge and Step 9's GOOD band.
+  // Recompute it even when the previous result was valid, because a gauge shift
+  // is sufficient to invalidate its search domain without producing an error.
+  const freshStep10=analyzeStep10(data,w,h,step3,step9,horizontal);
+  if(freshStep10&&freshStep10.valid)step10=freshStep10;
+  if(!step10||!step10.valid||![step10.goodLeft,step10.goodRight,step10.lateLeft].every(Number.isFinite)){
+    const fb=step10EdgeFallback(data,w,h,step3,step9,horizontal); if(fb)step10={...step10,...fb};
+  }
+
+  return {step3,step4,step5,step10,gaugeChanged};
+}
+
 function analyze(){
   if(!state.imageData) return;
   const t0=performance.now();
@@ -3484,14 +4092,19 @@ function analyze(){
   const keptY=kept.map(r=>r.y);
   const finalY=Math.round(median(keptY));
   const spread=mad(keptY,finalY);
-  const step3=analyzeStep3(data,w,h,{finalY},horizontalForStep3);
-  const step4=analyzeStep4(data,w,h,{finalY},step3);
+  let step3=analyzeStep3(data,w,h,{finalY},horizontalForStep3);
+  let step4=analyzeStep4(data,w,h,{finalY},step3);
   setProgress(92);
-  const step5=analyzeStep5(data,w,h,step3,step4);
+  let step5=analyzeStep5(data,w,h,step3,step4);
   setProgress(95);
   const step9=analyzeStep9(data,w,h,step3,finalY,horizontalForStep3);
   setProgress(97);
-  const step10=analyzeStep10(data,w,h,step3,step9,horizontalForStep3);
+  let step10=analyzeStep10(data,w,h,step3,step9,horizontalForStep3);
+  const repaired=repairDownstreamAnchors(data,w,h,horizontalForStep3,step3,step4,step5,step9,step10,finalY);
+  step3=repaired.step3;
+  step4=repaired.step4;
+  step5=repaired.step5;
+  step10=repaired.step10;
   const regions16=createStep6to16Regions({w,h,horizontal:horizontalForStep3,step3,step4,step5,step9,step10});
 
   // Final edge strength at chosen y from center profile, useful for confidence/debug.
@@ -3540,163 +4153,56 @@ function drawAnnotated(){
   const c=el.annotatedCanvas;
   c.width=a.w;c.height=a.h;
   const ctx=c.getContext('2d');
-  ctx.clearRect(0,0,c.width,c.height);
-  ctx.drawImage(img,0,0);
+  ctx.clearRect(0,0,c.width,c.height);ctx.drawImage(img,0,0);
 
-  // 処理後画像の表示ルールを統一する。
-  //   ・スキャン線 = 点線
-  //   ・確定した境界線 = 実線
-  //   ・領域A〜I = 薄い塗り＋太い実線枠
-  //   ・座標や「白枠下端」などの説明文字 = 画像上には表示しない
-  const SCAN_DASH=[10,8];
-  const SCAN_W=3;
-  const BOUNDARY_W=5;
-  const drawScanLine=(x1,y1,x2,y2,color,alpha=.78)=>{
-    if(![x1,y1,x2,y2].every(Number.isFinite)) return;
-    ctx.save();
-    ctx.globalAlpha=alpha;
-    ctx.strokeStyle=color;
-    ctx.lineWidth=SCAN_W;
-    ctx.setLineDash(SCAN_DASH);
-    ctx.beginPath();ctx.moveTo(x1+.5,y1+.5);ctx.lineTo(x2+.5,y2+.5);ctx.stroke();
-    ctx.restore();
-  };
-  const drawBoundaryV=(x,y1,y2,color)=>{
-    if(![x,y1,y2].every(Number.isFinite)) return;
-    ctx.save();
-    ctx.globalAlpha=.96;
-    ctx.strokeStyle=color;
-    ctx.lineWidth=BOUNDARY_W;
-    ctx.setLineDash([]);
-    ctx.beginPath();ctx.moveTo(x+.5,y1);ctx.lineTo(x+.5,y2);ctx.stroke();
-    ctx.restore();
-  };
-  const drawBoundaryH=(y,x1,x2,color)=>{
-    if(![y,x1,x2].every(Number.isFinite)) return;
-    ctx.save();
-    ctx.globalAlpha=.96;
-    ctx.strokeStyle=color;
-    ctx.lineWidth=BOUNDARY_W;
-    ctx.setLineDash([]);
-    ctx.beginPath();ctx.moveTo(x1,y+.5);ctx.lineTo(x2,y+.5);ctx.stroke();
-    ctx.restore();
-  };
+  // ① Red — scan lines dashed, final lower frame boundary solid.
+  for(const r of (a.rows||[])) if(Number.isFinite(r.x)) drawDashedLine(ctx,ANNOTATION_STYLE.red,2.5,r.x+.5,0,r.x+.5,a.h);
+  if(Number.isFinite(a.xCenter)) drawDashedLine(ctx,ANNOTATION_STYLE.red,ANNOTATION_STYLE.scanWidth,a.xCenter+.5,0,a.xCenter+.5,a.h);
+  if(Number.isFinite(a.finalY)) drawSolidLine(ctx,ANNOTATION_STYLE.red,ANNOTATION_STYLE.boundaryWidth,0,a.finalY+.5,a.w,a.finalY+.5);
 
-  // 領域は先に薄く塗り、スキャン線・境界線をその上に描く。
-  drawRegionFills(ctx,a);
+  // ② Blue — top horizontal scan lines dashed, frame side boundaries solid.
+  const h=a.horizontal||{};
+  for(const r of (h.records||[])) if(Number.isFinite(r.y)) drawDashedLine(ctx,ANNOTATION_STYLE.blue,2.5,0,r.y+.5,a.w,r.y+.5);
+  if(Number.isFinite(h.frameLeft)) drawSolidLine(ctx,ANNOTATION_STYLE.blue,ANNOTATION_STYLE.boundaryWidth,h.frameLeft+.5,0,h.frameLeft+.5,a.finalY);
+  if(Number.isFinite(h.frameRight)) drawSolidLine(ctx,ANNOTATION_STYLE.blue,ANNOTATION_STYLE.boundaryWidth,h.frameRight+.5,0,h.frameRight+.5,a.finalY);
 
-  // ① 中央縦スキャン＋補助列
-  if(Number.isFinite(a.xCenter)) drawScanLine(a.xCenter,0,a.xCenter,a.h,'#ff3b30',.72);
-  for(const r of (a.rows||[])){
-    if(!Number.isFinite(r.x) || r.x===a.xCenter) continue;
-    drawScanLine(r.x,0,r.x,a.h,'#ff3b30',.38);
-  }
-
-  // ② 最上端横スキャンの補助行
-  const h=a.horizontal;
-  for(const r of (h?.records||[])){
-    if(!Number.isFinite(r.y)) continue;
-    drawScanLine(0,r.y,a.w,r.y,'#1473e6',.35);
-  }
-  if(Number.isFinite(h?.frameLeft)) drawBoundaryV(h.frameLeft,0,Math.min(a.h,a.finalY),'#1473e6');
-  if(Number.isFinite(h?.frameRight)) drawBoundaryV(h.frameRight,0,Math.min(a.h,a.finalY),'#1473e6');
-
-  // ③ 白枠中央の横スキャン＋ジャケット左右枠・ゲージ左端
+  // ③ Green — center horizontal scan dashed, jacket/gauge boundaries solid.
   const s3=a.step3;
   if(s3){
-    if(Number.isFinite(s3.nominalY)) drawScanLine(0,s3.nominalY,a.w,s3.nominalY,'#16a05d',.35);
-    if(Number.isFinite(s3.scanY)) drawScanLine(0,s3.scanY,a.w,s3.scanY,'#16a05d',.78);
-    if(Number.isFinite(s3.representative?.y) && s3.representative.y!==s3.scanY) drawScanLine(0,s3.representative.y,a.w,s3.representative.y,'#16a05d',.32);
-    for(const x of [s3.jacketLeft,s3.jacketRight,s3.gaugeLeft]){
-      if(Number.isFinite(x)) drawBoundaryV(x,0,Math.min(a.h,Math.max(0,a.finalY)),'#16a05d');
-    }
+    if(Number.isFinite(s3.scanY)) drawDashedLine(ctx,ANNOTATION_STYLE.green,ANNOTATION_STYLE.scanWidth,0,s3.scanY+.5,a.w,s3.scanY+.5);
+    for(const x of [s3.jacketLeft,s3.jacketRight,s3.gaugeLeft]) if(Number.isFinite(x)) drawSolidLine(ctx,ANNOTATION_STYLE.green,ANNOTATION_STYLE.boundaryWidth,x+.5,0,x+.5,Math.min(a.h,a.finalY));
   }
 
-  // ④ ジャケット中央の縦スキャン＋上下境界
+  // ④ Yellow — jacket-center vertical scan dashed, top/bottom boundaries solid.
   const s4=a.step4;
   if(s4){
-    if(Number.isFinite(s4.scanX)) drawScanLine(s4.scanX,Math.min(a.h,Math.max(0,a.finalY)),s4.scanX,Math.min(a.h,Math.max(0,s4.jacketBottom??a.finalY)),'#d94bd7',.78);
-    for(const y of [s4.jacketTop,s4.jacketBottom]){
-      if(Number.isFinite(y)) drawBoundaryH(y,0,a.w,'#d94bd7');
-    }
+    if(Number.isFinite(s4.scanX)) drawDashedLine(ctx,ANNOTATION_STYLE.yellow,ANNOTATION_STYLE.scanWidth,s4.scanX+.5,Math.max(0,a.finalY),s4.scanX+.5,Math.min(a.h,s4.jacketBottom??a.finalY));
+    for(const y of [s4.jacketTop,s4.jacketBottom]) if(Number.isFinite(y)) drawSolidLine(ctx,ANNOTATION_STYLE.yellow,ANNOTATION_STYLE.boundaryWidth,0,y+.5,a.w,y+.5);
   }
 
-  // ⑤ 2本の横スキャン＋難易度・レベルの4境界
+  // ⑤ Purple — the two horizontal scans dashed, four x-boundaries solid.
   const s5=a.step5;
   if(s5?.scan){
-    for(const y of [s5.scan.upperY,s5.scan.lowerY]){
-      if(Number.isFinite(y)) drawScanLine(s5.scan.startX??0,y,s5.scan.endX??a.w,y,'#8e44ad',.78);
-    }
-    for(const x of [s5.difficultyLeft,s5.difficultyRight,s5.levelLeft,s5.levelRight]){
-      if(Number.isFinite(x)) drawBoundaryV(x,s5.scan.upperY,s5.scan.lowerY,'#8e44ad');
-    }
+    for(const y of [s5.scan.upperY,s5.scan.lowerY]) if(Number.isFinite(y)) drawDashedLine(ctx,ANNOTATION_STYLE.purple,ANNOTATION_STYLE.scanWidth,s5.scan.startX??0,y+.5,s5.scan.endX??a.w,y+.5);
+    for(const x of [s5.difficultyLeft,s5.difficultyRight,s5.levelLeft,s5.levelRight]) if(Number.isFinite(x)) drawSolidLine(ctx,ANNOTATION_STYLE.purple,ANNOTATION_STYLE.boundaryWidth,x+.5,s5.scan.upperY,x+.5,s5.scan.lowerY);
   }
 
-  // ⑨ ジャケット右枠を延長した縦スキャン＋6境界
+  // ⑨ Pink — vertical scan dashed, six judgment boundaries solid.
   const s9=a.step9;
   if(s9){
-    if(Number.isFinite(s9.scanX)) drawScanLine(s9.scanX,Math.max(0,a.finalY),s9.scanX,a.h,'#16a085',.78);
-    for(const y of (s9.boundaries||[])){
-      if(Number.isFinite(y)) drawBoundaryH(y,0,a.w,'#e91e63');
-    }
+    if(Number.isFinite(s9.scanX)) drawDashedLine(ctx,ANNOTATION_STYLE.pink,ANNOTATION_STYLE.scanWidth,s9.scanX+.5,Math.max(0,a.finalY),s9.scanX+.5,a.h);
+    for(const y of (s9.boundaries||[])) if(Number.isFinite(y)) drawSolidLine(ctx,ANNOTATION_STYLE.pink,ANNOTATION_STYLE.boundaryWidth,0,y+.5,a.w,y+.5);
   }
 
-  // ⑩ GOOD縦中央の横スキャン＋左右境界
+  // ⑩ Cyan — horizontal scan dashed, GOOD/LATE/FAST boundaries solid.
   const s10=a.step10;
   if(s10){
-    if(Number.isFinite(s10.scanY)) drawScanLine(Number.isFinite(s10.startX)?s10.startX:0,s10.scanY,Number.isFinite(s10.endX)?s10.endX:a.w,s10.scanY,'#29b6f6',.8);
-    for(const x of [s10.goodLeft,s10.goodRight,s10.lateLeft,s10.lateRight]){
-      if(Number.isFinite(x)) drawBoundaryV(x,s10.scanY-50,Math.min(a.h,s10.scanY+50),'#29b6f6');
-    }
+    if(Number.isFinite(s10.scanY)) drawDashedLine(ctx,ANNOTATION_STYLE.cyan,ANNOTATION_STYLE.scanWidth,Number.isFinite(s10.startX)?s10.startX:0,s10.scanY+.5,Number.isFinite(s10.endX)?s10.endX:a.w,s10.scanY+.5);
+    for(const x of [s10.goodLeft,s10.goodRight,s10.lateLeft,s10.lateRight]) if(Number.isFinite(x)) drawSolidLine(ctx,ANNOTATION_STYLE.cyan,ANNOTATION_STYLE.boundaryWidth,x+.5,Math.max(0,s10.scanY-50),x+.5,Math.min(a.h,s10.scanY+50));
   }
 
-  // 領域の境界・ラベルを最後に描き、常に目立つようにする。
-  drawRegionBorders(ctx,a);
-
-  // ①で確定した白枠下端そのものは境界線だけ表示し、文字ラベルは表示しない。
-  if(Number.isFinite(a.finalY)) drawBoundaryH(a.finalY,0,a.w,'#e60000');
-}
-
-function drawRegionFills(ctx,a){
-  const regs=a?.regions16?.regions||{};
-  const palette={A:'#7e57c2',B:'#fb8c00',C:'#1e88e5',D:'#e53935',E:'#8e24aa',F:'#00897b',G:'#6d4c41',H:'#c62828',I:'#00acc1'};
-  ctx.save();
-  for(const [key,r] of Object.entries(regs)){
-    if(!r || ![r.x,r.y,r.width,r.height].every(Number.isFinite) || r.width<=0 || r.height<=0) continue;
-    const col=palette[key]||'#546e7a';
-    ctx.fillStyle=col;
-    ctx.globalAlpha=.14;
-    ctx.fillRect(r.x,r.y,r.width,r.height);
-  }
-  ctx.restore();
-}
-
-function drawRegionBorders(ctx,a){
-  const regs=a?.regions16?.regions||{};
-  const palette={A:'#7e57c2',B:'#fb8c00',C:'#1e88e5',D:'#e53935',E:'#8e24aa',F:'#00897b',G:'#6d4c41',H:'#c62828',I:'#00acc1'};
-  ctx.save();
-  ctx.lineWidth=5;
-  ctx.setLineDash([]);
-  ctx.font='bold 18px sans-serif';
-  ctx.textBaseline='top';
-  for(const [key,r] of Object.entries(regs)){
-    if(!r || ![r.x,r.y,r.width,r.height].every(Number.isFinite) || r.width<=0 || r.height<=0) continue;
-    const col=palette[key]||'#546e7a';
-    ctx.globalAlpha=.96;
-    ctx.strokeStyle=col;
-    ctx.strokeRect(r.x+.5,r.y+.5,r.width,r.height);
-
-    // ラベルは領域名だけを統一形式で表示する（座標・説明文は画像上に表示しない）。
-    const label=String(key);
-    const chipW=28, chipH=24;
-    const chipX=clamp(r.x,0,Math.max(0,a.w-chipW));
-    const chipY=clamp(r.y,0,Math.max(0,a.h-chipH));
-    ctx.fillStyle=col;
-    ctx.fillRect(chipX,chipY,chipW,chipH);
-    ctx.fillStyle='#fff';
-    ctx.fillText(label,chipX+8,chipY+3);
-  }
-  ctx.restore();
+  // ⑥〜⑯ — lightly filled, bold A-I regions are always the top annotation layer.
+  drawRegionOverlay(ctx,a);
 }
 
 function drawSignal(){
@@ -3805,7 +4311,7 @@ function renderAll(){
   el.emptyState.hidden=true;
   el.resultArea.hidden=false;
   drawImageToCanvas(el.originalCanvas,state.image);
-  drawAnnotated();drawSignal();drawZoom();drawHorizontal();drawStep3Signal();drawStep3Zoom();drawStep4Signal();drawStep4Zoom();drawStep5Signal(el.step5UpperSignalCanvas,a.step5?.upper,a.step5,"⑤ 中央");drawStep5Signal(el.step5LowerSignalCanvas,a.step5?.lower,a.step5,"⑤ 3/4");drawStep5Zoom();drawStep9Signal();drawStep9Zoom();drawStep10Signal();drawStep10Zoom();renderTable();renderHorizontalTable();renderStep3Table();renderStep4Table();renderStep5Table();renderStep9Table();renderStep10Table();renderDbValidation(a);renderRegions(a);
+  drawAnnotated();drawSignal();drawZoom();drawHorizontal();drawStep3Signal();drawStep3Zoom();drawStep4Signal();drawStep4Zoom();drawStep5Signal(el.step5UpperSignalCanvas,a.step5?.upper,a.step5,"⑤ 中央");drawStep5Signal(el.step5LowerSignalCanvas,a.step5?.lower,a.step5,"⑤ 3/4");drawStep5Zoom();drawStep9Signal();drawStep9Zoom();drawStep10Signal();drawStep10Zoom();renderTable();renderHorizontalTable();renderStep3Table();renderStep4Table();renderStep5Table();renderStep9Table();renderStep10Table();renderRegions(a);
   el.edgeY.textContent=String(a.finalY);
   el.frameHeight.textContent=String(a.finalY);
   el.frameLeft.textContent=Number.isFinite(a.horizontal.frameLeft)?String(a.horizontal.frameLeft):'—';
@@ -3882,7 +4388,6 @@ function renderAll(){
           selected:a.step9.boundaries.includes(c.top)||a.step9.boundaries.includes(c.bottom)
         }))},
     step10:{settings:a.step10.cfg,scanY:a.step10.scanY,startX:a.step10.startX,endX:a.step10.endX,valid:a.step10.valid,reason:a.step10.reason,result:{goodLeft:a.step10.goodLeft,goodRight:a.step10.goodRight,lateLeft:a.step10.lateLeft,lateRight:a.step10.lateRight},qualityPercent:Number((a.step10.quality||0).toFixed(2)),selection:a.step10.selection?{score:Number((a.step10.selection.score||0).toFixed(3)),gap:a.step10.selection.gap,widthSym:Number((a.step10.selection.widthSym||0).toFixed(3)),gapScore:Number((a.step10.selection.gapScore||0).toFixed(3)),relaxed:!!a.step10.selection.relaxed}:null,candidates:(a.step10.candidates||[]).map(c=>({left:c.left,right:c.right,width:c.width,contrast:Number((c.contrast||0).toFixed(3)),leftEdge:Number((c.leftEdge||0).toFixed(3)),rightEdge:Number((c.rightEdge||0).toFixed(3)),consistency:Number((c.consistency||0).toFixed(3)),score:Number((c.score||0).toFixed(3))}))},
-    dbValidation:a.dbValidation||null,
     regions16:{inputs:a.regions16?.inputs||null,regions:Object.fromEntries(Object.entries(a.regions16?.regions||{}).map(([k,r])=>[k,{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,source:r.source,ocr:r.ocr||null,preprocess:r.prepared?{chosen:r.prepared.chosen.name,scale:r.prepared.scale}:null}]))},
     diagnostics:{centerEdgeScore:Number(a.centerEdgeScore.toFixed(4)),postLuma:Number(a.postLuma.toFixed(2)),separation:Number(a.separation.toFixed(2)),signalNoise:Number(a.signalNoise.toFixed(2)),confidencePercent:Number(a.confidence.toFixed(2)),elapsedMs:Number(a.elapsed.toFixed(2))}
   },null,2);
